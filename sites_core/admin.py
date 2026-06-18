@@ -33,6 +33,12 @@ class SiteScopedAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
             kwargs["queryset"] = request.user.sites.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+    def get_list_filter(self, request):
+        list_filter = super().get_list_filter(request)
+        if request.user.is_superuser:
+            return list_filter
+        return [item for item in list_filter if item != self.site_field]
+
     def get_changeform_initial_data(self, request):
         initial = super().get_changeform_initial_data(request)
         if not request.user.is_superuser and request.user.default_site_id:

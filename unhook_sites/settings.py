@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "django.contrib.sitemaps",
     "django_prose_editor",
     "sites_core",
+    "media_library",
 ]
 
 MIDDLEWARE = [

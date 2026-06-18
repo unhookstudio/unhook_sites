@@ -99,3 +99,16 @@ def test_site_owned_admin_changelist_and_detail_are_scoped_for_staff(client, db)
     assert kent_link.label in changelist.text
     assert other_link.label not in changelist.text
     assert other_detail.status_code == 404
+
+
+def test_site_scoped_admin_hides_site_filter_for_staff(client, db):
+    kent = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    user = User.objects.create_user(username="editor", password="password", is_staff=True)
+    user.sites.add(kent)
+    user.user_permissions.add(Permission.objects.get(codename="view_navigationlink"))
+
+    client.force_login(user)
+    changelist = client.get(reverse("admin:sites_core_navigationlink_changelist"))
+
+    assert changelist.status_code == 200
+    assert "site__id__exact" not in changelist.text
