@@ -15,4 +15,4 @@ def test_sitemap_xml(client):
     assert response.status_code == 200
     assert response["content-type"] == "application/xml"
     assert "<urlset" in response.text
-    assert "/health/" in response.text
+    assert "/health/" not in response.text

@@ -6,7 +6,20 @@ from django.http import Http404
 from .models import NavigationLink, Redirect, Site, SiteSettings, User
 
 
-class SiteScopedAdmin(admin.ModelAdmin):
+class ScopedObjectAdminMixin:
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        if not self._object_visible_to_request(request, object_id):
+            raise Http404
+        return super().change_view(request, object_id, form_url, extra_context)
+
+    def _object_visible_to_request(self, request, object_id):
+        try:
+            return self.get_queryset(request).filter(pk=object_id).exists()
+        except (TypeError, ValueError, ValidationError):
+            return False
+
+
+class SiteScopedAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
     site_field = "site"
 
     def get_queryset(self, request):
@@ -26,17 +39,6 @@ class SiteScopedAdmin(admin.ModelAdmin):
             initial.setdefault(self.site_field, request.user.default_site_id)
         return initial
 
-    def change_view(self, request, object_id, form_url="", extra_context=None):
-        if not self._object_visible_to_request(request, object_id):
-            raise Http404
-        return super().change_view(request, object_id, form_url, extra_context)
-
-    def _object_visible_to_request(self, request, object_id):
-        try:
-            return self.get_queryset(request).filter(pk=object_id).exists()
-        except (TypeError, ValueError, ValidationError):
-            return False
-
 
 class SiteSettingsInline(admin.StackedInline):
     model = SiteSettings
@@ -45,7 +47,7 @@ class SiteSettingsInline(admin.StackedInline):
 
 
 @admin.register(Site)
-class SiteAdmin(admin.ModelAdmin):
+class SiteAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
     list_display = ["name", "slug", "domain", "is_active"]
     list_filter = ["is_active"]
     search_fields = ["name", "slug", "domain"]
@@ -57,18 +59,6 @@ class SiteAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return queryset
         return queryset.filter(pk__in=request.user.sites.values("pk"))
-
-    def change_view(self, request, object_id, form_url="", extra_context=None):
-        if not self._object_visible_to_request(request, object_id):
-            raise Http404
-        return super().change_view(request, object_id, form_url, extra_context)
-
-    def _object_visible_to_request(self, request, object_id):
-        try:
-            return self.get_queryset(request).filter(pk=object_id).exists()
-        except (TypeError, ValueError, ValidationError):
-            return False
-
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):

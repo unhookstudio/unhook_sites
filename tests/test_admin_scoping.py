@@ -44,7 +44,7 @@ def test_site_scoped_admin_uses_default_site_as_initial_data(db):
     assert initial["site"] == kent.pk
 
 
-def test_site_scoped_admin_does_not_initial_blank_default_site(db):
+def test_site_scoped_admin_does_not_set_initial_blank_default_site(db):
     user = User.objects.create_user(username="editor", is_staff=True)
     request = RequestFactory().get("/admin/sites_core/navigationlink/add/")
     request.user = user

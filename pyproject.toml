@@ -17,4 +17,12 @@ dependencies = [
 DJANGO_SETTINGS_MODULE = "unhook_sites.settings"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 testpaths = ["tests"]
+env = [
+    "DEBUG=True",
+    "SECRET_KEY=django-insecure-test-secret-key",
+]
 
+[dependency-groups]
+dev = [
+    "pytest-env>=1.6.0",
+]
