@@ -46,13 +46,16 @@ class PublishableModel(models.Model):
         abstract = True
 
     def publish(self) -> None:
+        """Mark this instance as published without saving it."""
         self.is_published = True
         if self.published_at is None:
             self.published_at = timezone.now()
 
 
-class SiteSettings(SiteOwnedModel):
+class SiteSettings(models.Model):
     site = models.OneToOneField(Site, on_delete=models.CASCADE, related_name="settings")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     footer_text = models.TextField(blank=True)
     newsletter_text = models.TextField(blank=True)
     instagram_url = models.URLField(blank=True)
@@ -81,9 +84,18 @@ class NavigationLink(SiteOwnedModel):
 
 
 class Redirect(SiteOwnedModel):
+    class StatusCode(models.IntegerChoices):
+        MOVED_PERMANENTLY = 301, "301 Moved Permanently"
+        FOUND = 302, "302 Found"
+        TEMPORARY_REDIRECT = 307, "307 Temporary Redirect"
+        PERMANENT_REDIRECT = 308, "308 Permanent Redirect"
+
     old_path = models.CharField(max_length=500)
     new_url_or_path = models.CharField(max_length=500)
-    status_code = models.PositiveSmallIntegerField(default=301)
+    status_code = models.PositiveSmallIntegerField(
+        choices=StatusCode.choices,
+        default=StatusCode.MOVED_PERMANENTLY,
+    )
     is_active = models.BooleanField(default=True)
 
     class Meta:

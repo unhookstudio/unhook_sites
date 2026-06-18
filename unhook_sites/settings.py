@@ -1,19 +1,26 @@
 from pathlib import Path
 
 import environ
+from django.core.exceptions import ImproperlyConfigured
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env(
-    DEBUG=(bool, False),
+    DEBUG=(bool, True),
     ALLOWED_HOSTS=(list, []),
 )
 environ.Env.read_env(BASE_DIR / ".env")
 
 
-SECRET_KEY = env("SECRET_KEY", default="django-insecure-local-dev-change-me")
 DEBUG = env("DEBUG")
+SECRET_KEY = env("SECRET_KEY", default="django-insecure-local-dev-change-me")
+if not DEBUG and (
+    not SECRET_KEY
+    or SECRET_KEY.startswith("django-insecure")
+    or SECRET_KEY in {"change-me", "change-me-in-production"}
+):
+    raise ImproperlyConfigured("Set a strong SECRET_KEY when DEBUG is False.")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 
 

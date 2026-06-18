@@ -2,10 +2,6 @@ from django.http import HttpRequest, HttpResponse
 from django.urls import reverse
 
 
-def canonical_url(request: HttpRequest, viewname: str, *args: object, **kwargs: object) -> str:
-    return request.build_absolute_uri(reverse(viewname, args=args, kwargs=kwargs))
-
-
 def robots_txt(request: HttpRequest) -> HttpResponse:
     sitemap_url = request.build_absolute_uri(reverse("sitemap"))
     lines = [
