@@ -30,7 +30,7 @@ class User(AbstractUser):
 
 
 class SiteOwnedModel(models.Model):
-    site = models.ForeignKey(Site, on_delete=models.CASCADE)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name="%(class)ss")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

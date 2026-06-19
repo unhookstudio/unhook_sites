@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 
 from media_library.payload import (
     DEFAULT_PAYLOAD_BASE_URL,
@@ -28,7 +29,12 @@ class Command(BaseCommand):
             limit=options["limit"],
             depth=0,
         )
-        for doc in docs:
-            upsert_payload_media_doc(site=site, doc=doc, base_url=options["base_url"])
+        imported = 0
+        with transaction.atomic():
+            for doc in docs:
+                upsert_payload_media_doc(site=site, doc=doc, base_url=options["base_url"])
+                imported += 1
 
-        self.stdout.write(self.style.SUCCESS(f"Imported {len(docs)} media records."))
+        self.stdout.write(
+            self.style.SUCCESS(f"Imported {imported} of {len(docs)} fetched media records.")
+        )

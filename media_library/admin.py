@@ -8,7 +8,7 @@ from .models import Image, ImageVariant
 class ImageVariantInline(admin.TabularInline):
     model = ImageVariant
     extra = 0
-    fields = ["kind", "file", "width", "height", "filesize", "payload_url"]
+    fields = ["kind", "payload_kind", "file", "width", "height", "filesize", "payload_url"]
     readonly_fields = ["width", "height", "filesize", "payload_url"]
 
 
@@ -31,9 +31,9 @@ class ImageAdmin(SiteScopedAdmin):
 
 @admin.register(ImageVariant)
 class ImageVariantAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
-    list_display = ["image", "kind", "width", "height", "filesize"]
+    list_display = ["image", "kind", "payload_kind", "width", "height", "filesize"]
     list_filter = ["image__site", "kind", "mime_type"]
-    search_fields = ["image__title", "image__filename", "filename", "payload_url"]
+    search_fields = ["image__title", "image__filename", "filename", "payload_kind", "payload_url"]
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)

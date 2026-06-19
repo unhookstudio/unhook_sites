@@ -75,8 +75,9 @@ def upsert_payload_media_doc(
             continue
         ImageVariant.objects.update_or_create(
             image=image,
-            kind=kind if kind in ImageVariant.Kind.values else ImageVariant.Kind.OTHER,
+            payload_kind=kind,
             defaults={
+                "kind": kind if kind in ImageVariant.Kind.values else ImageVariant.Kind.OTHER,
                 "width": variant_data.get("width"),
                 "height": variant_data.get("height"),
                 "filesize": variant_data.get("filesize"),

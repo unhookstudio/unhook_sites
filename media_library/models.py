@@ -2,7 +2,7 @@ from pathlib import PurePath
 
 from django.db import models
 
-from sites_core.models import Site, SiteOwnedModel
+from sites_core.models import SiteOwnedModel
 
 
 def _clean_filename(filename: str) -> str:
@@ -16,11 +16,11 @@ def image_original_upload_path(instance: "Image", filename: str) -> str:
 
 def image_variant_upload_path(instance: "ImageVariant", filename: str) -> str:
     site_slug = instance.image.site.slug if instance.image_id else "unassigned"
-    return f"sites/{site_slug}/images/variants/{instance.kind}/{_clean_filename(filename)}"
+    variant_kind = instance.payload_kind or instance.kind
+    return f"sites/{site_slug}/images/variants/{variant_kind}/{_clean_filename(filename)}"
 
 
 class Image(SiteOwnedModel):
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name="images")
     title = models.CharField(max_length=255, blank=True)
     alt_text = models.CharField(max_length=255, blank=True)
     caption = models.TextField(blank=True)
@@ -62,6 +62,7 @@ class ImageVariant(models.Model):
 
     image = models.ForeignKey(Image, on_delete=models.CASCADE, related_name="variants")
     kind = models.CharField(max_length=40, choices=Kind.choices)
+    payload_kind = models.CharField(max_length=80, blank=True)
     file = models.ImageField(upload_to=image_variant_upload_path, blank=True)
     width = models.PositiveIntegerField(blank=True, null=True)
     height = models.PositiveIntegerField(blank=True, null=True)
@@ -76,8 +77,8 @@ class ImageVariant(models.Model):
         ordering = ["image", "kind"]
         constraints = [
             models.UniqueConstraint(
-                fields=["image", "kind"],
-                name="unique_image_variant_kind_per_image",
+                fields=["image", "payload_kind"],
+                name="unique_image_variant_payload_kind_per_image",
             ),
         ]
 
