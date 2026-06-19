@@ -27,6 +27,8 @@ db.sqlite3
 db.sqlite3-journal
 media/
 staticfiles/
+data/payload/raw/
+data/payload/logs/
 
 # Environment files
 .env

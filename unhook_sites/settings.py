@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "writing",
     "visual_art",
     "photos",
+    "payload_migration",
 ]
 
 MIDDLEWARE = [
