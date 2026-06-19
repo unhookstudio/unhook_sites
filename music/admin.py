@@ -1,0 +1,70 @@
+from django.contrib import admin
+
+from sites_core.admin import ScopedObjectAdminMixin
+from unhook_sites.admin import DomainModelAdmin
+
+from .models import Album, Artist, Song, Track, VideoClip
+
+
+class TrackInline(admin.TabularInline):
+    model = Track
+    extra = 0
+    autocomplete_fields = ["song"]
+
+
+@admin.register(Artist)
+class ArtistAdmin(DomainModelAdmin):
+    list_display = ["name", "site", "payload_id"]
+    list_filter = ["site"]
+    search_fields = ["name", "slug", "payload_id"]
+    prepopulated_fields = {"slug": ["name"]}
+
+
+@admin.register(Album)
+class AlbumAdmin(DomainModelAdmin):
+    rich_text_fields = ("description_html", "credits_html")
+    list_display = ["title", "site", "artist", "category", "release_date", "is_published", "payload_id"]
+    list_filter = ["site", "artist", "category", "is_published"]
+    search_fields = ["title", "slug", "label", "payload_id"]
+    prepopulated_fields = {"slug": ["title"]}
+    autocomplete_fields = ["artist", "cover_image", "additional_images"]
+    inlines = [TrackInline]
+
+
+@admin.register(Song)
+class SongAdmin(DomainModelAdmin):
+    rich_text_fields = ("description_html", "lyrics_html")
+    list_display = ["title", "site", "composer", "lyricist", "is_published", "payload_id"]
+    list_filter = ["site", "is_published"]
+    search_fields = ["title", "slug", "composer", "lyricist", "payload_id"]
+    prepopulated_fields = {"slug": ["title"]}
+
+
+@admin.register(Track)
+class TrackAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
+    list_display = ["album", "song", "disc_number", "track_number", "version_type", "payload_id"]
+    list_filter = ["album__site", "version_type"]
+    search_fields = ["display_title", "album__title", "song__title", "payload_id"]
+    autocomplete_fields = ["album", "song"]
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        if request.user.is_superuser:
+            return queryset
+        return queryset.filter(album__site__in=request.user.sites.all())
+
+    def get_list_filter(self, request):
+        list_filter = super().get_list_filter(request)
+        if request.user.is_superuser:
+            return list_filter
+        return [item for item in list_filter if item != "album__site"]
+
+
+@admin.register(VideoClip)
+class VideoClipAdmin(DomainModelAdmin):
+    rich_text_fields = ("description_html",)
+    list_display = ["title", "site", "video_id", "release_date", "is_published", "payload_id"]
+    list_filter = ["site", "is_published"]
+    search_fields = ["title", "slug", "video_id", "payload_id"]
+    prepopulated_fields = {"slug": ["title"]}
+    autocomplete_fields = ["thumbnail"]

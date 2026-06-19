@@ -31,6 +31,11 @@ INSTALLED_APPS = [
     "django_prose_editor",
     "sites_core",
     "media_library",
+    "events",
+    "music",
+    "writing",
+    "visual_art",
+    "photos",
 ]
 
 MIDDLEWARE = [
