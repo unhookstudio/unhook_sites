@@ -84,3 +84,8 @@ class ImageVariant(models.Model):
 
     def __str__(self) -> str:
         return f"{self.image} ({self.kind})"
+
+    def save(self, *args, **kwargs):
+        if not self.payload_kind:
+            self.payload_kind = self.kind
+        super().save(*args, **kwargs)

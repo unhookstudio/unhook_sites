@@ -9,7 +9,7 @@ class ImageVariantInline(admin.TabularInline):
     model = ImageVariant
     extra = 0
     fields = ["kind", "payload_kind", "file", "width", "height", "filesize", "payload_url"]
-    readonly_fields = ["width", "height", "filesize", "payload_url"]
+    readonly_fields = ["payload_kind", "width", "height", "filesize", "payload_url"]
 
 
 @admin.register(Image)
@@ -33,6 +33,7 @@ class ImageAdmin(SiteScopedAdmin):
 class ImageVariantAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
     list_display = ["image", "kind", "payload_kind", "width", "height", "filesize"]
     list_filter = ["image__site", "kind", "mime_type"]
+    readonly_fields = ["payload_kind"]
     search_fields = ["image__title", "image__filename", "filename", "payload_kind", "payload_url"]
 
     def get_queryset(self, request):

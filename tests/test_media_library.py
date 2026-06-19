@@ -3,6 +3,7 @@ from io import BytesIO, StringIO
 import pytest
 from django.core.files.base import ContentFile
 from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.db import IntegrityError
 from PIL import Image as PillowImage
 
@@ -120,6 +121,15 @@ def test_payload_media_upsert_preserves_distinct_unknown_size_keys(db):
     assert [variant.payload_kind for variant in variants] == ["customTall", "customWide"]
 
 
+def test_manual_variant_defaults_payload_kind_to_kind(db):
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    image = Image.objects.create(site=site, title="Cover")
+
+    variant = ImageVariant.objects.create(image=image, kind=ImageVariant.Kind.SMALL)
+
+    assert variant.payload_kind == ImageVariant.Kind.SMALL
+
+
 def test_payload_id_is_unique_per_site(db):
     site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
     Image.objects.create(site=site, payload_id=1)
@@ -147,7 +157,39 @@ def test_import_payload_media_reports_actual_upserts(db, monkeypatch):
     assert "Imported 2 of 2 fetched media records." in stdout.getvalue()
 
 
-def test_import_payload_media_rolls_back_when_upsert_fails(db, monkeypatch):
+def test_import_payload_media_continues_and_reports_failures(db, monkeypatch):
+    Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    docs = [
+        {"id": 1, "filename": "first.jpg", "url": "/api/media/file/first.jpg"},
+        {"id": 2, "filename": "second.jpg", "url": "/api/media/file/second.jpg"},
+        {"id": 3, "filename": "third.jpg", "url": "/api/media/file/third.jpg"},
+    ]
+
+    def upsert_or_fail(*, site, doc, base_url):
+        if doc["id"] == 2:
+            raise RuntimeError("boom")
+        return upsert_payload_media_doc(site=site, doc=doc, base_url=base_url)
+
+    monkeypatch.setattr(
+        "media_library.management.commands.import_payload_media.fetch_payload_collection",
+        lambda *args, **kwargs: docs,
+    )
+    monkeypatch.setattr(
+        "media_library.management.commands.import_payload_media.upsert_payload_media_doc",
+        upsert_or_fail,
+    )
+    stdout = StringIO()
+    stderr = StringIO()
+
+    with pytest.raises(CommandError):
+        call_command("import_payload_media", "--site", "kent", stdout=stdout, stderr=stderr)
+
+    assert Image.objects.count() == 2
+    assert "Imported 2 of 3 fetched media records." in stdout.getvalue()
+    assert "payload_id:2: boom" in stderr.getvalue()
+
+
+def test_import_payload_media_atomic_rolls_back_when_upsert_fails(db, monkeypatch):
     Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
     docs = [
         {"id": 1, "filename": "first.jpg", "url": "/api/media/file/first.jpg"},
@@ -169,7 +211,7 @@ def test_import_payload_media_rolls_back_when_upsert_fails(db, monkeypatch):
     )
 
     with pytest.raises(RuntimeError):
-        call_command("import_payload_media", "--site", "kent")
+        call_command("import_payload_media", "--site", "kent", "--atomic")
 
     assert Image.objects.count() == 0
 

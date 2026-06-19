@@ -1,6 +1,7 @@
 from django.contrib.auth.models import Permission
 from django.urls import reverse
 
+from media_library.admin import ImageVariantAdmin, ImageVariantInline
 from media_library.models import Image, ImageVariant
 from sites_core.models import Site, User
 
@@ -76,3 +77,8 @@ def test_image_variant_admin_hides_site_filter_for_staff(client, db):
 
     assert changelist.status_code == 200
     assert "image__site__id__exact" not in changelist.text
+
+
+def test_payload_kind_is_readonly_in_media_admin():
+    assert "payload_kind" in ImageVariantInline.readonly_fields
+    assert "payload_kind" in ImageVariantAdmin.readonly_fields
