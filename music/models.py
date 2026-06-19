@@ -35,7 +35,7 @@ class Album(SiteOwnedModel, PublishableModel):
     payload_description = models.JSONField(blank=True, null=True)
     payload_credits = models.JSONField(blank=True, null=True)
     cover_image = models.ForeignKey(Image, blank=True, null=True, on_delete=models.SET_NULL)
-    additional_images = models.ManyToManyField(Image, blank=True, related_name="album_additional_uses")
+    additional_images = models.ManyToManyField(Image, blank=True, related_name="+")
     release_date = models.DateField(blank=True, null=True)
     label = models.CharField(max_length=255, blank=True)
     shop_url = models.URLField(blank=True)
@@ -105,6 +105,7 @@ class Track(models.Model):
                 fields=["album", "disc_number", "track_number"],
                 name="unique_track_position_per_album",
             ),
+            models.UniqueConstraint(fields=["payload_id"], name="unique_track_payload_id"),
         ]
 
     def __str__(self) -> str:

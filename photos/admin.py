@@ -23,7 +23,7 @@ class PhotoStoryAdmin(DomainModelAdmin):
     list_filter = ["site", "is_published"]
     search_fields = ["title", "slug", "photographer", "payload_id"]
     prepopulated_fields = {"slug": ["title"]}
-    autocomplete_fields = ["photo"]
+    autocomplete_fields = ["image"]
 
 
 class PhotoCollectionItemInline(admin.TabularInline):

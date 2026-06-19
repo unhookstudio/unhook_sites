@@ -18,7 +18,7 @@ class BD(SiteOwnedModel, PublishableModel):
     description_html = models.TextField(blank=True)
     payload_description = models.JSONField(blank=True, null=True)
     cover_image = models.ForeignKey(Image, blank=True, null=True, on_delete=models.SET_NULL)
-    additional_images = models.ManyToManyField(Image, blank=True, related_name="bd_additional_uses")
+    additional_images = models.ManyToManyField(Image, blank=True, related_name="+")
     editor = models.CharField(max_length=255, blank=True)
     release_date = models.DateField(blank=True, null=True)
     shop_url = models.URLField(blank=True)
@@ -43,7 +43,7 @@ class Drawing(SiteOwnedModel, PublishableModel):
     slug = models.SlugField()
     description_html = models.TextField(blank=True)
     payload_description = models.JSONField(blank=True, null=True)
-    images = models.ManyToManyField(Image, blank=True, related_name="drawing_uses")
+    images = models.ManyToManyField(Image, blank=True, related_name="+")
     release_date = models.DateField(blank=True, null=True)
     payload_id = models.PositiveIntegerField(blank=True, null=True)
 

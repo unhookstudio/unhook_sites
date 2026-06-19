@@ -14,7 +14,10 @@ class Article(SiteOwnedModel, PublishableModel):
     title = models.CharField(max_length=255)
     slug = models.SlugField()
     content_html = models.TextField(blank=True)
-    content_plain = models.TextField(blank=True)
+    content_plain = models.TextField(
+        blank=True,
+        help_text="Importer-maintained plain text extracted from content_html for search.",
+    )
     payload_content = models.JSONField(blank=True, null=True)
     category = models.CharField(max_length=60, choices=Category.choices, default=Category.NEWS)
     featured_image = models.ForeignKey(Image, blank=True, null=True, on_delete=models.SET_NULL)
@@ -51,7 +54,7 @@ class Book(SiteOwnedModel, PublishableModel):
     payload_short_description = models.JSONField(blank=True, null=True)
     payload_description = models.JSONField(blank=True, null=True)
     cover_image = models.ForeignKey(Image, blank=True, null=True, on_delete=models.SET_NULL)
-    additional_images = models.ManyToManyField(Image, blank=True, related_name="book_additional_uses")
+    additional_images = models.ManyToManyField(Image, blank=True, related_name="+")
     editor = models.CharField(max_length=255, blank=True)
     release_date = models.DateField(blank=True, null=True)
     shop_url = models.URLField(blank=True)

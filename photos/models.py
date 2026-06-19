@@ -29,7 +29,7 @@ class Photo(SiteOwnedModel, PublishableModel):
 class PhotoStory(SiteOwnedModel, PublishableModel):
     title = models.CharField(max_length=255)
     slug = models.SlugField()
-    photo = models.ForeignKey(Image, blank=True, null=True, on_delete=models.SET_NULL)
+    image = models.ForeignKey(Image, blank=True, null=True, on_delete=models.SET_NULL)
     description_html = models.TextField(blank=True)
     payload_description = models.JSONField(blank=True, null=True)
     date = models.DateField(blank=True, null=True)

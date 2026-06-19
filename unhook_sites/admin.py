@@ -15,3 +15,14 @@ class RichTextAdminMixin:
 
 class DomainModelAdmin(RichTextAdminMixin, SiteScopedAdmin):
     readonly_fields = ["payload_id", "created_at", "updated_at"]
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = list(super().get_readonly_fields(request, obj))
+        if request.user.is_superuser:
+            return readonly_fields
+        payload_fields = [
+            field.name
+            for field in self.model._meta.fields
+            if field.name.startswith("payload_") and field.name not in readonly_fields
+        ]
+        return [*readonly_fields, *payload_fields]
