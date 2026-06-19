@@ -29,6 +29,7 @@ media/
 staticfiles/
 data/payload/raw/
 data/payload/logs/
+data/payload/r2-media/
 
 # Environment files
 .env

@@ -7,6 +7,7 @@ from django.core.management.base import CommandError
 from django.db import IntegrityError
 from PIL import Image as PillowImage
 
+from media_library.admin import image_preview
 from media_library.management.commands.download_payload_media import Command
 from media_library.models import Image, ImageVariant
 from media_library.payload import absolute_payload_url, upsert_payload_media_doc
@@ -38,6 +39,18 @@ def test_variant_upload_path_uses_site_slug_and_kind(db, settings, tmp_path):
     variant.file.save("cover-thumb.jpg", ContentFile(b"not-really-an-image"), save=False)
 
     assert variant.file.name == "sites/kent/images/variants/thumbnail/cover-thumb.jpg"
+
+
+def test_admin_image_preview_renders_image_tag(db, settings, tmp_path):
+    settings.MEDIA_ROOT = tmp_path
+    settings.MEDIA_URL = "/media/"
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    image = Image.objects.create(site=site, title="Cover")
+    image.original.save("cover.png", ContentFile(png_bytes()), save=True)
+
+    preview = str(image_preview(image.original))
+
+    assert '<img src="/media/sites/kent/images/originals/cover.png"' in preview
 
 
 def test_variant_upload_path_prefers_raw_payload_kind(db, settings, tmp_path):
@@ -377,3 +390,108 @@ def test_download_command_refreshes_variant_metadata_from_local_file(
     assert variant.width == 13
     assert variant.height == 17
     assert variant.filesize == len(content)
+
+
+def test_attach_payload_media_files_attaches_original_from_flat_directory(db, settings, tmp_path):
+    settings.MEDIA_ROOT = tmp_path / "media"
+    source_dir = tmp_path / "r2-media"
+    source_dir.mkdir()
+    content = png_bytes(width=19, height=23)
+    (source_dir / "Slogans dada 2.png").write_bytes(content)
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    image = Image.objects.create(
+        site=site,
+        filename="Slogans dada 2.png",
+        payload_url="https://payload.test/api/media/file/Slogans%20dada%202.png",
+    )
+
+    call_command(
+        "attach_payload_media_files",
+        "--site",
+        "kent",
+        "--source-dir",
+        source_dir,
+    )
+    image.refresh_from_db()
+
+    assert image.original.name == "sites/kent/images/originals/Slogans_dada_2.png"
+    assert image.width == 19
+    assert image.height == 23
+    assert image.filesize == len(content)
+    assert image.mime_type == "image/png"
+
+
+def test_attach_payload_media_files_matches_decoded_payload_url(db, settings, tmp_path):
+    settings.MEDIA_ROOT = tmp_path / "media"
+    source_dir = tmp_path / "r2-media"
+    source_dir.mkdir()
+    (source_dir / "Slogans dada 2.png").write_bytes(png_bytes())
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    image = Image.objects.create(
+        site=site,
+        payload_url="https://payload.test/api/media/file/Slogans%20dada%202.png",
+    )
+
+    call_command(
+        "attach_payload_media_files",
+        "--site",
+        "kent",
+        "--source-dir",
+        source_dir,
+    )
+    image.refresh_from_db()
+
+    assert image.original.name == "sites/kent/images/originals/Slogans_dada_2.png"
+
+
+def test_attach_payload_media_files_attaches_variants_when_enabled(db, settings, tmp_path):
+    settings.MEDIA_ROOT = tmp_path / "media"
+    source_dir = tmp_path / "r2-media"
+    source_dir.mkdir()
+    content = png_bytes(width=31, height=37)
+    (source_dir / "cover-300x188.png").write_bytes(content)
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    image = Image.objects.create(site=site, filename="cover.png")
+    variant = ImageVariant.objects.create(
+        image=image,
+        kind=ImageVariant.Kind.THUMBNAIL,
+        payload_kind="thumbnail",
+        filename="cover-300x188.png",
+    )
+
+    call_command(
+        "attach_payload_media_files",
+        "--site",
+        "kent",
+        "--source-dir",
+        source_dir,
+        "--variants",
+    )
+    variant.refresh_from_db()
+
+    assert variant.file.name == "sites/kent/images/variants/thumbnail/cover-300x188.png"
+    assert variant.width == 31
+    assert variant.height == 37
+    assert variant.filesize == len(content)
+
+
+def test_attach_payload_media_files_reports_missing_files(db, settings, tmp_path):
+    settings.MEDIA_ROOT = tmp_path / "media"
+    source_dir = tmp_path / "r2-media"
+    source_dir.mkdir()
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    image = Image.objects.create(site=site, filename="missing.png")
+    stderr = StringIO()
+
+    call_command(
+        "attach_payload_media_files",
+        "--site",
+        "kent",
+        "--source-dir",
+        source_dir,
+        stderr=stderr,
+    )
+    image.refresh_from_db()
+
+    assert not image.original
+    assert f"image:{image.pk}:missing.png" in stderr.getvalue()

@@ -238,3 +238,22 @@ def test_audit_payload_import_command_outputs_summary(tmp_path, db):
 
     assert "posts: imported 0 / snapshot 1" in stdout.getvalue()
     assert "Unknown Lexical nodes: 0" in stdout.getvalue()
+
+
+def test_write_migration_report_command_outputs_json(tmp_path, db):
+    Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    (tmp_path / "posts.json").write_text('{"docs":[{"id":1}]}', encoding="utf-8")
+    output = tmp_path / "report.json"
+
+    call_command(
+        "write_migration_report",
+        "--site",
+        "kent",
+        "--input-dir",
+        tmp_path,
+        "--output",
+        output,
+    )
+
+    report = read_json(output)
+    assert report["counts"] == [{"collection": "posts", "snapshot": 1, "imported": 0}]
