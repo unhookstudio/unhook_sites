@@ -292,6 +292,35 @@ def test_album_detail_shows_tracks(client, db, settings):
     assert "Song" in response.text
 
 
+def test_song_detail_preserves_lyrics_breaks_and_uses_compact_album_panel(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    artist = Artist.objects.create(site=site, name="Kent", slug="kent")
+    album = Album.objects.create(
+        site=site,
+        artist=artist,
+        title="Album",
+        slug="album",
+        is_published=True,
+    )
+    song = Song.objects.create(
+        site=site,
+        title="Song",
+        slug="song",
+        is_published=True,
+        lyrics_html="<p>Line one\nLine two</p>",
+    )
+    Track.objects.create(album=album, song=song, track_number=1)
+
+    response = client.get(reverse("song_detail", args=["song"]), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "song-lyrics" in response.text
+    assert "Line one\nLine two" in response.text
+    assert "song-albums-panel" in response.text
+    assert "album-appearance" in response.text
+
+
 def test_livres_uses_book_page_placement_flag(client, db, settings):
     settings.ALLOWED_HOSTS = ["kent-artiste.com"]
     site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")

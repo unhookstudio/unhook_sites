@@ -15,10 +15,10 @@
       </p>
     </header>
     <div class="song-grid">
-      <section class="prose">
+      <section class="prose song-lyrics">
         {% if song.lyrics_html %}{{ song.lyrics_html|safe }}{% else %}<p class="muted"><em>Paroles non disponibles.</em></p>{% endif %}
       </section>
-      <aside class="panel">
+      <aside class="panel song-albums-panel">
         <h2 class="panel-title">Albums</h2>
         {% if tracks %}
           <div class="album-appearance-list">

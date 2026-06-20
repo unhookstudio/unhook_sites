@@ -991,6 +991,15 @@ img {
   font-family: var(--font-frama);
 }
 
+.song-lyrics {
+  color: var(--foreground);
+  line-height: 1.65;
+}
+
+.song-lyrics p {
+  white-space: pre-line;
+}
+
 .meta-list {
   margin-top: 1.5rem;
   display: grid;
@@ -1059,7 +1068,8 @@ img {
   display: flex;
   gap: 1rem;
   align-items: center;
-  padding: 0.75rem;
+  min-height: 0;
+  padding: 0.5rem;
   border-radius: 0.5rem;
 }
 
@@ -1068,10 +1078,20 @@ img {
 }
 
 .album-appearance img {
-  width: 4rem;
-  height: 4rem;
+  width: 3rem;
+  height: 3rem;
+  flex: 0 0 auto;
   object-fit: cover;
   border-radius: 0.25rem;
+}
+
+.song-albums-panel {
+  align-self: start;
+  padding: 1rem;
+}
+
+.song-albums-panel .panel-title {
+  margin-bottom: 1rem;
 }
 
 .news-card {
