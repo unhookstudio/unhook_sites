@@ -84,5 +84,78 @@
         </a>
       </section>
     {% endif %}
+
+    <section id="newsletter" class="newsletter-section">
+      <div class="newsletter-section__grid">
+        <div>
+          {% include "public_site/includes/section_title.html" with src="kent/assets/actualite.svg" alt="Suivre l'actualité de Kent" class_name="section-title--newsletter" mask=True %}
+          <p class="newsletter-section__text">
+            Environ une fois par mois, Kent envoie une newslettre remplie de ses états d'âme, de recommandations de films et musiques et bien plus encore.
+          </p>
+          <form class="newsletter-form" action="{% url 'newsletter_signup' %}" method="post">
+            {% csrf_token %}
+            <div class="newsletter-form__honeypot" aria-hidden="true">
+              <label for="newsletter-company">Société</label>
+              <input id="newsletter-company" name="company" tabindex="-1" type="text" />
+            </div>
+            <input class="newsletter-form__input" id="newsletter-email" name="email" placeholder="Votre email" required type="email" />
+            <button class="newsletter-form__button" type="submit">Oui, je veux la newslettre</button>
+          </form>
+        </div>
+        <div class="newsletter-section__image-wrap">
+          <img class="newsletter-section__image" src="{% static 'kent/assets/kent_gauche.jpg' %}" alt="Kent" />
+        </div>
+      </div>
+    </section>
+
+    <section class="section-spacer" aria-hidden="true">
+      <img src="{% static 'kent/assets/line_horizontal_straight.svg' %}" alt="" />
+    </section>
+
+    <section class="quick-links section">
+      <div class="grid grid--two">
+        <a class="quick-link-card quick-link-card--about" href="/a-propos">
+          <svg class="quick-link-card__icon lucide lucide-info" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4" />
+            <path d="M12 8h.01" />
+          </svg>
+          <h2>Chanteur, écrivain, illustrateur</h2>
+          <p>Une de ses chansons s'intitule : « En route vers de nouvelles aventures... » Autant de découvertes proposées, autant de perspectives qu'il se plaît à explorer.</p>
+          <span class="quick-link-card__cta">Voir plus <img src="{% static 'kent/assets/arrow_right.svg' %}" alt="" /></span>
+        </a>
+        <a class="quick-link-card quick-link-card--music" href="{% url 'musique' %}">
+          <svg class="quick-link-card__icon lucide lucide-music" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18V5l12-2v13" />
+            <circle cx="6" cy="18" r="3" />
+            <circle cx="18" cy="16" r="3" />
+          </svg>
+          <h2>Musique</h2>
+          <p>Juste quelqu'un de bien, Betsy Party, J'aime un pays... La musique de Kent est marquée par un inépuisable esprit d'explorateur.</p>
+          <span class="quick-link-card__cta">Voir plus <img src="{% static 'kent/assets/arrow_right.svg' %}" alt="" /></span>
+        </a>
+        <a class="quick-link-card quick-link-card--drawings" href="{% url 'dessins' %}">
+          <svg class="quick-link-card__icon lucide lucide-palette" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
+            <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
+            <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
+            <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
+          </svg>
+          <h2>Dessins</h2>
+          <p>Métal Hurlant, biographie d'Elvis Presley, l'histoire de Dada... Et toujours avec son trait caractéristique.</p>
+          <span class="quick-link-card__cta">Voir plus <img src="{% static 'kent/assets/arrow_right.svg' %}" alt="" /></span>
+        </a>
+        <a class="quick-link-card quick-link-card--books" href="{% url 'livres' %}">
+          <svg class="quick-link-card__icon lucide lucide-book-open" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+          </svg>
+          <h2>Livres</h2>
+          <p>Romans, poésie, essais et livres pour enfants.</p>
+          <span class="quick-link-card__cta">Voir plus <img src="{% static 'kent/assets/arrow_right.svg' %}" alt="" /></span>
+        </a>
+      </div>
+    </section>
   </main>
 {% endblock %}

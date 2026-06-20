@@ -902,6 +902,176 @@ img {
   color: var(--primary);
 }
 
+.section-title--newsletter {
+  width: min(100%, 36rem);
+  height: auto;
+  aspect-ratio: 5713 / 613;
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.newsletter-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  overflow: hidden;
+  border: 1px solid var(--border-warm);
+  border-radius: 0.5rem;
+  background: var(--card);
+}
+
+.newsletter-section__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: center;
+}
+
+.newsletter-section__text {
+  max-width: 34rem;
+  margin: 0 0 1.5rem;
+  color: var(--muted-foreground);
+}
+
+.newsletter-form {
+  display: flex;
+  max-width: 28rem;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 3rem;
+}
+
+.newsletter-form__honeypot {
+  display: none;
+}
+
+.newsletter-form__input {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  border: 1px solid var(--border-warm);
+  border-radius: 0.5rem;
+  background: var(--background);
+  color: var(--foreground);
+  font: inherit;
+}
+
+.newsletter-form__input:focus {
+  outline: 2px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.newsletter-form__button {
+  padding: 0.625rem 1.5rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  cursor: pointer;
+  font: inherit;
+  transition: background-color 180ms ease;
+}
+
+.newsletter-form__button:hover {
+  background: color-mix(in srgb, var(--primary) 90%, black);
+}
+
+.newsletter-section__image-wrap {
+  position: relative;
+  width: 100%;
+  height: 18rem;
+}
+
+.newsletter-section__image {
+  width: 100%;
+  height: 100%;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  object-position: 50% 35%;
+}
+
+.quick-links {
+  margin-top: 4rem;
+}
+
+.quick-link-card {
+  display: flex;
+  min-height: 17rem;
+  aspect-ratio: 2 / 1;
+  flex-direction: column;
+  padding: 1.5rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  color: #fff;
+  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 600ms ease;
+}
+
+.quick-link-card:hover {
+  transform: translateY(-0.125rem);
+  box-shadow: 0 12px 24px rgb(0 0 0 / 14%);
+}
+
+.quick-link-card--about {
+  background: color-mix(in srgb, var(--accent-4) 90%, transparent);
+  border-color: color-mix(in srgb, var(--accent-4) 20%, transparent);
+}
+
+.quick-link-card--music {
+  background: color-mix(in srgb, var(--accent-1) 90%, transparent);
+  border-color: color-mix(in srgb, var(--accent-1) 20%, transparent);
+}
+
+.quick-link-card--drawings {
+  background: color-mix(in srgb, var(--accent-2) 90%, transparent);
+  border-color: color-mix(in srgb, var(--accent-2) 20%, transparent);
+}
+
+.quick-link-card--books {
+  background: color-mix(in srgb, var(--accent-3) 90%, transparent);
+  border-color: color-mix(in srgb, var(--accent-3) 20%, transparent);
+}
+
+.quick-link-card__icon {
+  display: block;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.quick-link-card h2 {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-frama);
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.quick-link-card p {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: #fff;
+  font-weight: 300;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 7;
+}
+
+.quick-link-card__cta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.quick-link-card__cta img {
+  width: 2rem;
+  height: auto;
+  filter: brightness(0) invert(1);
+}
+
 .site-footer {
   margin-top: auto;
   border-top: 1px solid var(--border-warm);
@@ -989,6 +1159,14 @@ img {
     grid-template-columns: 1fr 2fr;
   }
 
+  .newsletter-section {
+    padding-inline: 2rem;
+  }
+
+  .newsletter-section__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .news-card__article {
     flex-direction: row;
     align-items: flex-start;
@@ -1014,5 +1192,9 @@ img {
   .news-card__media {
     width: 12rem;
     height: 9rem;
+  }
+
+  .newsletter-section__image-wrap {
+    height: 30rem;
   }
 }

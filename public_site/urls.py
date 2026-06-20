@@ -14,4 +14,5 @@ urlpatterns = [
     path("dessins/<slug:slug>", views.dessin_detail, name="dessin_detail"),
     path("posts", views.posts, name="posts"),
     path("post/<slug:slug>", views.post_detail, name="post_detail"),
+    path("newsletter", views.newsletter_signup, name="newsletter_signup"),
 ]

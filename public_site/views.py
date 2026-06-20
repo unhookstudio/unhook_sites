@@ -2,7 +2,8 @@ from random import choice
 
 from django.http import Http404
 from django.db.models import Prefetch
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
 from events.models import Event
 from music.models import Album, Song, Track, VideoClip
@@ -157,6 +158,11 @@ def post_detail(request, slug):
         slug=slug,
     )
     return render(request, "public_site/post_detail.html", {"article": article})
+
+
+@require_POST
+def newsletter_signup(request):
+    return redirect("/?newsletter=success#newsletter")
 
 
 def _published(model, site):

@@ -75,6 +75,37 @@ def test_home_renders_actualites_section_with_image_left_layout(client, db, sett
     assert "line_horizontal_squiggly.svg" in response.text
 
 
+def test_home_renders_newsletter_and_quick_links(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+
+    response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert 'id="newsletter"' in response.text
+    assert "actualite.svg" in response.text
+    assert "kent_gauche.jpg" in response.text
+    assert "Oui, je veux la newslettre" in response.text
+    assert "line_horizontal_straight.svg" in response.text
+    assert "quick-link-card--music" in response.text
+    assert "quick-link-card--drawings" in response.text
+    assert "quick-link-card--books" in response.text
+
+
+def test_newsletter_signup_redirects_to_home_anchor(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+
+    response = client.post(
+        reverse("newsletter_signup"),
+        {"email": "reader@example.com"},
+        HTTP_HOST="kent-artiste.com",
+    )
+
+    assert response.status_code == 302
+    assert response["Location"] == "/?newsletter=success#newsletter"
+
+
 def test_musique_lists_only_published_site_albums(client, db, settings):
     settings.ALLOWED_HOSTS = ["kent-artiste.com"]
     site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
