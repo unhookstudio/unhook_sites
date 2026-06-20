@@ -1,0 +1,65 @@
+{% extends "public_site/base.html" %}
+{% load static %}
+
+{% block title %}Musique - Kent{% endblock %}
+
+{% block body %}
+  <main class="container page-layout">
+    {% include "public_site/includes/section_title.html" with src="kent/assets/musiquev.svg" alt="Musique" %}
+    <figure class="quote" style="color: var(--musique);">
+      <blockquote>
+        Du jeune punk rocker du groupe Starshooter à sa carrière solo d’auteur-compositeur reconnu, Kent s’est inventé mille vies et autant de pseudos. Mieux vaut changer pour ne jamais tourner en rond, et devenir un autre pour rester, en fait, au plus près de soi-même.
+      </blockquote>
+      <figcaption>Thomas Boujut</figcaption>
+    </figure>
+
+    {% if kent_albums %}
+      <section class="section">
+        <h2 style="color: var(--musique);">Kent</h2>
+        <div class="grid grid--four">
+          {% for album in kent_albums %}
+            {% include "public_site/includes/album_card.html" with album=album show_meta=True %}
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {% if starshooter_albums %}
+      <section class="section">
+        <h2 style="color: var(--musique);">Starshooter</h2>
+        <div class="grid grid--four">
+          {% for album in starshooter_albums %}
+            {% include "public_site/includes/album_card.html" with album=album show_meta=True %}
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {% if other_albums %}
+      <section class="section">
+        <h2 style="color: var(--musique);">Participations</h2>
+        <div class="grid grid--four">
+          {% for album in other_albums %}
+            {% include "public_site/includes/album_card.html" with album=album show_artist=True show_meta=True %}
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {% if video_clips %}
+      <section class="section">
+        <h2 style="color: var(--musique);">Clips</h2>
+        <div class="grid grid--two">
+          {% for clip in video_clips %}
+            <article class="card">
+              <div class="card__body">
+                <h3 class="card__title">{{ clip.title }}</h3>
+                {% if clip.release_date %}<p class="small muted">{{ clip.release_date|date:"Y" }}</p>{% endif %}
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+  </main>
+{% endblock %}

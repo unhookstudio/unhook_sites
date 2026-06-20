@@ -1,0 +1,39 @@
+{% extends "public_site/base.html" %}
+{% load public_site_tags %}
+
+{% block title %}{{ song.title }} - Kent{% endblock %}
+
+{% block body %}
+  <main class="container page-layout">
+    <a class="back-link" href="{% url 'musique' %}">← Retour à la musique</a>
+    <header class="section">
+      <h1 class="detail-title">{{ song.title }}</h1>
+      <p class="muted">
+        {% if song.composer %}Compositeur : {{ song.composer }}{% endif %}
+        {% if song.composer and song.lyricist %} · {% endif %}
+        {% if song.lyricist %}Parolier : {{ song.lyricist }}{% endif %}
+      </p>
+    </header>
+    <div class="song-grid">
+      <section class="prose">
+        {% if song.lyrics_html %}{{ song.lyrics_html|safe }}{% else %}<p class="muted"><em>Paroles non disponibles.</em></p>{% endif %}
+      </section>
+      <aside class="panel">
+        <h2 class="panel-title">Albums</h2>
+        {% if tracks %}
+          <div class="album-appearance-list">
+            {% for track in tracks %}
+              <a class="album-appearance" href="{% url 'album_detail' track.album.slug %}">
+                {% image_url track.album.cover_image "thumbnail" as cover_url %}
+                {% if cover_url %}<img src="{{ cover_url }}" alt="{{ track.album.title }}" />{% endif %}
+                <span>{{ track.album.title }}</span>
+              </a>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="muted">Aucun album trouvé.</p>
+        {% endif %}
+      </aside>
+    </div>
+  </main>
+{% endblock %}

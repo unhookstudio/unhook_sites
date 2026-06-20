@@ -1,0 +1,12 @@
+{% load public_site_tags %}
+<a class="card article-card" href="{% url 'post_detail' article.slug %}">
+  {% image_url article.featured_image "medium" as image_src %}
+  {% if image_src %}
+    <div class="article-card__image"><img src="{{ image_src }}" alt="{{ article.title }}" /></div>
+  {% endif %}
+  <div class="card__body">
+    <h3 class="card__title">{{ article.title }}</h3>
+    {% if article.published_at %}<p class="small muted">{{ article.published_at|date:"j F Y" }}</p>{% endif %}
+    {% if article.content_plain %}<p class="small muted">{{ article.content_plain|truncatewords:28 }}</p>{% endif %}
+  </div>
+</a>

@@ -1,0 +1,18 @@
+{% extends "public_site/base.html" %}
+{% load public_site_tags %}
+
+{% block title %}{{ drawing.title }} - Kent{% endblock %}
+
+{% block body %}
+  <main class="container page-layout">
+    <a class="back-link" href="{% url 'dessins' %}">← Retour aux dessins</a>
+    <h1 class="detail-title">{{ drawing.title }}</h1>
+    {% if drawing.description_html %}<div class="prose">{{ drawing.description_html|safe }}</div>{% endif %}
+    <div class="grid grid--two section">
+      {% for image in drawing.images.all %}
+        {% image_url image "large" as image_src %}
+        {% if image_src %}<img class="detail-cover detail-cover--contain" src="{{ image_src }}" alt="{{ drawing.title }}" />{% endif %}
+      {% endfor %}
+    </div>
+  </main>
+{% endblock %}

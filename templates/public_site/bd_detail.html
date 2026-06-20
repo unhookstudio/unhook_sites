@@ -1,0 +1,28 @@
+{% extends "public_site/base.html" %}
+{% load public_site_tags %}
+
+{% block title %}{{ bd.title }} - Kent{% endblock %}
+
+{% block body %}
+  <main class="container page-layout">
+    <a class="back-link" href="{% url 'dessins' %}">← Retour aux B.D.s</a>
+    <div class="detail-grid">
+      <div>
+        <p class="small muted">{{ bd.get_category_display }}</p>
+        <h1 class="detail-title">{{ bd.title }}</h1>
+        {% if bd.description_html %}<div class="prose">{{ bd.description_html|safe }}</div>{% else %}<p class="muted">Aucune description n'est disponible pour cette B.D.</p>{% endif %}
+        <dl class="meta-list">
+          {% if bd.author %}<div><dt>Auteur</dt><dd>{{ bd.author }}</dd></div>{% endif %}
+          {% if bd.illustrator %}<div><dt>Illustrateur</dt><dd>{{ bd.illustrator }}</dd></div>{% endif %}
+          {% if bd.editor %}<div><dt>Éditeur</dt><dd>{{ bd.editor }}</dd></div>{% endif %}
+          {% if bd.release_date %}<div><dt>Sortie</dt><dd>{{ bd.release_date|year }}</dd></div>{% endif %}
+        </dl>
+        {% if bd.shop_url %}<a class="button-link" href="{{ bd.shop_url }}" target="_blank" rel="noreferrer">Acheter</a>{% endif %}
+      </div>
+      <div>
+        {% image_url bd.cover_image "large" as cover_url %}
+        {% if cover_url %}<img class="detail-cover detail-cover--contain" src="{{ cover_url }}" alt="{{ bd.title }}" />{% endif %}
+      </div>
+    </div>
+  </main>
+{% endblock %}

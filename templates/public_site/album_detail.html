@@ -1,0 +1,50 @@
+{% extends "public_site/base.html" %}
+{% load public_site_tags %}
+
+{% block title %}{{ album.title }} - Kent{% endblock %}
+
+{% block body %}
+  <main class="container page-layout">
+    <a class="back-link" href="{% url 'musique' %}">← Retour aux albums</a>
+    <div class="detail-grid">
+      <div>
+        {% image_url album.cover_image "large" as cover_url %}
+        {% if cover_url %}<img class="detail-cover" src="{{ cover_url }}" alt="{{ album.title }}" />{% endif %}
+      </div>
+      <div>
+        <h1 class="detail-title">{{ album.title }}</h1>
+        <p class="muted">
+          {% if album.label %}{{ album.label }}{% endif %}
+          {% if album.label and album.release_date %}, {% endif %}
+          {% if album.release_date %}{{ album.release_date|year }}{% endif %}
+        </p>
+        {% if album.description_html %}<div class="prose">{{ album.description_html|safe }}</div>{% endif %}
+      </div>
+    </div>
+    <div class="detail-grid">
+      <section>
+        <h2 class="panel-title">Tracklist</h2>
+        {% if tracks %}
+          <ul class="track-list">
+            {% for track in tracks %}
+              <li>
+                <span class="track-number">{{ track.track_number|stringformat:"02d" }}.</span>
+                <a href="{% url 'song_detail' track.song.slug %}">{{ track.song.title }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="muted">Aucune piste disponible</p>
+        {% endif %}
+      </section>
+      <section>
+        <h2 class="panel-title">Crédits</h2>
+        {% if album.credits_html %}
+          <div class="prose">{{ album.credits_html|safe }}</div>
+        {% else %}
+          <p class="muted">Aucun crédit disponible</p>
+        {% endif %}
+      </section>
+    </div>
+  </main>
+{% endblock %}

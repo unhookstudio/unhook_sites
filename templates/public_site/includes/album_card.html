@@ -1,0 +1,18 @@
+{% load public_site_tags %}
+<a class="card album-card" href="{% url 'album_detail' album.slug %}">
+  {% image_url album.cover_image "medium" as cover_url %}
+  {% if cover_url %}
+    <div class="album-card__image"><img src="{{ cover_url }}" alt="{{ album.title }}" /></div>
+  {% endif %}
+  <div class="card__body">
+    <h3 class="card__title">{{ album.title }}</h3>
+    {% if show_artist and album.artist %}<p class="small muted">{{ album.artist }}</p>{% endif %}
+    {% if show_meta %}
+      <p class="small muted">
+        {% if album.label %}{{ album.label }}{% endif %}
+        {% if album.label and album.release_date %}, {% endif %}
+        {% if album.release_date %}{{ album.release_date|year }}{% endif %}
+      </p>
+    {% endif %}
+  </div>
+</a>

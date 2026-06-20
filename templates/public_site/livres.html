@@ -1,0 +1,27 @@
+{% extends "public_site/base.html" %}
+{% load static %}
+
+{% block title %}Livres - Kent{% endblock %}
+
+{% block body %}
+  <main class="container page-layout">
+    {% include "public_site/includes/section_title.html" with src="kent/assets/livres.svg" alt="Livres" class_name="section-title--large" %}
+    <figure class="quote" style="color: var(--ecrits);">
+      <blockquote>Entre chanson, bande dessinée et romans, l'homme déborde de créativité depuis quatre décennies. Il est rare de croiser le chemin d'un homme aussi épanoui.</blockquote>
+      <figcaption>Olivier Nuc, Le Figaro</figcaption>
+    </figure>
+    {% for title, books in sections %}
+      {% if books %}
+        <section class="section">
+          <h2 style="color: var(--ecrits);">{{ title }}</h2>
+          <div class="grid grid--two">
+            {% for book in books %}
+              {% include "public_site/includes/book_card.html" with book=book %}
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+    {% endfor %}
+    {% if not books %}<p class="empty text-center">Aucun livre disponible pour le moment.</p>{% endif %}
+  </main>
+{% endblock %}

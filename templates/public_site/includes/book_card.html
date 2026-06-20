@@ -1,0 +1,22 @@
+{% load public_site_tags %}
+<a class="card book-card" href="{% url 'book_detail' book.slug %}">
+  {% image_url book.cover_image "small" as cover_url %}
+  {% if cover_url %}
+    <img class="book-card__cover" src="{{ cover_url }}" alt="{{ book.title }}" />
+  {% else %}
+    <div class="book-card__cover"></div>
+  {% endif %}
+  <div class="card__content">
+    <div>
+      <h3 class="card__title">{{ book.title }}</h3>
+      {% if book.short_description_html %}
+        <div class="small muted">{{ book.short_description_html|striptags|truncatewords:24 }}</div>
+      {% endif %}
+    </div>
+    <p class="tiny muted">
+      {% if book.editor %}{{ book.editor }}{% endif %}
+      {% if book.editor and book.release_date %} · {% endif %}
+      {% if book.release_date %}{{ book.release_date|year }}{% endif %}
+    </p>
+  </div>
+</a>

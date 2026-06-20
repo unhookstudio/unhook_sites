@@ -1,0 +1,19 @@
+{% extends "public_site/base.html" %}
+{% load public_site_tags %}
+
+{% block title %}{{ article.title }} - Kent{% endblock %}
+
+{% block body %}
+  <main class="container page-layout">
+    <a class="back-link" href="{% url 'posts' %}">← Retour aux actualités</a>
+    <article class="prose" style="margin-inline: auto;">
+      <header>
+        <h1 class="detail-title">{{ article.title }}</h1>
+        {% if article.published_at %}<p class="muted">Publié le {{ article.published_at|date:"j F Y" }}</p>{% endif %}
+      </header>
+      {% image_url article.featured_image "large" as image_src %}
+      {% if image_src %}<img class="detail-cover" src="{{ image_src }}" alt="{{ article.title }}" />{% endif %}
+      {% if article.content_html %}{{ article.content_html|safe }}{% endif %}
+    </article>
+  </main>
+{% endblock %}

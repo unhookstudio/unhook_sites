@@ -1,0 +1,13 @@
+{% load public_site_tags %}
+<a class="card drawing-card" href="{% url 'dessin_detail' drawing.slug %}">
+  {% with image=drawing.images.all.0 %}
+    {% image_url image "medium" as image_src %}
+    <div class="drawing-card__image">
+      {% if image_src %}<img src="{{ image_src }}" alt="{{ drawing.title }}" />{% endif %}
+    </div>
+  {% endwith %}
+  <div class="card__body">
+    <h3 class="card__title">{{ drawing.title }}</h3>
+    {% if drawing.release_date %}<p class="small muted">{{ drawing.release_date|year }}</p>{% endif %}
+  </div>
+</a>

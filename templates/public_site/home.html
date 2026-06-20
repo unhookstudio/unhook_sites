@@ -1,0 +1,73 @@
+{% extends "public_site/base.html" %}
+{% load static public_site_tags %}
+
+{% block title %}Kent{% endblock %}
+
+{% block body %}
+  <main class="container page-layout">
+    {% if events %}
+      <section class="section">
+        {% include "public_site/includes/section_title.html" with src="kent/assets/actualites.svg" alt="Prochaines dates" %}
+        <div class="detail-grid">
+          <div>
+            {% for event in events %}
+              <article class="panel">
+                <h2 class="panel-title">{{ event.title }}</h2>
+                {% if event.date %}<p class="small muted">{{ event.date|date:"j F Y" }}</p>{% endif %}
+                {% if event.description_html %}<div class="prose">{{ event.description_html|safe }}</div>{% endif %}
+              </article>
+            {% endfor %}
+          </div>
+          <img class="detail-cover" src="{% static 'kent/assets/Cabaret_Voltaire_md.webp' %}" alt="Kent" />
+        </div>
+      </section>
+    {% endif %}
+
+    {% if latest_posts %}
+      <section class="section">
+        {% include "public_site/includes/section_title.html" with src="kent/assets/au_fil_derniers.svg" alt="Au fil des derniers articles" %}
+        <div class="grid grid--two">
+          {% for article in latest_posts %}
+            {% include "public_site/includes/article_card.html" with article=article %}
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {% if featured_album %}
+      <section class="section">
+        <div class="section-heading-row">
+          {% include "public_site/includes/section_title.html" with src="kent/assets/album_a_decouvrir.svg" alt="Album à découvrir" %}
+          <a class="section-link" href="{% url 'musique' %}">
+            <span>Voir la discographie</span>
+            <img src="{% static 'kent/assets/arrow_right.svg' %}" alt="" />
+          </a>
+        </div>
+        <a class="featured-album" href="{% url 'album_detail' featured_album.slug %}">
+          <div class="featured-album__grid">
+            <div>
+              {% image_url featured_album.cover_image "medium" as featured_cover %}
+              {% if featured_cover %}
+                <img class="featured-album__cover" src="{{ featured_cover }}" alt="{{ featured_album.title }}" />
+              {% else %}
+                <div class="featured-album__cover"></div>
+              {% endif %}
+            </div>
+            <div>
+              <h3 class="featured-album__title">{{ featured_album.title }}</h3>
+              <p class="muted">
+                {% if featured_album.label %}{{ featured_album.label }}{% endif %}
+                {% if featured_album.label and featured_album.release_date %}, {% endif %}
+                {% if featured_album.release_date %}{{ featured_album.release_date|year }}{% endif %}
+              </p>
+              {% if featured_album.description_html %}
+                <div class="featured-album__description">{{ featured_album.description_html|safe }}</div>
+              {% endif %}
+              <p class="featured-album__cta">Voir l'album →</p>
+            </div>
+          </div>
+        </a>
+      </section>
+    {% endif %}
+  </main>
+{% endblock %}

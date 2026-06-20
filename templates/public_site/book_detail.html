@@ -1,0 +1,26 @@
+{% extends "public_site/base.html" %}
+{% load public_site_tags %}
+
+{% block title %}{{ book.title }} - Kent{% endblock %}
+
+{% block body %}
+  <main class="container page-layout">
+    <a class="back-link" href="{% url 'livres' %}">← Retour aux livres</a>
+    <div class="detail-grid">
+      <div>
+        {% image_url book.cover_image "large" as cover_url %}
+        {% if cover_url %}<img class="detail-cover" src="{{ cover_url }}" alt="{{ book.title }}" />{% endif %}
+      </div>
+      <div>
+        <p class="small muted">{{ book.get_category_display }}</p>
+        <h1 class="detail-title">{{ book.title }}</h1>
+        {% if book.description_html %}<div class="prose">{{ book.description_html|safe }}</div>{% else %}<p class="muted">Aucune description n'est disponible pour ce livre.</p>{% endif %}
+        <dl class="meta-list">
+          {% if book.editor %}<div><dt>Éditeur</dt><dd>{{ book.editor }}</dd></div>{% endif %}
+          {% if book.release_date %}<div><dt>Sortie</dt><dd>{{ book.release_date|year }}</dd></div>{% endif %}
+        </dl>
+        {% if book.shop_url %}<a class="button-link" href="{{ book.shop_url }}" target="_blank" rel="noreferrer">Acheter</a>{% endif %}
+      </div>
+    </div>
+  </main>
+{% endblock %}

@@ -1,0 +1,142 @@
+from django.urls import reverse
+
+from music.models import Album, Artist, Song, Track
+from sites_core.models import Site
+from writing.models import Article, Book
+
+
+def test_public_home_uses_site_from_request_host(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    kent = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    other = Site.objects.create(name="Other", slug="other", domain="example.com")
+    Article.objects.create(site=kent, title="Kent article", slug="kent-article", is_published=True)
+    Article.objects.create(site=other, title="Other article", slug="other-article", is_published=True)
+
+    response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "Kent article" in response.text
+    assert "Other article" not in response.text
+
+
+def test_public_home_falls_back_to_kent_for_localhost(client, db):
+    Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+
+    response = client.get(reverse("home"), HTTP_HOST="localhost")
+
+    assert response.status_code == 200
+
+
+def test_public_base_loads_kent_scoped_stylesheet(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+
+    response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert 'class="site site--kent"' in response.text
+    assert "/static/kent/css/site.css" in response.text
+
+
+def test_musique_lists_only_published_site_albums(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    artist = Artist.objects.create(site=site, name="Kent", slug="kent")
+    Album.objects.create(
+        site=site,
+        artist=artist,
+        title="Published album",
+        slug="published-album",
+        is_published=True,
+    )
+    Album.objects.create(
+        site=site,
+        artist=artist,
+        title="Draft album",
+        slug="draft-album",
+        is_published=False,
+    )
+
+    response = client.get(reverse("musique"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "Published album" in response.text
+    assert "Draft album" not in response.text
+
+
+def test_home_renders_featured_album_panel(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    artist = Artist.objects.create(site=site, name="Kent", slug="kent")
+    Album.objects.create(
+        site=site,
+        artist=artist,
+        title="Featured album",
+        slug="featured-album",
+        is_published=True,
+        label="Label",
+    )
+
+    response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "featured-album" in response.text
+    assert "Voir la discographie" in response.text
+    assert "Featured album" in response.text
+
+
+def test_album_detail_shows_tracks(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    artist = Artist.objects.create(site=site, name="Kent", slug="kent")
+    album = Album.objects.create(
+        site=site,
+        artist=artist,
+        title="Album",
+        slug="album",
+        is_published=True,
+    )
+    song = Song.objects.create(site=site, title="Song", slug="song", is_published=True)
+    Track.objects.create(album=album, song=song, track_number=1)
+
+    response = client.get(reverse("album_detail", args=["album"]), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "Album" in response.text
+    assert "Song" in response.text
+
+
+def test_livres_uses_book_page_placement_flag(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    Book.objects.create(
+        site=site,
+        title="Visible book",
+        slug="visible-book",
+        is_published=True,
+        show_on_books_page=True,
+    )
+    Book.objects.create(
+        site=site,
+        title="Drawings only book",
+        slug="drawings-only-book",
+        is_published=True,
+        show_on_books_page=False,
+        show_on_drawings_page=True,
+    )
+
+    response = client.get(reverse("livres"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "Visible book" in response.text
+    assert "Drawings only book" not in response.text
+
+
+def test_post_detail_404s_for_drafts(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    Article.objects.create(site=site, title="Draft", slug="draft", is_published=False)
+
+    response = client.get(reverse("post_detail", args=["draft"]), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 404

@@ -1,0 +1,76 @@
+{% load static %}
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Kent{% endblock %}</title>
+    {% if request.site.slug == "kent" %}
+      <link rel="stylesheet" href="{% static 'kent/css/site.css' %}" />
+    {% endif %}
+  </head>
+  <body class="site site--{{ request.site.slug|default:'unknown' }}">
+    <div class="background-layers" aria-hidden="true"></div>
+    <header class="site-header" data-site-header>
+      <div class="container site-header__inner">
+        <a href="{% url 'home' %}" aria-label="Kent">
+          <span class="logo" aria-hidden="true"></span>
+        </a>
+        <nav class="site-nav" aria-label="Navigation principale">
+          <a class="nav-musique" href="{% url 'musique' %}">Musique</a>
+          <a class="nav-dessins" href="{% url 'dessins' %}">Dessins</a>
+          <a class="nav-livres" href="{% url 'livres' %}">Livres</a>
+        </nav>
+        <a class="shop-link" href="https://shop.kent-artiste.com" target="_blank" rel="noopener noreferrer">Shop</a>
+        <button class="menu-button" type="button" aria-label="Ouvrir le menu" data-menu-toggle>☰</button>
+      </div>
+    </header>
+    <div class="mobile-menu" data-mobile-menu>
+      <div class="container mobile-menu__inner">
+        <button class="menu-button mobile-menu__close" type="button" aria-label="Fermer le menu" data-menu-toggle>×</button>
+        <nav aria-label="Navigation mobile">
+          <a class="nav-musique" href="{% url 'musique' %}">Musique</a>
+          <a class="nav-dessins" href="{% url 'dessins' %}">Dessins</a>
+          <a class="nav-livres" href="{% url 'livres' %}">Livres</a>
+          <a class="nav-dates" href="{% url 'posts' %}">Actualités</a>
+          <a class="shop-link" href="https://shop.kent-artiste.com" target="_blank" rel="noopener noreferrer">Shop</a>
+        </nav>
+      </div>
+    </div>
+    {% block body %}{% endblock %}
+    <footer class="site-footer">
+      <div class="container site-footer__inner">
+        <div class="site-footer__top">
+          <a href="{% url 'home' %}" aria-label="Kent">
+            <span class="logo" aria-hidden="true"></span>
+          </a>
+          <nav aria-label="Navigation secondaire">
+            <a href="/mentions-legales">Mentions légales</a>
+            <a href="/contact">Contact</a>
+          </nav>
+        </div>
+        <hr />
+        <p class="text-center small muted">© {% now "Y" %} Kent. Tous droits réservés.</p>
+      </div>
+    </footer>
+    <script>
+      (function () {
+        var header = document.querySelector("[data-site-header]");
+        var menu = document.querySelector("[data-mobile-menu]");
+        var buttons = document.querySelectorAll("[data-menu-toggle]");
+        function onScroll() {
+          if (!header) return;
+          header.classList.toggle("is-scrolled", window.scrollY > 10);
+        }
+        buttons.forEach(function (button) {
+          button.addEventListener("click", function () {
+            if (!menu) return;
+            menu.classList.toggle("is-open");
+          });
+        });
+        window.addEventListener("scroll", onScroll);
+        onScroll();
+      })();
+    </script>
+  </body>
+</html>

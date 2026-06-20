@@ -1,0 +1,51 @@
+{% extends "public_site/base.html" %}
+{% load static %}
+
+{% block title %}Dessins - Kent{% endblock %}
+
+{% block body %}
+  <main class="container page-layout">
+    {% include "public_site/includes/section_title.html" with src="kent/assets/dessins.svg" alt="Dessins" %}
+    <figure class="quote" style="color: var(--dessins);">
+      <blockquote>Son coup de crayon est un mélange de sécheresse et d'amour.
+De sécheresse parce qu'il n'y a pas un trait de trop et d'amour du dessin.</blockquote>
+      <figcaption>Jean-Pierre Dionnet</figcaption>
+    </figure>
+
+    {% if adult_bds %}
+      <section class="section">
+        <h3 style="color: var(--dessins);">B.D.</h3>
+        <div class="grid grid--two">
+          {% for bd in adult_bds %}{% include "public_site/includes/bd_card.html" with bd=bd %}{% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {% if youth_bds %}
+      <section class="section">
+        <h3 style="color: var(--dessins);">Jeunesse</h3>
+        <div class="grid grid--two">
+          {% for bd in youth_bds %}{% include "public_site/includes/bd_card.html" with bd=bd %}{% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {% if illustrated_books %}
+      <section class="section">
+        <h2 style="color: var(--dessins);">Livres illustrés</h2>
+        <div class="grid grid--two">
+          {% for book in illustrated_books %}{% include "public_site/includes/book_card.html" with book=book %}{% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {% if drawings %}
+      <section class="section">
+        <h2 style="color: var(--dessins);">Dessins</h2>
+        <div class="grid grid--four">
+          {% for drawing in drawings %}{% include "public_site/includes/drawing_card.html" with drawing=drawing %}{% endfor %}
+        </div>
+      </section>
+    {% endif %}
+  </main>
+{% endblock %}

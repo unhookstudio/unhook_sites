@@ -1,0 +1,16 @@
+{% extends "public_site/base.html" %}
+
+{% block title %}Actualités - Kent{% endblock %}
+
+{% block body %}
+  <main class="container page-layout">
+    {% include "public_site/includes/section_title.html" with src="kent/assets/actualites.svg" alt="Actualités" %}
+    <div class="grid grid--two">
+      {% for article in articles %}
+        {% include "public_site/includes/article_card.html" with article=article %}
+      {% empty %}
+        <p class="empty">Aucun article disponible pour le moment.</p>
+      {% endfor %}
+    </div>
+  </main>
+{% endblock %}

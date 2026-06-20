@@ -1,0 +1,23 @@
+{% load public_site_tags %}
+<a class="card bd-card" href="{% url 'dessin_detail' bd.slug %}">
+  {% image_url bd.cover_image "medium" as cover_url %}
+  {% if cover_url %}
+    <img class="bd-card__cover" src="{{ cover_url }}" alt="{{ bd.title }}" />
+  {% else %}
+    <div class="bd-card__cover"></div>
+  {% endif %}
+  <div class="card__content">
+    <div>
+      <h3 class="card__title">{{ bd.title }}</h3>
+      {% if bd.description_html %}
+        <p class="small muted">{{ bd.description_html|striptags|truncatewords:24 }}</p>
+      {% endif %}
+    </div>
+    <p class="tiny muted">
+      {% if bd.author %}{{ bd.author }}{% endif %}
+      {% if bd.author and bd.editor %} · {% endif %}
+      {% if bd.editor %}{{ bd.editor }}{% endif %}
+      {% if bd.release_date %} · {{ bd.release_date|year }}{% endif %}
+    </p>
+  </div>
+</a>

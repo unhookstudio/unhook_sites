@@ -1,4 +1,5 @@
 from django.urls import reverse
+from django.contrib.staticfiles.finders import find
 
 
 def test_robots_txt(client):
@@ -16,3 +17,8 @@ def test_sitemap_xml(client):
     assert response["content-type"] == "application/xml"
     assert "<urlset" in response.text
     assert "/health/" not in response.text
+
+
+def test_kent_static_assets_are_discoverable():
+    assert find("kent/css/site.css") is not None
+    assert find("kent/assets/musiquev.svg") is not None
