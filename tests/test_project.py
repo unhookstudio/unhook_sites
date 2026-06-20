@@ -26,3 +26,12 @@ def test_kent_static_assets_are_discoverable():
     assert find("kent/assets/line_horizontal_squiggly.svg") is not None
     assert find("kent/assets/line_horizontal_straight.svg") is not None
     assert find("kent/assets/musiquev.svg") is not None
+
+
+def test_kent_base_uses_configured_youtube_embed():
+    with open("templates/kent_site/base.html", encoding="utf-8") as template_file:
+        template = template_file.read()
+
+    assert "https://www.youtube.com/embed/" in template
+    assert "origin=\" + encodeURIComponent(window.location.origin)" in template
+    assert 'iframe.referrerPolicy = "strict-origin-when-cross-origin"' in template

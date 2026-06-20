@@ -141,6 +141,50 @@
             expand.focus();
           });
         });
+
+        var videoModal = document.querySelector("[data-video-modal]");
+        var videoModalFrame = document.querySelector("[data-video-modal-frame]");
+        var lastVideoTrigger = null;
+        function closeVideoModal() {
+          if (!videoModal || !videoModalFrame) return;
+          videoModal.hidden = true;
+          videoModalFrame.replaceChildren();
+          document.body.classList.remove("has-modal-open");
+          if (lastVideoTrigger) lastVideoTrigger.focus();
+        }
+        function openVideoModal(trigger) {
+          if (!videoModal || !videoModalFrame) return;
+          var videoId = trigger.getAttribute("data-video-id");
+          if (!videoId) return;
+          lastVideoTrigger = trigger;
+          var title = trigger.getAttribute("data-video-title") || "Vidéo";
+          var iframe = document.createElement("iframe");
+          iframe.src = "https://www.youtube.com/embed/" + encodeURIComponent(videoId) + "?autoplay=1&rel=0&origin=" + encodeURIComponent(window.location.origin);
+          iframe.title = title;
+          iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+          iframe.allowFullscreen = true;
+          iframe.referrerPolicy = "strict-origin-when-cross-origin";
+          videoModalFrame.replaceChildren(iframe);
+          videoModal.hidden = false;
+          document.body.classList.add("has-modal-open");
+          var closeButton = videoModal.querySelector("[data-video-modal-close]");
+          if (closeButton) closeButton.focus();
+        }
+        document.querySelectorAll("[data-video-modal-trigger]").forEach(function (trigger) {
+          trigger.addEventListener("click", function (event) {
+            if (!videoModal || !videoModalFrame) return;
+            event.preventDefault();
+            openVideoModal(trigger);
+          });
+        });
+        document.querySelectorAll("[data-video-modal-close]").forEach(function (button) {
+          button.addEventListener("click", closeVideoModal);
+        });
+        document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape" && videoModal && !videoModal.hidden) {
+            closeVideoModal();
+          }
+        });
       })();
     </script>
   </body>

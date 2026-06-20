@@ -120,6 +120,7 @@ class VideoClip(SiteOwnedModel, PublishableModel):
     video_id = models.CharField(max_length=100, blank=True)
     thumbnail = models.ForeignKey(Image, blank=True, null=True, on_delete=models.SET_NULL)
     release_date = models.DateField(blank=True, null=True)
+    sort_order = models.PositiveIntegerField(blank=True, null=True)
     payload_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:

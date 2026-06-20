@@ -1,9 +1,19 @@
+from datetime import date
+
 from django.urls import reverse
 
 from music.models import Album, Artist, Song, Track, VideoClip
 from events.models import Event
 from sites_core.models import Site, SiteSettings
 from writing.models import Article, Book
+
+
+def test_public_views_resolve_templates_from_site_slug():
+    from public_site.views import _template
+
+    site = Site(slug="kent")
+
+    assert _template(site, "home.html") == "kent_site/home.html"
 
 
 def test_public_home_uses_site_from_request_host(client, db, settings):
@@ -196,8 +206,47 @@ def test_musique_shows_album_preview_disclosure_and_video_cards(client, db, sett
     assert "Voir moins" in response.text
     assert 'class="music-album-grid music-album-grid--continued" hidden' in response.text
     assert "music-video-card" in response.text
+    assert "data-video-modal-trigger" in response.text
+    assert 'data-video-id="abc123"' in response.text
+    assert "data-video-modal" in response.text
     assert "https://img.youtube.com/vi/abc123/hqdefault.jpg" in response.text
     assert "music-video-card__play" in response.text
+
+
+def test_musique_orders_videos_by_sort_order_then_current_fallback(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    VideoClip.objects.create(
+        site=site,
+        title="Newest unordered",
+        slug="newest-unordered",
+        video_id="newest",
+        release_date=date(2024, 1, 1),
+        is_published=True,
+    )
+    VideoClip.objects.create(
+        site=site,
+        title="Older unordered",
+        slug="older-unordered",
+        video_id="older",
+        release_date=date(2020, 1, 1),
+        is_published=True,
+    )
+    VideoClip.objects.create(
+        site=site,
+        title="Ordered clip",
+        slug="ordered-clip",
+        video_id="ordered",
+        release_date=date(2010, 1, 1),
+        sort_order=1,
+        is_published=True,
+    )
+
+    response = client.get(reverse("musique"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert response.text.index("Ordered clip") < response.text.index("Newest unordered")
+    assert response.text.index("Newest unordered") < response.text.index("Older unordered")
 
 
 def test_home_renders_featured_album_panel(client, db, settings):

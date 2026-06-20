@@ -80,7 +80,16 @@ class TrackAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
 @admin.register(VideoClip)
 class VideoClipAdmin(DomainModelAdmin):
     rich_text_fields = ("description_html",)
-    list_display = ["title", "site", "video_id", "release_date", "is_published", "payload_id"]
+    list_display = [
+        "title",
+        "site",
+        "sort_order",
+        "video_id",
+        "release_date",
+        "is_published",
+        "payload_id",
+    ]
+    list_editable = ["sort_order"]
     list_filter = ["site", "is_published"]
     search_fields = ["title", "slug", "video_id", "payload_id"]
     prepopulated_fields = {"slug": ["title"]}

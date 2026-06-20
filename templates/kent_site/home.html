@@ -1,4 +1,4 @@
-{% extends "public_site/base.html" %}
+{% extends "kent_site/base.html" %}
 {% load static public_site_tags %}
 
 {% block title %}Kent{% endblock %}
@@ -27,7 +27,7 @@
     {% if events %}
       <section class="section home-dates">
         <div class="section-heading-row">
-          {% include "public_site/includes/section_title.html" with src="kent/assets/actualites.svg" alt="Prochaines dates" class_name="section-title--dates" mask=True %}
+          {% include "kent_site/includes/section_title.html" with src="kent/assets/actualites.svg" alt="Prochaines dates" class_name="section-title--dates" mask=True %}
         </div>
         <div class="home-dates__grid">
           <div class="home-dates__image-wrap">
@@ -59,10 +59,10 @@
 
     {% if latest_posts %}
       <section class="section">
-        {% include "public_site/includes/section_title.html" with src="kent/assets/au_fil_derniers.svg" alt="Au fil du temps, derniers épisodes" class_name="section-title--news" mask=True %}
+        {% include "kent_site/includes/section_title.html" with src="kent/assets/au_fil_derniers.svg" alt="Au fil du temps, derniers épisodes" class_name="section-title--news" mask=True %}
         <div class="grid grid--two">
           {% for article in latest_posts %}
-            {% include "public_site/includes/article_card.html" with article=article %}
+            {% include "kent_site/includes/article_card.html" with article=article %}
           {% endfor %}
         </div>
       </section>
@@ -71,7 +71,7 @@
     {% if featured_album %}
       <section class="section">
         <div class="section-heading-row">
-          {% include "public_site/includes/section_title.html" with src="kent/assets/album_a_decouvrir.svg" alt="Album à découvrir" class_name="section-title--album" mask=True %}
+          {% include "kent_site/includes/section_title.html" with src="kent/assets/album_a_decouvrir.svg" alt="Album à découvrir" class_name="section-title--album" mask=True %}
           <a class="section-link" href="{% url 'musique' %}">
             <span>Voir la discographie</span>
             <img src="{% static 'kent/assets/arrow_right.svg' %}" alt="" />
@@ -107,7 +107,7 @@
     <section id="newsletter" class="newsletter-section">
       <div class="newsletter-section__grid">
         <div>
-          {% include "public_site/includes/section_title.html" with src="kent/assets/actualite.svg" alt="Suivre l'actualité de Kent" class_name="section-title--newsletter" mask=True %}
+          {% include "kent_site/includes/section_title.html" with src="kent/assets/actualite.svg" alt="Suivre l'actualité de Kent" class_name="section-title--newsletter" mask=True %}
           <p class="newsletter-section__text">
             Environ une fois par mois, Kent envoie une newslettre remplie de ses états d'âme, de recommandations de films et musiques et bien plus encore.
           </p>

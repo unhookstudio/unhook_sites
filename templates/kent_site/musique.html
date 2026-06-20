@@ -1,11 +1,11 @@
-{% extends "public_site/base.html" %}
+{% extends "kent_site/base.html" %}
 {% load static public_site_tags %}
 
 {% block title %}Musique - Kent{% endblock %}
 
 {% block body %}
   <main class="container page-layout">
-    {% include "public_site/includes/section_title.html" with src="kent/assets/musiquev.svg" alt="Musique" class_name="section-title--musique" mask=True %}
+    {% include "kent_site/includes/section_title.html" with src="kent/assets/musiquev.svg" alt="Musique" class_name="section-title--musique" mask=True %}
     <figure class="quote quote--musique">
       <blockquote>
         Du jeune punk rocker du groupe Starshooter à sa carrière solo d’auteur-compositeur reconnu, Kent s’est inventé mille vies et autant de pseudos. Mieux vaut changer pour ne jamais tourner en rond, et devenir un autre pour rester, en fait, au plus près de soi-même.
@@ -18,7 +18,7 @@
         <h2>Albums</h2>
         <div class="music-album-grid">
           {% for album in official_preview_albums %}
-            {% include "public_site/includes/album_card.html" with album=album %}
+            {% include "kent_site/includes/album_card.html" with album=album %}
           {% endfor %}
         </div>
         {% if official_hidden_albums %}
@@ -31,7 +31,7 @@
             </button>
             <div class="music-album-grid music-album-grid--continued" hidden data-music-albums-hidden>
               {% for album in official_hidden_albums %}
-                {% include "public_site/includes/album_card.html" with album=album %}
+                {% include "kent_site/includes/album_card.html" with album=album %}
               {% endfor %}
             </div>
             <button class="music-disclosure__button music-disclosure__button--collapse" type="button" hidden aria-expanded="true" data-music-albums-collapse>
@@ -50,7 +50,7 @@
         <h2>Intime Collection</h2>
         <div class="music-album-grid">
           {% for album in intime_albums %}
-            {% include "public_site/includes/album_card.html" with album=album %}
+            {% include "kent_site/includes/album_card.html" with album=album %}
           {% endfor %}
         </div>
       </section>
@@ -61,7 +61,7 @@
         <h2>Starshooter</h2>
         <div class="music-album-grid">
           {% for album in starshooter_albums %}
-            {% include "public_site/includes/album_card.html" with album=album %}
+            {% include "kent_site/includes/album_card.html" with album=album %}
           {% endfor %}
         </div>
       </section>
@@ -72,7 +72,7 @@
         <h2>Clips Vidéo</h2>
         <div class="music-video-grid">
           {% for clip in video_clips %}
-            <a class="music-video-card" href="https://www.youtube.com/watch?v={{ clip.video_id }}" target="_blank" rel="noopener noreferrer">
+            <a class="music-video-card" href="https://www.youtube.com/watch?v={{ clip.video_id }}" target="_blank" rel="noopener noreferrer" data-video-modal-trigger data-video-id="{{ clip.video_id }}" data-video-title="{{ clip.title }}">
               <div class="music-video-card__media">
                 {% image_url clip.thumbnail "medium" as clip_thumbnail %}
                 {% if clip_thumbnail %}
@@ -96,6 +96,13 @@
           <a href="https://www.youtube.com/user/ChaineOfficielleKENT" target="_blank" rel="noopener noreferrer">chaîne YouTube</a>
         </p>
       </section>
+      <div class="video-modal" role="dialog" aria-modal="true" aria-label="Lecteur vidéo" hidden data-video-modal>
+        <button class="video-modal__backdrop" type="button" aria-label="Fermer la vidéo" data-video-modal-close></button>
+        <div class="video-modal__panel">
+          <button class="video-modal__close" type="button" aria-label="Fermer la vidéo" data-video-modal-close>×</button>
+          <div class="video-modal__frame" data-video-modal-frame></div>
+        </div>
+      </div>
     {% endif %}
   </main>
 {% endblock %}

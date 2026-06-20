@@ -1,7 +1,7 @@
 from random import choice
 
 from django.http import Http404
-from django.db.models import Prefetch
+from django.db.models import F, Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -29,7 +29,7 @@ def home(request):
     featured_album = choice(albums) if albums else None
     return render(
         request,
-        "public_site/home.html",
+        _template(site, "home.html"),
         {
             "homepage_settings": homepage_settings,
             "latest_posts": latest_posts,
@@ -52,10 +52,14 @@ def musique(request):
     starshooter_albums = [
         album for album in albums if _artist_name(album) == "starshooter"
     ]
-    video_clips = _published(VideoClip, site).select_related("thumbnail")[:100]
+    video_clips = (
+        _published(VideoClip, site)
+        .select_related("thumbnail")
+        .order_by(F("sort_order").asc(nulls_last=True), "-release_date", "title")[:100]
+    )
     return render(
         request,
-        "public_site/musique.html",
+        _template(site, "musique.html"),
         {
             "official_albums": official_albums,
             "official_preview_albums": official_albums[:6],
@@ -78,7 +82,7 @@ def album_detail(request, slug):
         .select_related("song")
         .order_by("disc_number", "track_number")
     )
-    return render(request, "public_site/album_detail.html", {"album": album, "tracks": tracks})
+    return render(request, _template(site, "album_detail.html"), {"album": album, "tracks": tracks})
 
 
 def song_detail(request, slug):
@@ -89,7 +93,7 @@ def song_detail(request, slug):
         .select_related("album", "album__cover_image")
         .order_by("album__release_date", "track_number")
     )
-    return render(request, "public_site/song_detail.html", {"song": song, "tracks": tracks})
+    return render(request, _template(site, "song_detail.html"), {"song": song, "tracks": tracks})
 
 
 def livres(request):
@@ -101,7 +105,7 @@ def livres(request):
         ("Livres illustrés", [book for book in books if book.category == Book.Category.ILLUSTRATED]),
         ("Livres jeunesse", [book for book in books if book.category == Book.Category.CHILDREN]),
     ]
-    return render(request, "public_site/livres.html", {"sections": sections, "books": books})
+    return render(request, _template(site, "livres.html"), {"sections": sections, "books": books})
 
 
 def book_detail(request, slug):
@@ -110,7 +114,7 @@ def book_detail(request, slug):
         _published(Book, site).select_related("cover_image").prefetch_related("additional_images"),
         slug=slug,
     )
-    return render(request, "public_site/book_detail.html", {"book": book})
+    return render(request, _template(site, "book_detail.html"), {"book": book})
 
 
 def dessins(request):
@@ -128,7 +132,7 @@ def dessins(request):
     )
     return render(
         request,
-        "public_site/dessins.html",
+        _template(site, "dessins.html"),
         {
             "adult_bds": [bd for bd in bds if bd.category == BD.Category.ADULT],
             "youth_bds": [bd for bd in bds if bd.category == BD.Category.YOUTH],
@@ -148,19 +152,19 @@ def dessin_detail(request, slug):
         .first()
     )
     if bd is not None:
-        return render(request, "public_site/bd_detail.html", {"bd": bd})
+        return render(request, _template(site, "bd_detail.html"), {"bd": bd})
 
     drawing = get_object_or_404(
         _published(Drawing, site).prefetch_related("images"),
         slug=slug,
     )
-    return render(request, "public_site/drawing_detail.html", {"drawing": drawing})
+    return render(request, _template(site, "drawing_detail.html"), {"drawing": drawing})
 
 
 def posts(request):
     site = _site(request)
     articles = _published(Article, site).select_related("featured_image")[:100]
-    return render(request, "public_site/posts.html", {"articles": articles})
+    return render(request, _template(site, "posts.html"), {"articles": articles})
 
 
 def post_detail(request, slug):
@@ -169,7 +173,7 @@ def post_detail(request, slug):
         _published(Article, site).select_related("featured_image"),
         slug=slug,
     )
-    return render(request, "public_site/post_detail.html", {"article": article})
+    return render(request, _template(site, "post_detail.html"), {"article": article})
 
 
 @require_POST
@@ -179,6 +183,10 @@ def newsletter_signup(request):
 
 def _published(model, site):
     return model.objects.filter(site=site, is_published=True)
+
+
+def _template(site, name: str) -> str:
+    return f"{site.slug}_site/{name}"
 
 
 def _artist_name(album: Album) -> str:
