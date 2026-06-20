@@ -2,7 +2,7 @@ from django.urls import reverse
 
 from music.models import Album, Artist, Song, Track
 from events.models import Event
-from sites_core.models import Site
+from sites_core.models import Site, SiteSettings
 from writing.models import Article, Book
 
 
@@ -74,6 +74,37 @@ def test_home_renders_actualites_section_with_image_left_layout(client, db, sett
     assert "home-date-card" in response.text
     assert "line_horizontal_squiggly.svg" in response.text
     assert "section-title-mask section-title--dates" in response.text
+
+
+def test_home_does_not_render_hero_without_site_setting_checkbox(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    SiteSettings.objects.create(site=site, show_homepage_hero=False)
+
+    response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "home-hero" not in response.text
+
+
+def test_home_renders_hero_when_site_setting_checkbox_is_enabled(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    SiteSettings.objects.create(
+        site=site,
+        show_homepage_hero=True,
+        homepage_hero_text="Custom hero",
+        homepage_hero_button_text="Découvrir",
+        homepage_hero_button_url="/a-propos",
+    )
+
+    response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "home-hero" in response.text
+    assert "kent_cut.webp" in response.text
+    assert "Custom hero" in response.text
+    assert "Découvrir" in response.text
 
 
 def test_home_renders_newsletter_and_quick_links(client, db, settings):

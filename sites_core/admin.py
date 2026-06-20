@@ -2,6 +2,9 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.core.exceptions import ValidationError
 from django.http import Http404
+from django.utils.html import format_html
+
+from media_library.models import Image
 
 from .models import NavigationLink, Redirect, Site, SiteSettings, User
 
@@ -50,6 +53,38 @@ class SiteSettingsInline(admin.StackedInline):
     model = SiteSettings
     can_delete = False
     extra = 0
+    fields = [
+        "footer_text",
+        "newsletter_text",
+        "show_homepage_hero",
+        "homepage_hero_preview",
+        "homepage_hero_image",
+        "homepage_hero_text",
+        "homepage_hero_button_text",
+        "homepage_hero_button_url",
+        "instagram_url",
+        "facebook_url",
+        "youtube_url",
+    ]
+    readonly_fields = ["homepage_hero_preview"]
+
+    @admin.display(description="Hero image preview")
+    def homepage_hero_preview(self, obj):
+        if not obj or not obj.homepage_hero_image or not obj.homepage_hero_image.original:
+            return "-"
+        try:
+            url = obj.homepage_hero_image.original.url
+        except ValueError:
+            return "-"
+        return format_html(
+            '<img src="{}" alt="" style="max-width: 220px; max-height: 140px; height: auto;" />',
+            url,
+        )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "homepage_hero_image" and not request.user.is_superuser:
+            kwargs["queryset"] = Image.objects.filter(site__in=request.user.sites.all())
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 @admin.register(Site)

@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
@@ -58,6 +59,24 @@ class SiteSettings(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     footer_text = models.TextField(blank=True)
     newsletter_text = models.TextField(blank=True)
+    show_homepage_hero = models.BooleanField(default=False)
+    homepage_hero_image = models.ForeignKey(
+        "media_library.Image",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    homepage_hero_text = models.TextField(
+        blank=True,
+        help_text="Falls back to the default Kent introduction when left blank.",
+    )
+    homepage_hero_button_text = models.CharField(
+        max_length=80,
+        blank=True,
+        help_text="Falls back to “(Re)Découvrir” when left blank.",
+    )
+    homepage_hero_button_url = models.CharField(max_length=500, default="/a-propos")
     instagram_url = models.URLField(blank=True)
     facebook_url = models.URLField(blank=True)
     youtube_url = models.URLField(blank=True)
@@ -68,6 +87,34 @@ class SiteSettings(models.Model):
 
     def __str__(self) -> str:
         return f"Settings for {self.site}"
+
+    def clean(self) -> None:
+        super().clean()
+        if (
+            self.homepage_hero_image_id
+            and self.site_id
+            and self.homepage_hero_image.site_id != self.site_id
+        ):
+            raise ValidationError(
+                {"homepage_hero_image": "The hero image must belong to the same site."}
+            )
+
+    @property
+    def effective_homepage_hero_text(self) -> str:
+        return self.homepage_hero_text or (
+            "D'un garage lyonnais,\n"
+            "en passant par\n"
+            "Métal hurlant et Taratata,\n"
+            "jusqu'à la BNF."
+        )
+
+    @property
+    def effective_homepage_hero_button_text(self) -> str:
+        return self.homepage_hero_button_text or "(Re)Découvrir"
+
+    @property
+    def effective_homepage_hero_button_url(self) -> str:
+        return self.homepage_hero_button_url or "/a-propos"
 
 
 class NavigationLink(SiteOwnedModel):

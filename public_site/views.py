@@ -7,6 +7,7 @@ from django.views.decorators.http import require_POST
 
 from events.models import Event
 from music.models import Album, Song, Track, VideoClip
+from sites_core.models import SiteSettings
 from visual_art.models import BD, Drawing
 from writing.models import Article, Book
 
@@ -19,6 +20,9 @@ def _site(request):
 
 def home(request):
     site = _site(request)
+    homepage_settings = (
+        SiteSettings.objects.filter(site=site).select_related("homepage_hero_image").first()
+    )
     latest_posts = _published(Article, site).select_related("featured_image")[:4]
     events = _published(Event, site).select_related("cover_image")[:3]
     albums = list(_published(Album, site).select_related("artist", "cover_image")[:100])
@@ -27,6 +31,7 @@ def home(request):
         request,
         "public_site/home.html",
         {
+            "homepage_settings": homepage_settings,
             "latest_posts": latest_posts,
             "events": events,
             "featured_album": featured_album,
