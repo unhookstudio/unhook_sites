@@ -1,6 +1,7 @@
 from django.urls import reverse
 
 from music.models import Album, Artist, Song, Track
+from events.models import Event
 from sites_core.models import Site
 from writing.models import Article, Book
 
@@ -36,6 +37,42 @@ def test_public_base_loads_kent_scoped_stylesheet(client, db, settings):
     assert response.status_code == 200
     assert 'class="site site--kent"' in response.text
     assert "/static/kent/css/site.css" in response.text
+
+
+def test_home_renders_news_cards_like_original_layout(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    Article.objects.create(
+        site=site,
+        title="Journal entry",
+        slug="journal-entry",
+        category=Article.Category.NEWS,
+        content_plain="A readable excerpt for the news card.",
+        is_published=True,
+    )
+
+    response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert 'class="news-card"' in response.text
+    assert "au_fil_derniers.svg" in response.text
+    assert "Actualités" in response.text
+    assert "News" not in response.text
+    assert "A readable excerpt for the news card." in response.text
+
+
+def test_home_renders_actualites_section_with_image_left_layout(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    Event.objects.create(site=site, title="Concert", slug="concert", is_published=True)
+
+    response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "home-dates__grid" in response.text
+    assert "home-dates__image" in response.text
+    assert "home-date-card" in response.text
+    assert "line_horizontal_squiggly.svg" in response.text
 
 
 def test_musique_lists_only_published_site_albums(client, db, settings):

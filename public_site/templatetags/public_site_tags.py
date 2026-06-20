@@ -19,6 +19,19 @@ def rich(value):
     return value or ""
 
 
+@register.filter
+def article_category_label(value: str) -> str:
+    labels = {
+        "journal": "Journal",
+        "news": "Actualités",
+        "press": "Presse",
+        "coup-de-coeur": "Coup de cœur",
+        "coups-de-coeur": "Coup de cœur",
+        "other": "Autre",
+    }
+    return labels.get(value, value)
+
+
 @register.simple_tag
 def image_url(image: Image | None, kind: str = "") -> str:
     if not image:

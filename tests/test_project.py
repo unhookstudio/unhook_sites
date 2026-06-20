@@ -21,4 +21,6 @@ def test_sitemap_xml(client):
 
 def test_kent_static_assets_are_discoverable():
     assert find("kent/css/site.css") is not None
+    assert find("kent/assets/au_fil.svg") is not None
+    assert find("kent/assets/line_horizontal_squiggly.svg") is not None
     assert find("kent/assets/musiquev.svg") is not None

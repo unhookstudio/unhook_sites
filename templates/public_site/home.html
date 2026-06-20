@@ -6,26 +6,41 @@
 {% block body %}
   <main class="container page-layout">
     {% if events %}
-      <section class="section">
-        {% include "public_site/includes/section_title.html" with src="kent/assets/actualites.svg" alt="Prochaines dates" %}
-        <div class="detail-grid">
-          <div>
+      <section class="section home-dates">
+        <div class="section-heading-row">
+          {% include "public_site/includes/section_title.html" with src="kent/assets/actualites.svg" alt="Prochaines dates" class_name="section-title--dates" %}
+        </div>
+        <div class="home-dates__grid">
+          <div class="home-dates__image-wrap">
+            <img class="home-dates__image" src="{% static 'kent/assets/Cabaret_Voltaire_md.webp' %}" alt="Kent" />
+          </div>
+          <div class="home-dates__cards">
             {% for event in events %}
-              <article class="panel">
-                <h2 class="panel-title">{{ event.title }}</h2>
-                {% if event.date %}<p class="small muted">{{ event.date|date:"j F Y" }}</p>{% endif %}
-                {% if event.description_html %}<div class="prose">{{ event.description_html|safe }}</div>{% endif %}
+              <article class="home-date-card">
+                {% if event.date %}
+                  <div class="home-date-card__date">
+                    <span class="home-date-card__day">{{ event.date|date:"j" }}</span>
+                    <span class="home-date-card__month">{{ event.date|date:"M" }}</span>
+                  </div>
+                {% endif %}
+                <div class="home-date-card__content">
+                  <h2 class="home-date-card__title">{{ event.title }}</h2>
+                  {% if event.description_html %}<div class="home-date-card__description">{{ event.description_html|safe }}</div>{% endif %}
+                </div>
               </article>
             {% endfor %}
           </div>
-          <img class="detail-cover" src="{% static 'kent/assets/Cabaret_Voltaire_md.webp' %}" alt="Kent" />
         </div>
       </section>
     {% endif %}
 
+    <section class="section-spacer" aria-hidden="true">
+      <img src="{% static 'kent/assets/line_horizontal_squiggly.svg' %}" alt="" />
+    </section>
+
     {% if latest_posts %}
       <section class="section">
-        {% include "public_site/includes/section_title.html" with src="kent/assets/au_fil_derniers.svg" alt="Au fil des derniers articles" %}
+        {% include "public_site/includes/section_title.html" with src="kent/assets/au_fil_derniers.svg" alt="Au fil du temps, derniers épisodes" class_name="section-title--news" mask=True %}
         <div class="grid grid--two">
           {% for article in latest_posts %}
             {% include "public_site/includes/article_card.html" with article=article %}

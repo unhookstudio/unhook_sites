@@ -1,12 +1,19 @@
 {% load public_site_tags %}
-<a class="card article-card" href="{% url 'post_detail' article.slug %}">
-  {% image_url article.featured_image "medium" as image_src %}
-  {% if image_src %}
-    <div class="article-card__image"><img src="{{ image_src }}" alt="{{ article.title }}" /></div>
-  {% endif %}
-  <div class="card__body">
-    <h3 class="card__title">{{ article.title }}</h3>
-    {% if article.published_at %}<p class="small muted">{{ article.published_at|date:"j F Y" }}</p>{% endif %}
-    {% if article.content_plain %}<p class="small muted">{{ article.content_plain|truncatewords:28 }}</p>{% endif %}
-  </div>
+<a class="news-card" href="{% url 'post_detail' article.slug %}">
+  <article class="news-card__article">
+    <div class="news-card__content">
+      <div class="news-card__meta">
+        {% if article.category %}<span>{{ article.category|article_category_label }}</span>{% endif %}
+        {% if article.published_at %}<span>{{ article.published_at|date:"j F Y" }}</span>{% endif %}
+      </div>
+      <h3 class="news-card__title">{{ article.title }}</h3>
+      {% if article.content_plain %}
+        <p class="news-card__excerpt">{{ article.content_plain|truncatechars:450 }}</p>
+      {% endif %}
+    </div>
+    {% image_url article.featured_image "small" as image_src %}
+    {% if image_src %}
+      <div class="news-card__media"><img src="{{ image_src }}" alt="{{ article.title }}" /></div>
+    {% endif %}
+  </article>
 </a>

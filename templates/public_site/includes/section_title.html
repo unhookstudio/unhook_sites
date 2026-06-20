@@ -1,2 +1,11 @@
 {% load static %}
-<img class="section-title {{ class_name|default:'' }}" src="{% static src %}" alt="{{ alt }}" />
+{% if mask %}
+  <span
+    role="img"
+    aria-label="{{ alt }}"
+    class="section-title section-title-mask {{ class_name|default:'' }}"
+    style="--section-title-image: url('{% static src %}');"
+  ></span>
+{% else %}
+  <img class="section-title {{ class_name|default:'' }}" src="{% static src %}" alt="{{ alt }}" />
+{% endif %}
