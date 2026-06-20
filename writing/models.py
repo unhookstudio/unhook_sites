@@ -42,6 +42,7 @@ class Book(SiteOwnedModel, PublishableModel):
         ILLUSTRATED = "illustrated", "Livres illustres"
         CHILDREN = "children", "Jeunesse"
         ESSAYS = "essays", "Essais"
+        MISC = "misc", "Divers"
         OTHER = "other", "Other"
 
     title = models.CharField(max_length=255)

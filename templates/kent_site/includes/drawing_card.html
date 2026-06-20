@@ -1,13 +1,24 @@
 {% load public_site_tags %}
-<a class="card drawing-card" href="{% url 'dessin_detail' drawing.slug %}">
-  {% with image=drawing.images.all.0 %}
-    {% image_url image "medium" as image_src %}
-    <div class="drawing-card__image">
-      {% if image_src %}<img src="{{ image_src }}" alt="{{ drawing.title }}" />{% endif %}
+{% with images=drawing.images.all %}
+<a class="card drawing-card{% if images|length > 1 and images|length < 4 %} drawing-card--wide{% endif %}" href="{% url 'dessin_detail' drawing.slug %}">
+  {% if images %}
+    <div class="drawing-card__images{% if images|length == 1 %} drawing-card__images--single{% endif %}">
+      {% for image in images %}
+        {% image_url image "small" as image_src %}
+        {% if not image_src %}{% image_url image "medium" as image_src %}{% endif %}
+        {% if not image_src %}{% image_url image "thumbnail" as image_src %}{% endif %}
+        <div class="drawing-card__image">
+          {% if image_src %}<img src="{{ image_src }}" alt="{{ image.alt_text|default:drawing.title }}" />{% endif %}
+        </div>
+      {% endfor %}
     </div>
-  {% endwith %}
+  {% endif %}
   <div class="card__body">
     <h3 class="card__title">{{ drawing.title }}</h3>
+    {% if drawing.description_html %}
+      <div class="small muted drawing-card__description">{{ drawing.description_html|striptags|html_unescape|truncatewords:24 }}</div>
+    {% endif %}
     {% if drawing.release_date %}<p class="small muted">{{ drawing.release_date|year }}</p>{% endif %}
   </div>
 </a>
+{% endwith %}

@@ -6,7 +6,7 @@
 {% block body %}
   <main class="container page-layout">
     {% include "kent_site/includes/section_title.html" with src="kent/assets/dessins.svg" alt="Dessins" %}
-    <figure class="quote" style="color: var(--dessins);">
+    <figure class="quote quote--dessins">
       <blockquote>Son coup de crayon est un mélange de sécheresse et d'amour.
 De sécheresse parce qu'il n'y a pas un trait de trop et d'amour du dessin.</blockquote>
       <figcaption>Jean-Pierre Dionnet</figcaption>
@@ -42,7 +42,7 @@ De sécheresse parce qu'il n'y a pas un trait de trop et d'amour du dessin.</blo
     {% if drawings %}
       <section class="section">
         <h2 style="color: var(--dessins);">Dessins</h2>
-        <div class="grid grid--four">
+        <div class="drawing-grid">
           {% for drawing in drawings %}{% include "kent_site/includes/drawing_card.html" with drawing=drawing %}{% endfor %}
         </div>
       </section>

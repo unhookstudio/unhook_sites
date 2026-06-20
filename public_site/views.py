@@ -101,8 +101,22 @@ def livres(request):
     books = list(_published(Book, site).select_related("cover_image").filter(show_on_books_page=True))
     sections = [
         ("Romans", [book for book in books if book.category == Book.Category.NOVELS]),
-        ("Divers", [book for book in books if book.category == Book.Category.OTHER]),
-        ("Livres illustrés", [book for book in books if book.category == Book.Category.ILLUSTRATED]),
+        (
+            "Divers",
+            [
+                book
+                for book in books
+                if book.category in {Book.Category.MISC, Book.Category.OTHER}
+            ],
+        ),
+        (
+            "Livres illustrés",
+            [
+                book
+                for book in books
+                if book.category == Book.Category.ILLUSTRATED and _is_kent_credit(book.author)
+            ],
+        ),
         ("Livres jeunesse", [book for book in books if book.category == Book.Category.CHILDREN]),
     ]
     return render(request, _template(site, "livres.html"), {"sections": sections, "books": books})
@@ -191,3 +205,7 @@ def _template(site, name: str) -> str:
 
 def _artist_name(album: Album) -> str:
     return str(album.artist or "").lower()
+
+
+def _is_kent_credit(value: str) -> bool:
+    return value.strip().casefold() == "kent"

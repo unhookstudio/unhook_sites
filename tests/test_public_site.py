@@ -1,10 +1,14 @@
 from datetime import date
 
+from django.core.files.base import ContentFile
 from django.urls import reverse
 
+from media_library.models import Image
 from music.models import Album, Artist, Song, Track, VideoClip
 from events.models import Event
 from sites_core.models import Site, SiteSettings
+from tests.test_media_library import png_bytes
+from visual_art.models import BD, Drawing
 from writing.models import Article, Book
 
 
@@ -328,6 +332,7 @@ def test_livres_uses_book_page_placement_flag(client, db, settings):
         site=site,
         title="Visible book",
         slug="visible-book",
+        short_description_html="<p>Une chanson vue de l&#x27;intérieur.</p>",
         is_published=True,
         show_on_books_page=True,
     )
@@ -339,12 +344,94 @@ def test_livres_uses_book_page_placement_flag(client, db, settings):
         show_on_books_page=False,
         show_on_drawings_page=True,
     )
+    Book.objects.create(
+        site=site,
+        title="Misc book",
+        slug="misc-book",
+        category=Book.Category.MISC,
+        is_published=True,
+        show_on_books_page=True,
+    )
+    Book.objects.create(
+        site=site,
+        title="Kent illustrated book",
+        slug="kent-illustrated-book",
+        author="Kent",
+        category=Book.Category.ILLUSTRATED,
+        is_published=True,
+        show_on_books_page=True,
+        show_on_drawings_page=True,
+    )
+    Book.objects.create(
+        site=site,
+        title="Other illustrated book",
+        slug="other-illustrated-book",
+        author="Other Author",
+        category=Book.Category.ILLUSTRATED,
+        is_published=True,
+        show_on_books_page=True,
+        show_on_drawings_page=True,
+    )
 
     response = client.get(reverse("livres"), HTTP_HOST="kent-artiste.com")
 
     assert response.status_code == 200
+    assert "quote--livres" in response.text
+    assert "Divers" in response.text
+    assert "Misc book" in response.text
     assert "Visible book" in response.text
+    assert "Kent illustrated book" in response.text
+    assert "Other illustrated book" not in response.text
+    assert "l&#x27;intérieur" in response.text
+    assert "l&amp;#x27;intérieur" not in response.text
     assert "Drawings only book" not in response.text
+
+    drawings_response = client.get(reverse("dessins"), HTTP_HOST="kent-artiste.com")
+
+    assert drawings_response.status_code == 200
+    assert "Kent illustrated book" in drawings_response.text
+    assert "Other illustrated book" in drawings_response.text
+
+
+def test_dessins_decodes_list_descriptions_and_renders_drawing_grid(
+    client, db, settings, tmp_path
+):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    settings.MEDIA_ROOT = tmp_path
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    BD.objects.create(
+        site=site,
+        title="BD",
+        slug="bd",
+        description_html="<p>L&#x27;encre et l&#x27;acrylique.</p>",
+        is_published=True,
+    )
+    first_image = Image.objects.create(site=site, title="First drawing image")
+    second_image = Image.objects.create(site=site, title="Second drawing image")
+    first_image.original.save("drawing-1.png", ContentFile(png_bytes()), save=True)
+    second_image.original.save("drawing-2.png", ContentFile(png_bytes()), save=True)
+    drawing = Drawing.objects.create(
+        site=site,
+        title="Drawing",
+        slug="drawing",
+        description_html="<p>L&#x27;atelier à l&#x27;encre.</p>",
+        is_published=True,
+    )
+    drawing.images.add(first_image, second_image)
+
+    response = client.get(reverse("dessins"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "quote--dessins" in response.text
+    assert "drawing-grid" in response.text
+    assert "drawing-card--wide" in response.text
+    assert "drawing-card__description" in response.text
+    assert "/media/sites/kent/images/originals/drawing-1.png" in response.text
+    assert "/media/sites/kent/images/originals/drawing-2.png" in response.text
+    assert "L&#x27;encre et l&#x27;acrylique." in response.text
+    assert "L&#x27;atelier à l&#x27;encre." in response.text
+    assert "L&amp;#x27;encre" not in response.text
+    assert "L&amp;#x27;atelier" not in response.text
 
 
 def test_post_detail_404s_for_drafts(client, db, settings):

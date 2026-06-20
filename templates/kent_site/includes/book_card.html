@@ -10,7 +10,7 @@
     <div>
       <h3 class="card__title">{{ book.title }}</h3>
       {% if book.short_description_html %}
-        <div class="small muted">{{ book.short_description_html|striptags|truncatewords:24 }}</div>
+        <div class="small muted">{{ book.short_description_html|striptags|html_unescape|truncatewords:24 }}</div>
       {% endif %}
     </div>
     <p class="tiny muted">

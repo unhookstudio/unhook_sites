@@ -1,3 +1,5 @@
+from html import unescape
+
 from django import template
 from django.utils.html import format_html
 
@@ -17,6 +19,13 @@ def year(value):
 @register.filter
 def rich(value):
     return value or ""
+
+
+@register.filter
+def html_unescape(value):
+    if value is None:
+        return ""
+    return unescape(str(value))
 
 
 @register.filter
