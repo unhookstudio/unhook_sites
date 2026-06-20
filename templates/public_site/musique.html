@@ -1,64 +1,100 @@
 {% extends "public_site/base.html" %}
-{% load static %}
+{% load static public_site_tags %}
 
 {% block title %}Musique - Kent{% endblock %}
 
 {% block body %}
   <main class="container page-layout">
-    {% include "public_site/includes/section_title.html" with src="kent/assets/musiquev.svg" alt="Musique" %}
-    <figure class="quote" style="color: var(--musique);">
+    {% include "public_site/includes/section_title.html" with src="kent/assets/musiquev.svg" alt="Musique" class_name="section-title--musique" mask=True %}
+    <figure class="quote quote--musique">
       <blockquote>
         Du jeune punk rocker du groupe Starshooter à sa carrière solo d’auteur-compositeur reconnu, Kent s’est inventé mille vies et autant de pseudos. Mieux vaut changer pour ne jamais tourner en rond, et devenir un autre pour rester, en fait, au plus près de soi-même.
       </blockquote>
       <figcaption>Thomas Boujut</figcaption>
     </figure>
 
-    {% if kent_albums %}
-      <section class="section">
-        <h2 style="color: var(--musique);">Kent</h2>
-        <div class="grid grid--four">
-          {% for album in kent_albums %}
-            {% include "public_site/includes/album_card.html" with album=album show_meta=True %}
+    {% if official_albums %}
+      <section class="section music-section">
+        <h2>Albums</h2>
+        <div class="music-album-grid">
+          {% for album in official_preview_albums %}
+            {% include "public_site/includes/album_card.html" with album=album %}
+          {% endfor %}
+        </div>
+        {% if official_hidden_albums %}
+          <div class="music-disclosure" data-music-albums-disclosure>
+            <button class="music-disclosure__button" type="button" aria-expanded="false" data-music-albums-expand>
+              <svg aria-hidden="true" class="music-disclosure__chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+              <span>Voir tout ({{ official_albums|length }} albums)</span>
+            </button>
+            <div class="music-album-grid music-album-grid--continued" hidden data-music-albums-hidden>
+              {% for album in official_hidden_albums %}
+                {% include "public_site/includes/album_card.html" with album=album %}
+              {% endfor %}
+            </div>
+            <button class="music-disclosure__button music-disclosure__button--collapse" type="button" hidden aria-expanded="true" data-music-albums-collapse>
+              <svg aria-hidden="true" class="music-disclosure__chevron music-disclosure__chevron--up" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m18 15-6-6-6 6" />
+              </svg>
+              <span>Voir moins</span>
+            </button>
+          </div>
+        {% endif %}
+      </section>
+    {% endif %}
+
+    {% if intime_albums %}
+      <section class="section music-section">
+        <h2>Intime Collection</h2>
+        <div class="music-album-grid">
+          {% for album in intime_albums %}
+            {% include "public_site/includes/album_card.html" with album=album %}
           {% endfor %}
         </div>
       </section>
     {% endif %}
 
     {% if starshooter_albums %}
-      <section class="section">
-        <h2 style="color: var(--musique);">Starshooter</h2>
-        <div class="grid grid--four">
+      <section class="section music-section">
+        <h2>Starshooter</h2>
+        <div class="music-album-grid">
           {% for album in starshooter_albums %}
-            {% include "public_site/includes/album_card.html" with album=album show_meta=True %}
-          {% endfor %}
-        </div>
-      </section>
-    {% endif %}
-
-    {% if other_albums %}
-      <section class="section">
-        <h2 style="color: var(--musique);">Participations</h2>
-        <div class="grid grid--four">
-          {% for album in other_albums %}
-            {% include "public_site/includes/album_card.html" with album=album show_artist=True show_meta=True %}
+            {% include "public_site/includes/album_card.html" with album=album %}
           {% endfor %}
         </div>
       </section>
     {% endif %}
 
     {% if video_clips %}
-      <section class="section">
-        <h2 style="color: var(--musique);">Clips</h2>
-        <div class="grid grid--two">
+      <section class="section music-section">
+        <h2>Clips Vidéo</h2>
+        <div class="music-video-grid">
           {% for clip in video_clips %}
-            <article class="card">
-              <div class="card__body">
-                <h3 class="card__title">{{ clip.title }}</h3>
-                {% if clip.release_date %}<p class="small muted">{{ clip.release_date|date:"Y" }}</p>{% endif %}
+            <a class="music-video-card" href="https://www.youtube.com/watch?v={{ clip.video_id }}" target="_blank" rel="noopener noreferrer">
+              <div class="music-video-card__media">
+                {% image_url clip.thumbnail "medium" as clip_thumbnail %}
+                {% if clip_thumbnail %}
+                  <img src="{{ clip_thumbnail }}" alt="{{ clip.title }}" />
+                {% elif clip.video_id %}
+                  <img src="https://img.youtube.com/vi/{{ clip.video_id }}/hqdefault.jpg" alt="{{ clip.title }}" />
+                {% endif %}
+                <span class="music-video-card__play" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="6 3 20 12 6 21 6 3" />
+                  </svg>
+                </span>
               </div>
-            </article>
+              <h3>{{ clip.title }}</h3>
+            </a>
           {% endfor %}
         </div>
+        <p class="music-youtube-link">
+          <span>Tous les vidéos sur la</span>
+          <img src="{% static 'kent/assets/arrow_right.svg' %}" alt="" />
+          <a href="https://www.youtube.com/user/ChaineOfficielleKENT" target="_blank" rel="noopener noreferrer">chaîne YouTube</a>
+        </p>
       </section>
     {% endif %}
   </main>

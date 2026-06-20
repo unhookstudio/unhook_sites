@@ -42,19 +42,26 @@ def home(request):
 def musique(request):
     site = _site(request)
     albums = list(_published(Album, site).select_related("artist", "cover_image")[:100])
-    kent_albums = [album for album in albums if str(album.artist or "").lower() == "kent"]
-    starshooter_albums = [
-        album for album in albums if str(album.artist or "").lower() == "starshooter"
+    kent_albums = [album for album in albums if _artist_name(album) == "kent"]
+    official_albums = [
+        album for album in kent_albums if album.category == Album.Category.COMMERCIAL
     ]
-    other_albums = [album for album in albums if album not in kent_albums and album not in starshooter_albums]
+    intime_albums = [
+        album for album in kent_albums if album.category in {"indie_collection", Album.Category.RARE}
+    ]
+    starshooter_albums = [
+        album for album in albums if _artist_name(album) == "starshooter"
+    ]
     video_clips = _published(VideoClip, site).select_related("thumbnail")[:100]
     return render(
         request,
         "public_site/musique.html",
         {
-            "kent_albums": kent_albums,
+            "official_albums": official_albums,
+            "official_preview_albums": official_albums[:6],
+            "official_hidden_albums": official_albums[6:],
+            "intime_albums": intime_albums,
             "starshooter_albums": starshooter_albums,
-            "other_albums": other_albums,
             "video_clips": video_clips,
         },
     )
@@ -172,3 +179,7 @@ def newsletter_signup(request):
 
 def _published(model, site):
     return model.objects.filter(site=site, is_published=True)
+
+
+def _artist_name(album: Album) -> str:
+    return str(album.artist or "").lower()

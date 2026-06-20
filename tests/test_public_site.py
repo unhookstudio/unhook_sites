@@ -1,6 +1,6 @@
 from django.urls import reverse
 
-from music.models import Album, Artist, Song, Track
+from music.models import Album, Artist, Song, Track, VideoClip
 from events.models import Event
 from sites_core.models import Site, SiteSettings
 from writing.models import Article, Book
@@ -162,6 +162,42 @@ def test_musique_lists_only_published_site_albums(client, db, settings):
     assert response.status_code == 200
     assert "Published album" in response.text
     assert "Draft album" not in response.text
+
+
+def test_musique_shows_album_preview_disclosure_and_video_cards(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    artist = Artist.objects.create(site=site, name="Kent", slug="kent")
+    for index in range(8):
+        Album.objects.create(
+            site=site,
+            artist=artist,
+            title=f"Album {index}",
+            slug=f"album-{index}",
+            is_published=True,
+            category=Album.Category.COMMERCIAL,
+        )
+    VideoClip.objects.create(
+        site=site,
+        title="Clip",
+        slug="clip",
+        video_id="abc123",
+        is_published=True,
+    )
+
+    response = client.get(reverse("musique"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "quote--musique" in response.text
+    assert "music-disclosure" in response.text
+    assert "data-music-albums-expand" in response.text
+    assert "data-music-albums-collapse" in response.text
+    assert "Voir tout (8 albums)" in response.text
+    assert "Voir moins" in response.text
+    assert 'class="music-album-grid music-album-grid--continued" hidden' in response.text
+    assert "music-video-card" in response.text
+    assert "https://img.youtube.com/vi/abc123/hqdefault.jpg" in response.text
+    assert "music-video-card__play" in response.text
 
 
 def test_home_renders_featured_album_panel(client, db, settings):

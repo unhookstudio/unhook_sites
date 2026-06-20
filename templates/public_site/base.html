@@ -118,6 +118,29 @@
           reducedMotionQuery.addEventListener("change", updateHero);
           updateHero();
         }
+
+        document.querySelectorAll("[data-music-albums-disclosure]").forEach(function (root) {
+          var expand = root.querySelector("[data-music-albums-expand]");
+          var collapse = root.querySelector("[data-music-albums-collapse]");
+          var hiddenAlbums = root.querySelector("[data-music-albums-hidden]");
+          if (!expand || !collapse || !hiddenAlbums) return;
+
+          function setExpanded(isExpanded) {
+            hiddenAlbums.hidden = !isExpanded;
+            expand.hidden = isExpanded;
+            collapse.hidden = !isExpanded;
+            expand.setAttribute("aria-expanded", String(isExpanded));
+            collapse.setAttribute("aria-expanded", String(isExpanded));
+          }
+
+          expand.addEventListener("click", function () {
+            setExpanded(true);
+          });
+          collapse.addEventListener("click", function () {
+            setExpanded(false);
+            expand.focus();
+          });
+        });
       })();
     </script>
   </body>
