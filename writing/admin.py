@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from media_library.admin import image_preview
 from unhook_sites.admin import DomainModelAdmin
 
 from .models import Article, Book
@@ -19,6 +20,7 @@ class ArticleAdmin(DomainModelAdmin):
 class BookAdmin(DomainModelAdmin):
     rich_text_fields = ("short_description_html", "description_html")
     list_display = [
+        "cover_preview",
         "title",
         "site",
         "category",
@@ -32,3 +34,10 @@ class BookAdmin(DomainModelAdmin):
     search_fields = ["title", "slug", "author", "illustrator", "editor", "payload_id"]
     prepopulated_fields = {"slug": ["title"]}
     autocomplete_fields = ["cover_image", "additional_images"]
+    readonly_fields = [*DomainModelAdmin.readonly_fields, "cover_preview"]
+
+    @admin.display(description="Cover")
+    def cover_preview(self, obj):
+        if not obj.cover_image:
+            return "-"
+        return image_preview(obj.cover_image.original)

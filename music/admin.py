@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from media_library.admin import image_preview
 from sites_core.admin import ScopedObjectAdminMixin
 from unhook_sites.admin import DomainModelAdmin
 
@@ -23,12 +24,28 @@ class ArtistAdmin(DomainModelAdmin):
 @admin.register(Album)
 class AlbumAdmin(DomainModelAdmin):
     rich_text_fields = ("description_html", "credits_html")
-    list_display = ["title", "site", "artist", "category", "release_date", "is_published", "payload_id"]
+    list_display = [
+        "cover_preview",
+        "title",
+        "site",
+        "artist",
+        "category",
+        "release_date",
+        "is_published",
+        "payload_id",
+    ]
     list_filter = ["site", "artist", "category", "is_published"]
     search_fields = ["title", "slug", "label", "payload_id"]
     prepopulated_fields = {"slug": ["title"]}
     autocomplete_fields = ["artist", "cover_image", "additional_images"]
+    readonly_fields = [*DomainModelAdmin.readonly_fields, "cover_preview"]
     inlines = [TrackInline]
+
+    @admin.display(description="Cover")
+    def cover_preview(self, obj):
+        if not obj.cover_image:
+            return "-"
+        return image_preview(obj.cover_image.original)
 
 
 @admin.register(Song)
