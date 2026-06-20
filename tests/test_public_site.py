@@ -73,6 +73,7 @@ def test_home_renders_actualites_section_with_image_left_layout(client, db, sett
     assert "home-dates__image" in response.text
     assert "home-date-card" in response.text
     assert "line_horizontal_squiggly.svg" in response.text
+    assert "section-title-mask section-title--dates" in response.text
 
 
 def test_home_renders_newsletter_and_quick_links(client, db, settings):
@@ -151,6 +152,7 @@ def test_home_renders_featured_album_panel(client, db, settings):
     assert "featured-album" in response.text
     assert "Voir la discographie" in response.text
     assert "Featured album" in response.text
+    assert "section-title-mask section-title--album" in response.text
 
 
 def test_album_detail_shows_tracks(client, db, settings):

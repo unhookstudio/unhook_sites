@@ -332,6 +332,15 @@ img {
 
 .section-title--dates {
   height: 2.5rem;
+  width: min(100%, 10.25rem);
+  aspect-ratio: 535 / 131;
+  color: var(--primary);
+}
+
+.section-title--album {
+  height: 2.5rem;
+  width: min(100%, 20.375rem);
+  aspect-ratio: 1198 / 147;
   color: var(--primary);
 }
 

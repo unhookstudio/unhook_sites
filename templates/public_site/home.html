@@ -8,7 +8,7 @@
     {% if events %}
       <section class="section home-dates">
         <div class="section-heading-row">
-          {% include "public_site/includes/section_title.html" with src="kent/assets/actualites.svg" alt="Prochaines dates" class_name="section-title--dates" %}
+          {% include "public_site/includes/section_title.html" with src="kent/assets/actualites.svg" alt="Prochaines dates" class_name="section-title--dates" mask=True %}
         </div>
         <div class="home-dates__grid">
           <div class="home-dates__image-wrap">
@@ -52,7 +52,7 @@
     {% if featured_album %}
       <section class="section">
         <div class="section-heading-row">
-          {% include "public_site/includes/section_title.html" with src="kent/assets/album_a_decouvrir.svg" alt="Album à découvrir" %}
+          {% include "public_site/includes/section_title.html" with src="kent/assets/album_a_decouvrir.svg" alt="Album à découvrir" class_name="section-title--album" mask=True %}
           <a class="section-link" href="{% url 'musique' %}">
             <span>Voir la discographie</span>
             <img src="{% static 'kent/assets/arrow_right.svg' %}" alt="" />
