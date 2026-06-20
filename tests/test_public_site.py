@@ -84,7 +84,7 @@ def test_home_does_not_render_hero_without_site_setting_checkbox(client, db, set
     response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
 
     assert response.status_code == 200
-    assert "home-hero" not in response.text
+    assert '<section class="home-hero"' not in response.text
 
 
 def test_home_renders_hero_when_site_setting_checkbox_is_enabled(client, db, settings):

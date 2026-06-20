@@ -308,8 +308,8 @@ img {
 
 .home-hero {
   position: relative;
-  min-height: 34rem;
-  margin: -1rem 0 4rem;
+  min-height: 0;
+  margin: 6rem 0 2rem;
   isolation: isolate;
 }
 
@@ -321,7 +321,7 @@ img {
 .home-hero__image {
   width: 100%;
   height: auto;
-  object-fit: contain;
+  object-fit: cover;
   object-position: top center;
 }
 
@@ -331,6 +331,8 @@ img {
   padding-inline: 1rem;
   color: color-mix(in srgb, var(--foreground) 80%, transparent);
   text-align: center;
+  will-change: opacity;
+  transition: opacity 300ms ease;
 }
 
 .home-hero__text {
@@ -361,6 +363,11 @@ img {
 .home-hero__button img {
   width: 2rem;
   height: auto;
+}
+
+.page-layout--with-hero {
+  position: relative;
+  z-index: 10;
 }
 
 .section-title {
@@ -1218,31 +1225,47 @@ img {
   }
 
   .home-hero {
-    min-height: 60vh;
+    position: relative;
+    z-index: 0;
+    min-height: calc(100vh - 2rem);
     margin-top: 0;
+    pointer-events: none;
   }
 
   .home-hero__image-wrap {
-    position: absolute;
+    position: fixed;
     inset: 0;
-    z-index: -1;
-    height: 100%;
+    z-index: 0;
+    height: 100vh;
+    pointer-events: none;
   }
 
   .home-hero__image {
     width: 100%;
     height: 100%;
-    object-position: top left;
+    object-position: top center;
+    transform: scale(1.06);
+    transform-origin: top center;
+    will-change: opacity;
+    transition: opacity 300ms ease;
   }
 
   .home-hero__content {
+    position: fixed;
+    top: 8rem;
+    right: 3rem;
+    z-index: 20;
     margin: 0 0 0 auto;
-    padding-top: 2rem;
-    padding-right: 2rem;
+    padding: 0;
+    pointer-events: auto;
   }
 
   .home-hero__text {
     font-size: 1.5rem;
+  }
+
+  .page-layout--with-hero {
+    margin-top: -4rem;
   }
 
   .home-dates__grid {

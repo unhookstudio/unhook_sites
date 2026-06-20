@@ -70,6 +70,54 @@
         });
         window.addEventListener("scroll", onScroll);
         onScroll();
+
+        var hero = document.querySelector("[data-home-hero]");
+        var heroImage = document.querySelector("[data-home-hero-image]");
+        var heroContent = document.querySelector("[data-home-hero-content]");
+        var desktopQuery = window.matchMedia("(min-width: 48rem)");
+        var reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+        var heroRaf = 0;
+        function clamp01(value) {
+          return Math.max(0, Math.min(1, value));
+        }
+        function setHeroStatic() {
+          if (heroImage) heroImage.style.opacity = "1";
+          if (heroContent) {
+            heroContent.style.opacity = "1";
+            heroContent.style.pointerEvents = "auto";
+          }
+        }
+        function updateHero() {
+          if (!hero || !heroImage) return;
+          if (!desktopQuery.matches || reducedMotionQuery.matches) {
+            setHeroStatic();
+            return;
+          }
+          var fadeOutPx = 520;
+          var opacity = clamp01(1 - window.scrollY / fadeOutPx);
+          heroImage.style.opacity = String(opacity);
+          if (heroContent) {
+            var contentStartPx = Math.round(fadeOutPx * 0.45);
+            var contentDurationPx = Math.max(1, Math.round(fadeOutPx * 0.2));
+            var progress = (window.scrollY - contentStartPx) / contentDurationPx;
+            var contentOpacity = clamp01(1 - progress);
+            heroContent.style.opacity = String(contentOpacity);
+            heroContent.style.pointerEvents = contentOpacity < 0.05 ? "none" : "auto";
+          }
+        }
+        function onHeroScroll() {
+          if (heroRaf) return;
+          heroRaf = window.requestAnimationFrame(function () {
+            heroRaf = 0;
+            updateHero();
+          });
+        }
+        if (hero) {
+          window.addEventListener("scroll", onHeroScroll, { passive: true });
+          desktopQuery.addEventListener("change", updateHero);
+          reducedMotionQuery.addEventListener("change", updateHero);
+          updateHero();
+        }
       })();
     </script>
   </body>
