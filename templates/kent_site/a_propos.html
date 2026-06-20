@@ -1,0 +1,70 @@
+{% extends "kent_site/base.html" %}
+{% load public_site_tags %}
+
+{% block title %}À propos - Kent{% endblock %}
+
+{% block body %}
+  <main class="container page-layout about-page">
+    <div class="about-page__intro">
+      <section>
+        <h1 class="about-page__title">À propos</h1>
+        <figure class="quote quote--about">
+          <blockquote>Difficile de trouver artiste plus accompli que Kent. Entre chanson, bande dessinée et romans, l’homme déborde de créativité depuis quatre décennies. Il est rare de croiser le chemin d’un homme aussi épanoui.</blockquote>
+          <figcaption>Olivier Nuc, Le Figaro</figcaption>
+        </figure>
+        <div class="prose about-page__bio">
+          <p>Une de ses chansons s'intitule « En route vers de nouvelles aventures ».</p>
+          <p>Si l'on voulait présenter Kent en quelques mots, c'est une devise qui lui irait bien. Autant de découvertes proposées, autant de perspectives qu'il se plaît à explorer et qui, suivant l'instant, la rencontre, deviennent une chanson, un dessin ou un livre.</p>
+          <p>Né à la Croix-Rousse, Lyon 4ème, dans une famille ouvrière. Tout gamin, il tombe dans la bande dessinée et dès 13 ans, il découvre le rock et plaque ses premiers accords de guitare. Ces deux passions seront désormais deux rêves à aboutir et le moteur d'une vie.</p>
+          <p>Sur les bancs du lycée, il rencontre trois autres garçons. Ils se feront connaître sous le nom de Starshooter. Le groupe enregistrera 4 albums entre 1977 et 1982.</p>
+          <p>Kent entamera sa carrière solo dès 1983. Il a publié à ce jour 16 albums studio sous son nom, ainsi que 10 albums live.</p>
+          <p>Mû par une curiosité musicale et un besoin de se renouveler, il s'aventure et propose un répertoire allant du rock électro au piano/voix.</p>
+          <p>Kent, artiste atypique, artiste aux multiples casquettes, artiste tout court, voyage une guitare et un crayon à la main et revient là où on ne l'attend pas.</p>
+        </div>
+      </section>
+      {% if featured_photo_items %}
+        <aside class="about-photo-rail" aria-label="Photos">
+          {% for item in featured_photo_items %}
+            {% image_url item.photo.image "medium" as photo_url %}
+            {% if not photo_url %}{% image_url item.photo.image "large" as photo_url %}{% endif %}
+            {% if photo_url %}
+              <figure class="about-photo-rail__item">
+                <img src="{{ photo_url }}" alt="{{ item.photo.image.alt_text|default:item.photo.title }}" />
+                {% if item.photo.photographer or item.photo.description_html %}
+                  <figcaption>
+                    {% if item.photo.photographer %}
+                      <p>Photo : {{ item.photo.photographer }}</p>
+                    {% endif %}
+                  </figcaption>
+                {% endif %}
+              </figure>
+            {% endif %}
+          {% endfor %}
+        </aside>
+      {% endif %}
+    </div>
+
+    {% if key_dates %}
+      <section class="about-timeline">
+        <p class="about-timeline__eyebrow">Parcours</p>
+        <h2 class="about-timeline__title">Dates clés</h2>
+        <div class="about-timeline__items">
+          {% for key_date in key_dates %}
+            <article class="about-timeline__item {% cycle 'about-timeline__item--left' 'about-timeline__item--right' %}">
+              <div class="about-timeline__marker" aria-hidden="true"></div>
+              <div class="about-timeline__content">
+                {% if key_date.date %}
+                  <p class="about-timeline__year">{{ key_date.date|date:"Y" }}</p>
+                {% endif %}
+                <h3>{{ key_date.title }}</h3>
+                {% if key_date.description_html %}
+                  <div class="about-timeline__description">{{ key_date.description_html|safe }}</div>
+                {% endif %}
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+  </main>
+{% endblock %}

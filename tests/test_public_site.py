@@ -1,11 +1,13 @@
-from datetime import date
+from datetime import date, datetime
 
 from django.core.files.base import ContentFile
 from django.urls import reverse
+from django.utils import timezone
 
 from media_library.models import Image
 from music.models import Album, Artist, Song, Track, VideoClip
-from events.models import Event
+from events.models import Event, KeyDate
+from photos.models import Photo, PhotoCollection, PhotoCollectionItem
 from sites_core.models import Site, SiteSettings
 from tests.test_media_library import png_bytes
 from visual_art.models import BD, Drawing
@@ -88,6 +90,105 @@ def test_home_renders_actualites_section_with_image_left_layout(client, db, sett
     assert "home-date-card" in response.text
     assert "line_horizontal_squiggly.svg" in response.text
     assert "section-title-mask section-title--dates" in response.text
+    assert 'href="/dates">Actualités</a>' in response.text
+
+
+def test_base_hides_actualites_nav_without_published_events(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+
+    response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert 'href="/dates">Actualités</a>' not in response.text
+
+
+def test_dates_page_lists_published_events(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    Event.objects.create(
+        site=site,
+        title="Published date",
+        slug="published-date",
+        date=timezone.make_aware(datetime(2026, 6, 1, 20, 0)),
+        description_html="<p>On stage.</p>",
+        is_published=True,
+    )
+    Event.objects.create(
+        site=site,
+        title="Draft date",
+        slug="draft-date",
+        is_published=False,
+    )
+
+    response = client.get(reverse("dates"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "section-title--dates" in response.text
+    assert "date-card" in response.text
+    assert "Published date" in response.text
+    assert "On stage." in response.text
+    assert "Draft date" not in response.text
+
+
+def test_a_propos_renders_featured_photos_and_key_dates(client, db, settings, tmp_path):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    settings.MEDIA_ROOT = tmp_path
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    first_image = Image.objects.create(site=site, title="First about photo")
+    second_image = Image.objects.create(site=site, title="Second about photo")
+    first_image.original.save("about-1.png", ContentFile(png_bytes()), save=True)
+    second_image.original.save("about-2.png", ContentFile(png_bytes()), save=True)
+    first_photo = Photo.objects.create(
+        site=site,
+        title="First about photo",
+        slug="first-about-photo",
+        photographer="First Photographer",
+        image=first_image,
+        is_published=True,
+    )
+    second_photo = Photo.objects.create(
+        site=site,
+        title="Second about photo",
+        slug="second-about-photo",
+        photographer="Second Photographer",
+        image=second_image,
+        is_published=True,
+    )
+    collection = PhotoCollection.objects.create(
+        site=site,
+        title="A propos droite",
+        slug="a-propos-droite",
+        is_published=True,
+    )
+    PhotoCollectionItem.objects.create(collection=collection, photo=first_photo, order=1)
+    PhotoCollectionItem.objects.create(collection=collection, photo=second_photo, order=2)
+    KeyDate.objects.create(
+        site=site,
+        title="Premier album",
+        slug="premier-album",
+        date=timezone.make_aware(datetime(1978, 1, 1, 12, 0)),
+        description_html="<p>Starshooter.</p>",
+        is_published=True,
+    )
+
+    response = client.get(reverse("a_propos"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "À propos" in response.text
+    assert "quote--about" in response.text
+    assert "Difficile de trouver artiste plus accompli que Kent" in response.text
+    assert "Olivier Nuc, Le Figaro" in response.text
+    assert "Une de ses chansons s'intitule" in response.text
+    assert "Kent entamera sa carrière solo dès 1983" in response.text
+    assert "about-photo-rail" in response.text
+    assert "/media/sites/kent/images/originals/about-1.png" in response.text
+    assert "/media/sites/kent/images/originals/about-2.png" in response.text
+    assert "Photo : First Photographer" in response.text
+    assert "Dates clés" in response.text
+    assert "about-timeline__item--left" in response.text
+    assert "Premier album" in response.text
+    assert "Starshooter." in response.text
 
 
 def test_home_does_not_render_hero_without_site_setting_checkbox(client, db, settings):
@@ -432,6 +533,35 @@ def test_dessins_decodes_list_descriptions_and_renders_drawing_grid(
     assert "L&#x27;atelier à l&#x27;encre." in response.text
     assert "L&amp;#x27;encre" not in response.text
     assert "L&amp;#x27;atelier" not in response.text
+
+
+def test_bd_detail_renders_dessins_back_link_and_gallery(client, db, settings, tmp_path):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    settings.MEDIA_ROOT = tmp_path
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    cover = Image.objects.create(site=site, title="Cover")
+    first_gallery_image = Image.objects.create(site=site, title="First gallery image")
+    second_gallery_image = Image.objects.create(site=site, title="Second gallery image")
+    cover.original.save("cover.png", ContentFile(png_bytes()), save=True)
+    first_gallery_image.original.save("gallery-1.png", ContentFile(png_bytes()), save=True)
+    second_gallery_image.original.save("gallery-2.png", ContentFile(png_bytes()), save=True)
+    bd = BD.objects.create(
+        site=site,
+        title="BD",
+        slug="bd",
+        cover_image=cover,
+        is_published=True,
+    )
+    bd.additional_images.add(first_gallery_image, second_gallery_image)
+
+    response = client.get(reverse("dessin_detail", args=["bd"]), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "back-link--dessins" in response.text
+    assert "Galerie" in response.text
+    assert "detail-gallery" in response.text
+    assert "/media/sites/kent/images/originals/gallery-1.png" in response.text
+    assert "/media/sites/kent/images/originals/gallery-2.png" in response.text
 
 
 def test_post_detail_404s_for_drafts(client, db, settings):

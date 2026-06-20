@@ -5,7 +5,7 @@
 
 {% block body %}
   <main class="container page-layout">
-    <a class="back-link" href="{% url 'dessins' %}">← Retour aux B.D.s</a>
+    <a class="back-link back-link--dessins" href="{% url 'dessins' %}">← Retour aux B.D.s</a>
     <div class="detail-grid">
       <div>
         <p class="small muted">{{ bd.get_category_display }}</p>
@@ -24,5 +24,21 @@
         {% if cover_url %}<img class="detail-cover detail-cover--contain" src="{{ cover_url }}" alt="{{ bd.title }}" />{% endif %}
       </div>
     </div>
+    {% if bd.additional_images.all %}
+      <section class="section">
+        <h2 class="gallery-title gallery-title--dessins">Galerie</h2>
+        <div class="detail-gallery">
+          {% for image in bd.additional_images.all %}
+            {% image_url image "medium" as gallery_url %}
+            {% if not gallery_url %}{% image_url image "large" as gallery_url %}{% endif %}
+            {% if gallery_url %}
+              <div class="detail-gallery__item">
+                <img src="{{ gallery_url }}" alt="{{ image.alt_text|default:bd.title }}" />
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
   </main>
 {% endblock %}

@@ -5,8 +5,9 @@ from django.db.models import F, Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from events.models import Event
+from events.models import Event, KeyDate
 from music.models import Album, Song, Track, VideoClip
+from photos.models import PhotoCollection
 from sites_core.models import SiteSettings
 from visual_art.models import BD, Drawing
 from writing.models import Article, Book
@@ -35,6 +36,34 @@ def home(request):
             "latest_posts": latest_posts,
             "events": events,
             "featured_album": featured_album,
+        },
+    )
+
+
+def dates(request):
+    site = _site(request)
+    events = _published(Event, site).select_related("cover_image").order_by("date", "title")[:100]
+    return render(request, _template(site, "dates.html"), {"events": events})
+
+
+def a_propos(request):
+    site = _site(request)
+    key_dates = _published(KeyDate, site).order_by("date", "title")[:100]
+    featured_photo_collection = (
+        _published(PhotoCollection, site)
+        .filter(slug="a-propos-droite")
+        .prefetch_related("items__photo__image")
+        .first()
+    )
+    featured_photo_items = (
+        list(featured_photo_collection.items.all()[:2]) if featured_photo_collection else []
+    )
+    return render(
+        request,
+        _template(site, "a_propos.html"),
+        {
+            "featured_photo_items": featured_photo_items,
+            "key_dates": key_dates,
         },
     )
 

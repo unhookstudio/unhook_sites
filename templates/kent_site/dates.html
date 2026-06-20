@@ -1,0 +1,38 @@
+{% extends "kent_site/base.html" %}
+{% load static public_site_tags %}
+
+{% block title %}Actualités - Kent{% endblock %}
+
+{% block body %}
+  <main class="container page-layout">
+    {% include "kent_site/includes/section_title.html" with src="kent/assets/actualites.svg" alt="Actualités" class_name="section-title--dates" mask=True %}
+
+    <div class="dates-page-grid">
+      <div class="dates-list">
+        {% if events %}
+          {% for event in events %}
+            <article class="date-card">
+              {% if event.date %}
+                <div class="date-card__date">
+                  <span class="date-card__day">{{ event.date|date:"j" }}</span>
+                  <span class="date-card__month">{{ event.date|date:"M" }}</span>
+                </div>
+              {% endif %}
+              <div class="date-card__content">
+                <h2 class="date-card__title">{{ event.title }}</h2>
+                {% if event.description_html %}
+                  <div class="date-card__description">{{ event.description_html|safe }}</div>
+                {% endif %}
+              </div>
+            </article>
+          {% endfor %}
+        {% else %}
+          <p class="empty">Aucune date à venir pour le moment.</p>
+        {% endif %}
+      </div>
+      <div class="dates-page-image-wrap">
+        <img class="dates-page-image" src="{% static 'kent/assets/Cabaret_Voltaire_md.webp' %}" alt="Kent" />
+      </div>
+    </div>
+  </main>
+{% endblock %}

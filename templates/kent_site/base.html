@@ -20,6 +20,9 @@
           <a class="nav-musique" href="{% url 'musique' %}">Musique</a>
           <a class="nav-dessins" href="{% url 'dessins' %}">Dessins</a>
           <a class="nav-livres" href="{% url 'livres' %}">Livres</a>
+          {% if has_published_events %}
+            <a class="nav-dates" href="{% url 'dates' %}">Actualités</a>
+          {% endif %}
         </nav>
         <a class="shop-link" href="https://shop.kent-artiste.com" target="_blank" rel="noopener noreferrer">Shop</a>
         <button class="menu-button" type="button" aria-label="Ouvrir le menu" data-menu-toggle>☰</button>
@@ -32,7 +35,9 @@
           <a class="nav-musique" href="{% url 'musique' %}">Musique</a>
           <a class="nav-dessins" href="{% url 'dessins' %}">Dessins</a>
           <a class="nav-livres" href="{% url 'livres' %}">Livres</a>
-          <a class="nav-dates" href="{% url 'posts' %}">Actualités</a>
+          {% if has_published_events %}
+            <a class="nav-dates" href="{% url 'dates' %}">Actualités</a>
+          {% endif %}
           <a class="shop-link" href="https://shop.kent-artiste.com" target="_blank" rel="noopener noreferrer">Shop</a>
         </nav>
       </div>
