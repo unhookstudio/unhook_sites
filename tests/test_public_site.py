@@ -131,7 +131,9 @@ def test_dates_page_lists_published_events(client, db, settings):
     assert "Draft date" not in response.text
 
 
-def test_a_propos_renders_featured_photos_and_key_dates(client, db, settings, tmp_path):
+def test_a_propos_renders_random_photo_pools_stories_and_key_dates(
+    client, db, settings, tmp_path
+):
     settings.ALLOWED_HOSTS = ["kent-artiste.com"]
     settings.MEDIA_ROOT = tmp_path
     site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
@@ -144,6 +146,7 @@ def test_a_propos_renders_featured_photos_and_key_dates(client, db, settings, tm
         title="First about photo",
         slug="first-about-photo",
         photographer="First Photographer",
+        description_html="<p>Older story.</p>",
         image=first_image,
         is_published=True,
     )
@@ -152,17 +155,34 @@ def test_a_propos_renders_featured_photos_and_key_dates(client, db, settings, tm
         title="Second about photo",
         slug="second-about-photo",
         photographer="Second Photographer",
+        description_html="<p>Recent story.</p>",
         image=second_image,
         is_published=True,
     )
-    collection = PhotoCollection.objects.create(
+    older_collection = PhotoCollection.objects.create(
         site=site,
-        title="A propos droite",
-        slug="a-propos-droite",
+        title="A propos older",
+        slug="a-propos-older",
         is_published=True,
     )
-    PhotoCollectionItem.objects.create(collection=collection, photo=first_photo, order=1)
-    PhotoCollectionItem.objects.create(collection=collection, photo=second_photo, order=2)
+    recent_collection = PhotoCollection.objects.create(
+        site=site,
+        title="A propos recent",
+        slug="a-propos-recent",
+        is_published=True,
+    )
+    PhotoCollectionItem.objects.create(
+        collection=older_collection,
+        photo=first_photo,
+        caption="Older caption.",
+        order=1,
+    )
+    PhotoCollectionItem.objects.create(
+        collection=recent_collection,
+        photo=second_photo,
+        caption="Recent caption.",
+        order=1,
+    )
     KeyDate.objects.create(
         site=site,
         title="Premier album",
@@ -182,8 +202,16 @@ def test_a_propos_renders_featured_photos_and_key_dates(client, db, settings, tm
     assert "Une de ses chansons s'intitule" in response.text
     assert "Kent entamera sa carrière solo dès 1983" in response.text
     assert "about-photo-rail" in response.text
+    assert 'data-about-photo-pool="older"' in response.text
+    assert 'data-about-photo-pool="recent"' in response.text
+    assert "data-about-story-trigger" in response.text
+    assert "data-about-story-modal" in response.text
+    assert "lire l'histoire -&gt;" in response.text
+    assert "Older story." in response.text
+    assert "Recent story." in response.text
     assert "/media/sites/kent/images/originals/about-1.png" in response.text
     assert "/media/sites/kent/images/originals/about-2.png" in response.text
+    assert "about-photo-rail__credit" in response.text
     assert "Photo : First Photographer" in response.text
     assert "Dates clés" in response.text
     assert "about-timeline__item--left" in response.text

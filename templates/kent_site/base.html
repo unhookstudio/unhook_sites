@@ -185,9 +185,55 @@
         document.querySelectorAll("[data-video-modal-close]").forEach(function (button) {
           button.addEventListener("click", closeVideoModal);
         });
+
+        document.querySelectorAll("[data-about-photo-rail]").forEach(function (rail) {
+          ["older", "recent"].forEach(function (pool) {
+            var candidates = Array.prototype.slice.call(rail.querySelectorAll('[data-about-photo-candidate][data-about-photo-pool="' + pool + '"]'));
+            if (!candidates.length) return;
+            candidates.forEach(function (candidate) {
+              candidate.hidden = true;
+            });
+            candidates[Math.floor(Math.random() * candidates.length)].hidden = false;
+          });
+        });
+
+        var storyModal = document.querySelector("[data-about-story-modal]");
+        var storyFrame = document.querySelector("[data-about-story-frame]");
+        var lastStoryTrigger = null;
+        function closeStoryModal() {
+          if (!storyModal || !storyFrame) return;
+          storyModal.hidden = true;
+          storyFrame.replaceChildren();
+          document.body.classList.remove("has-modal-open");
+          if (lastStoryTrigger) lastStoryTrigger.focus();
+        }
+        function openStoryModal(trigger) {
+          if (!storyModal || !storyFrame) return;
+          var storyId = trigger.getAttribute("data-about-story-id");
+          var template = storyId ? document.getElementById(storyId) : null;
+          if (!template) return;
+          lastStoryTrigger = trigger;
+          storyFrame.replaceChildren(template.content.cloneNode(true));
+          storyModal.hidden = false;
+          document.body.classList.add("has-modal-open");
+          var closeButton = storyModal.querySelector("[data-about-story-close]");
+          if (closeButton) closeButton.focus();
+        }
+        document.querySelectorAll("[data-about-story-trigger]").forEach(function (trigger) {
+          trigger.addEventListener("click", function () {
+            openStoryModal(trigger);
+          });
+        });
+        document.querySelectorAll("[data-about-story-close]").forEach(function (button) {
+          button.addEventListener("click", closeStoryModal);
+        });
+
         document.addEventListener("keydown", function (event) {
           if (event.key === "Escape" && videoModal && !videoModal.hidden) {
             closeVideoModal();
+          }
+          if (event.key === "Escape" && storyModal && !storyModal.hidden) {
+            closeStoryModal();
           }
         });
       })();

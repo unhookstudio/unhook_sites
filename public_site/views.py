@@ -49,20 +49,22 @@ def dates(request):
 def a_propos(request):
     site = _site(request)
     key_dates = _published(KeyDate, site).order_by("date", "title")[:100]
-    featured_photo_collection = (
-        _published(PhotoCollection, site)
-        .filter(slug="a-propos-droite")
-        .prefetch_related("items__photo__image")
-        .first()
-    )
-    featured_photo_items = (
-        list(featured_photo_collection.items.all()[:2]) if featured_photo_collection else []
-    )
+    older_photo_items = _photo_collection_items(site, "a-propos-older")
+    recent_photo_items = _photo_collection_items(site, "a-propos-recent")
+
+    if not older_photo_items or not recent_photo_items:
+        fallback_items = _photo_collection_items(site, "a-propos-droite")
+        if not older_photo_items and fallback_items:
+            older_photo_items = fallback_items[:1]
+        if not recent_photo_items and len(fallback_items) > 1:
+            recent_photo_items = fallback_items[1:2]
+
     return render(
         request,
         _template(site, "a_propos.html"),
         {
-            "featured_photo_items": featured_photo_items,
+            "older_photo_items": older_photo_items,
+            "recent_photo_items": recent_photo_items,
             "key_dates": key_dates,
         },
     )
@@ -226,6 +228,18 @@ def newsletter_signup(request):
 
 def _published(model, site):
     return model.objects.filter(site=site, is_published=True)
+
+
+def _photo_collection_items(site, slug: str):
+    collection = (
+        _published(PhotoCollection, site)
+        .filter(slug=slug)
+        .prefetch_related("items__photo__image")
+        .first()
+    )
+    if collection is None:
+        return []
+    return [item for item in collection.items.all() if item.photo.is_published and item.photo.image_id]
 
 
 def _template(site, name: str) -> str:

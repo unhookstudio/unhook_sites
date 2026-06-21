@@ -22,20 +22,72 @@
           <p>Kent, artiste atypique, artiste aux multiples casquettes, artiste tout court, voyage une guitare et un crayon à la main et revient là où on ne l'attend pas.</p>
         </div>
       </section>
-      {% if featured_photo_items %}
-        <aside class="about-photo-rail" aria-label="Photos">
-          {% for item in featured_photo_items %}
+      {% if older_photo_items or recent_photo_items %}
+        <aside class="about-photo-rail" aria-label="Photos" data-about-photo-rail>
+          {% for item in older_photo_items %}
             {% image_url item.photo.image "medium" as photo_url %}
             {% if not photo_url %}{% image_url item.photo.image "large" as photo_url %}{% endif %}
             {% if photo_url %}
-              <figure class="about-photo-rail__item">
+              <figure class="about-photo-rail__item" data-about-photo-candidate data-about-photo-pool="older"{% if not forloop.first %} hidden{% endif %}>
                 <img src="{{ photo_url }}" alt="{{ item.photo.image.alt_text|default:item.photo.title }}" />
-                {% if item.photo.photographer or item.photo.description_html %}
-                  <figcaption>
-                    {% if item.photo.photographer %}
-                      <p>Photo : {{ item.photo.photographer }}</p>
-                    {% endif %}
-                  </figcaption>
+                <figcaption>
+                  {% if item.photo.photographer %}
+                    <span class="about-photo-rail__credit">Photo : {{ item.photo.photographer }}</span>
+                  {% endif %}
+                  {% if item.caption or item.photo.description_html %}
+                    <button class="about-photo-rail__story-button" type="button" data-about-story-trigger data-about-story-id="about-story-older-{{ forloop.counter }}">lire l'histoire -&gt;</button>
+                  {% endif %}
+                </figcaption>
+                {% if item.caption or item.photo.description_html %}
+                  {% image_url item.photo.image "large" as story_photo_url %}
+                  {% if not story_photo_url %}{% image_url item.photo.image "medium" as story_photo_url %}{% endif %}
+                  <template id="about-story-older-{{ forloop.counter }}">
+                    <div class="about-story-modal__grid">
+                      <div class="about-story-modal__image-wrap">
+                        <img src="{{ story_photo_url|default:photo_url }}" alt="{{ item.photo.image.alt_text|default:item.photo.title }}" />
+                      </div>
+                      <div class="about-story-modal__content">
+                        <h3>{{ item.photo.title }}</h3>
+                        {% if item.photo.photographer %}<p class="small muted">Photo : {{ item.photo.photographer }}</p>{% endif %}
+                        {% if item.caption %}<p>{{ item.caption }}</p>{% endif %}
+                        {% if item.photo.description_html %}<div class="prose">{{ item.photo.description_html|safe }}</div>{% endif %}
+                      </div>
+                    </div>
+                  </template>
+                {% endif %}
+              </figure>
+            {% endif %}
+          {% endfor %}
+          {% for item in recent_photo_items %}
+            {% image_url item.photo.image "medium" as photo_url %}
+            {% if not photo_url %}{% image_url item.photo.image "large" as photo_url %}{% endif %}
+            {% if photo_url %}
+              <figure class="about-photo-rail__item" data-about-photo-candidate data-about-photo-pool="recent"{% if not forloop.first %} hidden{% endif %}>
+                <img src="{{ photo_url }}" alt="{{ item.photo.image.alt_text|default:item.photo.title }}" />
+                <figcaption>
+                  {% if item.photo.photographer %}
+                    <span class="about-photo-rail__credit">Photo : {{ item.photo.photographer }}</span>
+                  {% endif %}
+                  {% if item.caption or item.photo.description_html %}
+                    <button class="about-photo-rail__story-button" type="button" data-about-story-trigger data-about-story-id="about-story-recent-{{ forloop.counter }}">lire l'histoire -&gt;</button>
+                  {% endif %}
+                </figcaption>
+                {% if item.caption or item.photo.description_html %}
+                  {% image_url item.photo.image "large" as story_photo_url %}
+                  {% if not story_photo_url %}{% image_url item.photo.image "medium" as story_photo_url %}{% endif %}
+                  <template id="about-story-recent-{{ forloop.counter }}">
+                    <div class="about-story-modal__grid">
+                      <div class="about-story-modal__image-wrap">
+                        <img src="{{ story_photo_url|default:photo_url }}" alt="{{ item.photo.image.alt_text|default:item.photo.title }}" />
+                      </div>
+                      <div class="about-story-modal__content">
+                        <h3>{{ item.photo.title }}</h3>
+                        {% if item.photo.photographer %}<p class="small muted">Photo : {{ item.photo.photographer }}</p>{% endif %}
+                        {% if item.caption %}<p>{{ item.caption }}</p>{% endif %}
+                        {% if item.photo.description_html %}<div class="prose">{{ item.photo.description_html|safe }}</div>{% endif %}
+                      </div>
+                    </div>
+                  </template>
                 {% endif %}
               </figure>
             {% endif %}
@@ -66,5 +118,12 @@
         </div>
       </section>
     {% endif %}
+    <div class="about-story-modal" hidden data-about-story-modal>
+      <button class="about-story-modal__backdrop" type="button" aria-label="Fermer" data-about-story-close></button>
+      <div class="about-story-modal__panel" role="dialog" aria-modal="true" aria-label="Histoire de la photo">
+        <button class="about-story-modal__close" type="button" aria-label="Fermer" data-about-story-close>×</button>
+        <div data-about-story-frame></div>
+      </div>
+    </div>
   </main>
 {% endblock %}
