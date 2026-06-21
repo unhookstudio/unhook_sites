@@ -1,0 +1,14 @@
+services:
+  web:
+    image: ${IMAGE:-ghcr.io/unhookstudio/unhook-sites:main}
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: sqlite:////data/db.sqlite3
+      MEDIA_ROOT: /data/media
+      STATIC_ROOT: /data/staticfiles
+    volumes:
+      - /srv/unhook_sites/data:/data
+    ports:
+      - "127.0.0.1:8000:8000"
