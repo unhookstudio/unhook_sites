@@ -26,7 +26,7 @@ class PhotoAdmin(DomainModelAdmin):
     autocomplete_fields = ["image"]
     readonly_fields = [*DomainModelAdmin.readonly_fields, "preview"]
 
-    @admin.display(description="Preview")
+    @admin.display(description="Aperçu")
     def preview(self, obj):
         if not obj.image:
             return "-"
@@ -50,7 +50,7 @@ class PhotoCollectionItemInline(admin.TabularInline):
     readonly_fields = ["preview"]
     autocomplete_fields = ["photo"]
 
-    @admin.display(description="Preview")
+    @admin.display(description="Aperçu")
     def preview(self, obj):
         if not obj.photo_id or not obj.photo.image:
             return "-"
@@ -74,7 +74,7 @@ class PhotoCollectionItemAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
     search_fields = ["collection__title", "photo__title", "caption"]
     autocomplete_fields = ["collection", "photo"]
 
-    @admin.display(description="Preview")
+    @admin.display(description="Aperçu")
     def preview(self, obj):
         if not obj.photo.image:
             return "-"

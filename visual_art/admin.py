@@ -25,7 +25,7 @@ class BDAdmin(DomainModelAdmin):
     autocomplete_fields = ["cover_image", "additional_images"]
     readonly_fields = [*DomainModelAdmin.readonly_fields, "cover_preview"]
 
-    @admin.display(description="Cover")
+    @admin.display(description="Couverture")
     def cover_preview(self, obj):
         if not obj.cover_image:
             return "-"

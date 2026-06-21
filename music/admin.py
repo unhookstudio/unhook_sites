@@ -41,7 +41,7 @@ class AlbumAdmin(DomainModelAdmin):
     readonly_fields = [*DomainModelAdmin.readonly_fields, "cover_preview"]
     inlines = [TrackInline]
 
-    @admin.display(description="Cover")
+    @admin.display(description="Couverture")
     def cover_preview(self, obj):
         if not obj.cover_image:
             return "-"

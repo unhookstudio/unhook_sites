@@ -16,6 +16,8 @@ class Photo(SiteOwnedModel, PublishableModel):
     payload_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
+        verbose_name = "photo"
+        verbose_name_plural = "photos"
         ordering = ["-date", "title"]
         constraints = [
             models.UniqueConstraint(fields=["site", "slug"], name="unique_photo_slug_per_site"),
@@ -37,7 +39,8 @@ class PhotoStory(SiteOwnedModel, PublishableModel):
     payload_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
-        verbose_name_plural = "photo stories"
+        verbose_name = "histoire de photo"
+        verbose_name_plural = "histoires de photos"
         ordering = ["-date", "title"]
         constraints = [
             models.UniqueConstraint(fields=["site", "slug"], name="unique_photostory_slug_per_site"),
@@ -59,6 +62,8 @@ class PhotoCollection(SiteOwnedModel, PublishableModel):
     payload_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
+        verbose_name = "collection de photos"
+        verbose_name_plural = "collections de photos"
         ordering = ["title"]
         constraints = [
             models.UniqueConstraint(fields=["site", "slug"], name="unique_photocollection_slug_per_site"),
@@ -79,6 +84,8 @@ class PhotoCollectionItem(models.Model):
     order = models.PositiveIntegerField(default=0)
 
     class Meta:
+        verbose_name = "photo de collection"
+        verbose_name_plural = "photos de collection"
         ordering = ["collection", "order", "id"]
         constraints = [
             models.UniqueConstraint(

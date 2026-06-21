@@ -6,10 +6,10 @@ from sites_core.models import PublishableModel, SiteOwnedModel
 
 class Article(SiteOwnedModel, PublishableModel):
     class Category(models.TextChoices):
-        NEWS = "news", "News"
-        PRESS = "press", "Press"
+        NEWS = "news", "Actualités"
+        PRESS = "press", "Presse"
         HEART = "coup-de-coeur", "Coup de coeur"
-        OTHER = "other", "Other"
+        OTHER = "other", "Autre"
 
     title = models.CharField(max_length=255)
     slug = models.SlugField()
@@ -26,6 +26,8 @@ class Article(SiteOwnedModel, PublishableModel):
     payload_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
+        verbose_name = "article"
+        verbose_name_plural = "articles"
         ordering = ["-published_at", "title"]
         constraints = [
             models.UniqueConstraint(fields=["site", "slug"], name="unique_article_slug_per_site"),
@@ -39,11 +41,11 @@ class Article(SiteOwnedModel, PublishableModel):
 class Book(SiteOwnedModel, PublishableModel):
     class Category(models.TextChoices):
         NOVELS = "novels", "Romans"
-        ILLUSTRATED = "illustrated", "Livres illustres"
+        ILLUSTRATED = "illustrated", "Livres illustrés"
         CHILDREN = "children", "Jeunesse"
         ESSAYS = "essays", "Essais"
         MISC = "misc", "Divers"
-        OTHER = "other", "Other"
+        OTHER = "other", "Autre"
 
     title = models.CharField(max_length=255)
     slug = models.SlugField()
@@ -65,6 +67,8 @@ class Book(SiteOwnedModel, PublishableModel):
     payload_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
+        verbose_name = "livre"
+        verbose_name_plural = "livres"
         ordering = ["-release_date", "title"]
         constraints = [
             models.UniqueConstraint(fields=["site", "slug"], name="unique_book_slug_per_site"),

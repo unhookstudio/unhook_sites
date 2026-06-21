@@ -10,6 +10,8 @@ class Artist(SiteOwnedModel):
     payload_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
+        verbose_name = "artiste"
+        verbose_name_plural = "artistes"
         ordering = ["name"]
         constraints = [
             models.UniqueConstraint(fields=["site", "slug"], name="unique_artist_slug_per_site"),
@@ -24,7 +26,7 @@ class Album(SiteOwnedModel, PublishableModel):
         COMMERCIAL = "commercial", "Commercial"
         RARE = "rare", "Rare"
         PARTICIPATION = "participation", "Participation"
-        OTHER = "other", "Other"
+        OTHER = "other", "Autre"
 
     title = models.CharField(max_length=255)
     slug = models.SlugField()
@@ -43,6 +45,8 @@ class Album(SiteOwnedModel, PublishableModel):
     payload_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
+        verbose_name = "album"
+        verbose_name_plural = "albums"
         ordering = ["-release_date", "title"]
         constraints = [
             models.UniqueConstraint(fields=["site", "slug"], name="unique_album_slug_per_site"),
@@ -69,6 +73,8 @@ class Song(SiteOwnedModel, PublishableModel):
     payload_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
+        verbose_name = "chanson"
+        verbose_name_plural = "chansons"
         ordering = ["title"]
         constraints = [
             models.UniqueConstraint(fields=["site", "slug"], name="unique_song_slug_per_site"),
@@ -99,6 +105,8 @@ class Track(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        verbose_name = "piste"
+        verbose_name_plural = "pistes"
         ordering = ["album", "disc_number", "track_number"]
         constraints = [
             models.UniqueConstraint(
@@ -124,6 +132,8 @@ class VideoClip(SiteOwnedModel, PublishableModel):
     payload_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
+        verbose_name = "clip vidéo"
+        verbose_name_plural = "clips vidéo"
         ordering = ["-release_date", "title"]
         constraints = [
             models.UniqueConstraint(fields=["site", "slug"], name="unique_videoclip_slug_per_site"),

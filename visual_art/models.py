@@ -8,7 +8,7 @@ class BD(SiteOwnedModel, PublishableModel):
     class Category(models.TextChoices):
         ADULT = "adult", "Adulte"
         YOUTH = "youth", "Jeunesse"
-        OTHER = "other", "Other"
+        OTHER = "other", "Autre"
 
     title = models.CharField(max_length=255)
     slug = models.SlugField()
@@ -48,6 +48,8 @@ class Drawing(SiteOwnedModel, PublishableModel):
     payload_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
+        verbose_name = "dessin"
+        verbose_name_plural = "dessins"
         ordering = ["-release_date", "title"]
         constraints = [
             models.UniqueConstraint(fields=["site", "slug"], name="unique_drawing_slug_per_site"),

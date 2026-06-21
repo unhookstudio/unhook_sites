@@ -37,6 +37,8 @@ class Image(SiteOwnedModel):
     payload_updated_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
+        verbose_name = "image"
+        verbose_name_plural = "images"
         ordering = ["site", "title", "filename", "id"]
         constraints = [
             models.UniqueConstraint(
@@ -51,14 +53,14 @@ class Image(SiteOwnedModel):
 
 class ImageVariant(models.Model):
     class Kind(models.TextChoices):
-        THUMBNAIL = "thumbnail", "Thumbnail"
-        SQUARE = "square", "Square"
-        SMALL = "small", "Small"
-        MEDIUM = "medium", "Medium"
-        LARGE = "large", "Large"
-        XLARGE = "xlarge", "XLarge"
+        THUMBNAIL = "thumbnail", "Vignette"
+        SQUARE = "square", "Carré"
+        SMALL = "small", "Petit"
+        MEDIUM = "medium", "Moyen"
+        LARGE = "large", "Grand"
+        XLARGE = "xlarge", "Très grand"
         OG = "og", "Open Graph"
-        OTHER = "other", "Other"
+        OTHER = "other", "Autre"
 
     image = models.ForeignKey(Image, on_delete=models.CASCADE, related_name="variants")
     kind = models.CharField(max_length=40, choices=Kind.choices)
@@ -74,6 +76,8 @@ class ImageVariant(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        verbose_name = "variante d'image"
+        verbose_name_plural = "variantes d'image"
         ordering = ["image", "kind"]
         constraints = [
             models.UniqueConstraint(

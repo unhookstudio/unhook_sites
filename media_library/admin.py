@@ -36,7 +36,7 @@ class ImageVariantInline(admin.TabularInline):
     ]
     readonly_fields = ["preview", "payload_kind", "width", "height", "filesize", "payload_url"]
 
-    @admin.display(description="Preview")
+    @admin.display(description="Aperçu")
     def preview(self, obj):
         return image_preview(obj.file, width=72)
 
@@ -58,7 +58,7 @@ class ImageAdmin(SiteScopedAdmin):
     ]
     inlines = [ImageVariantInline]
 
-    @admin.display(description="Preview")
+    @admin.display(description="Aperçu")
     def preview(self, obj):
         return image_preview(obj.original)
 
@@ -70,7 +70,7 @@ class ImageVariantAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
     readonly_fields = ["preview", "payload_kind"]
     search_fields = ["image__title", "image__filename", "filename", "payload_kind", "payload_url"]
 
-    @admin.display(description="Preview")
+    @admin.display(description="Aperçu")
     def preview(self, obj):
         return image_preview(obj.file)
 

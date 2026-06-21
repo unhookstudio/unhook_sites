@@ -82,8 +82,8 @@ class SiteSettings(models.Model):
     youtube_url = models.URLField(blank=True)
 
     class Meta:
-        verbose_name = "site settings"
-        verbose_name_plural = "site settings"
+        verbose_name = "réglages du site"
+        verbose_name_plural = "réglages du site"
 
     def __str__(self) -> str:
         return f"Settings for {self.site}"
@@ -124,6 +124,8 @@ class NavigationLink(SiteOwnedModel):
     is_active = models.BooleanField(default=True)
 
     class Meta:
+        verbose_name = "lien de navigation"
+        verbose_name_plural = "liens de navigation"
         ordering = ["site", "order", "label"]
 
     def __str__(self) -> str:
@@ -146,6 +148,8 @@ class Redirect(SiteOwnedModel):
     is_active = models.BooleanField(default=True)
 
     class Meta:
+        verbose_name = "redirection"
+        verbose_name_plural = "redirections"
         ordering = ["site", "old_path"]
         unique_together = [("site", "old_path")]
 

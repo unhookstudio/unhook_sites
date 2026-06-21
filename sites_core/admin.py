@@ -8,6 +8,10 @@ from media_library.models import Image
 
 from .models import NavigationLink, Redirect, Site, SiteSettings, User
 
+admin.site.site_header = "Administration Kent"
+admin.site.site_title = "Administration Kent"
+admin.site.index_title = "Gestion du site"
+
 
 class ScopedObjectAdminMixin:
     def change_view(self, request, object_id, form_url="", extra_context=None):
@@ -106,7 +110,7 @@ class SiteSettingsInline(admin.StackedInline):
     ]
     readonly_fields = ["homepage_hero_preview"]
 
-    @admin.display(description="Hero image preview")
+    @admin.display(description="Aperçu de l'image d'accueil")
     def homepage_hero_preview(self, obj):
         if not obj or not obj.homepage_hero_image or not obj.homepage_hero_image.original:
             return "-"

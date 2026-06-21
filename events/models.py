@@ -14,6 +14,8 @@ class Event(SiteOwnedModel, PublishableModel):
     payload_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
+        verbose_name = "date"
+        verbose_name_plural = "dates"
         ordering = ["-date", "title"]
         constraints = [
             models.UniqueConstraint(fields=["site", "slug"], name="unique_event_slug_per_site"),
@@ -36,6 +38,8 @@ class KeyDate(SiteOwnedModel, PublishableModel):
     payload_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
+        verbose_name = "date clé"
+        verbose_name_plural = "dates clés"
         ordering = ["-date", "title"]
         constraints = [
             models.UniqueConstraint(fields=["site", "slug"], name="unique_keydate_slug_per_site"),
