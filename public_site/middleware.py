@@ -8,7 +8,6 @@ class CurrentSiteMiddleware:
         "/admin/",
         "/health/",
         "/robots.txt",
-        "/sitemap.xml",
         "/static/",
         "/media/",
     )
