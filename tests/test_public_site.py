@@ -8,6 +8,7 @@ from media_library.models import Image
 from music.models import Album, Artist, Song, Track, VideoClip
 from events.models import Event, KeyDate
 from photos.models import Photo, PhotoCollection, PhotoCollectionItem
+from public_site.models import ContactSubmission
 from sites_core.models import Site, SiteSettings
 from tests.test_media_library import png_bytes
 from visual_art.models import BD, Drawing
@@ -129,6 +130,80 @@ def test_dates_page_lists_published_events(client, db, settings):
     assert "Published date" in response.text
     assert "On stage." in response.text
     assert "Draft date" not in response.text
+
+
+def test_contact_page_renders_live_content_and_photo(client, db, settings, tmp_path):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    settings.MEDIA_ROOT = tmp_path
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    image = Image.objects.create(site=site, title="Contact photo")
+    image.original.save("contact.png", ContentFile(png_bytes()), save=True)
+    Photo.objects.create(
+        site=site,
+        title="Kent par Laurent Julliand",
+        slug="kent-par-laurent-julliand",
+        image=image,
+        is_published=True,
+    )
+
+    response = client.get(reverse("contact"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "Kent est à l'écoute" in response.text
+    assert "Flavie Rodriguez" in response.text
+    assert "Label At(h)ome" in response.text
+    assert "Editions Thoobett" in response.text
+    assert "/media/sites/kent/images/originals/contact.png" in response.text
+    assert 'name="company"' in response.text
+
+
+def test_contact_post_stores_submission_and_redirects(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+
+    response = client.post(
+        reverse("contact"),
+        {"email": "reader@example.com", "message": "Bonjour Kent, bravo pour le site."},
+        HTTP_HOST="kent-artiste.com",
+    )
+
+    assert response.status_code == 302
+    assert response["Location"] == "/contact?sent=1"
+    submission = ContactSubmission.objects.get()
+    assert submission.site == site
+    assert submission.email == "reader@example.com"
+    assert "Bonjour Kent" in submission.message
+
+
+def test_contact_post_rejects_invalid_message(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+
+    response = client.post(
+        reverse("contact"),
+        {"email": "not-an-email", "message": "short"},
+        HTTP_HOST="kent-artiste.com",
+    )
+
+    assert response.status_code == 302
+    assert response["Location"] == "/contact?error=1"
+    assert ContactSubmission.objects.count() == 0
+
+
+def test_mentions_legales_renders_legal_content_and_alias_redirects(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+
+    response = client.get(reverse("mentions_legales"), HTTP_HOST="kent-artiste.com")
+    alias_response = client.get(reverse("mentions_legales_alias"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "Mentions Légales" in response.text
+    assert "Thoobett Éditions" in response.text
+    assert "Unhook Studio" in response.text
+    assert "Vercel Inc." in response.text
+    assert alias_response.status_code == 302
+    assert alias_response["Location"] == "/mentions-legales"
 
 
 def test_a_propos_renders_random_photo_pools_stories_and_key_dates(

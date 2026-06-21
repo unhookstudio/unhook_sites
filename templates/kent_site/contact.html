@@ -1,0 +1,71 @@
+{% extends "kent_site/base.html" %}
+{% load public_site_tags %}
+
+{% block title %}Contact - Kent{% endblock %}
+
+{% block body %}
+  <main class="container page-layout contact-page">
+    <h1 class="contact-page__title">Contact</h1>
+
+    <div class="contact-page__grid">
+      <div>
+        <section>
+          <h2 class="contact-page__subtitle">Kent est à l'écoute !</h2>
+          <div class="prose contact-page__intro">
+            <p>Pour engager Kent, exprimer votre admiration, ou simplement dire Bonjour,<br />vous pouvez utiliser ce formulaire.</p>
+          </div>
+
+          <div class="contact-form-wrap{% if status %} contact-form-wrap--has-status{% endif %}">
+            <form class="contact-form{% if status %} contact-form--inactive{% endif %}" action="{% url 'contact' %}" method="post">
+              {% csrf_token %}
+              <div>
+                <label for="contact-email">Email</label>
+                <input id="contact-email" name="email" required type="email" />
+              </div>
+              <div class="contact-form__honeypot" aria-hidden="true">
+                <label for="contact-company">Société</label>
+                <input id="contact-company" name="company" tabindex="-1" type="text" />
+              </div>
+              <div>
+                <label for="contact-message">Message</label>
+                <textarea id="contact-message" name="message" required rows="6"></textarea>
+              </div>
+              <button type="submit">Envoyer</button>
+            </form>
+
+            {% if status %}
+              <div class="contact-status contact-status--{{ status }}">
+                <div>
+                  <p class="contact-status__title">{% if status == "sent" %}Message envoyé{% else %}Envoi impossible{% endif %}</p>
+                  <p>{% if status == "sent" %}Merci, votre message a bien été reçu.{% else %}Impossible d'envoyer votre message. Vérifiez les champs et réessayez.{% endif %}</p>
+                  <a href="{% url 'contact' %}">{% if status == "sent" %}Envoyer un autre message{% else %}Réessayer{% endif %}</a>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </section>
+
+        <section class="contact-info">
+          <h3>Presse - Promo</h3>
+          <p>Flavie Rodriguez<br />Tél : +33 6 16 53 59 22<br />Mél : <a href="mailto:flavie.rodriguez@gmail.com">flavie.rodriguez@gmail.com</a></p>
+
+          <h3>Distribution</h3>
+          <p><a href="https://www.label-athome.com" target="_blank" rel="noreferrer">Label At(h)ome</a><br />17 rue du Chemin de Fer - 93500 Pantin<br />Tél : +33 1 57 42 18 90</p>
+
+          <h3>Production - Editions</h3>
+          <p>Editions Thoobett<br /><a href="mailto:thoobett@gmail.com">thoobett@gmail.com</a></p>
+        </section>
+      </div>
+
+      {% if contact_image %}
+        {% image_url contact_image "large" as contact_photo_url %}
+        {% if not contact_photo_url %}{% image_url contact_image "medium" as contact_photo_url %}{% endif %}
+        {% if contact_photo_url %}
+          <aside class="contact-page__image-wrap">
+            <img src="{{ contact_photo_url }}" alt="{{ contact_image.alt_text|default:contact_image.title }}" />
+          </aside>
+        {% endif %}
+      {% endif %}
+    </div>
+  </main>
+{% endblock %}

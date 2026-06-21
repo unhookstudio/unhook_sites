@@ -1,16 +1,20 @@
 from random import choice
 
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.http import Http404
 from django.db.models import F, Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods, require_POST
 
 from events.models import Event, KeyDate
+from media_library.models import Image
 from music.models import Album, Song, Track, VideoClip
-from photos.models import PhotoCollection
+from photos.models import Photo, PhotoCollection
 from sites_core.models import SiteSettings
 from visual_art.models import BD, Drawing
 from writing.models import Article, Book
+from .models import ContactSubmission
 
 
 def _site(request):
@@ -68,6 +72,40 @@ def a_propos(request):
             "key_dates": key_dates,
         },
     )
+
+
+@require_http_methods(["GET", "POST"])
+def contact(request):
+    site = _site(request)
+    if request.method == "POST":
+        return _handle_contact_submission(request, site)
+
+    contact_image = Image.objects.filter(site=site, filename="Kent-flou.jpg").first()
+    if contact_image is None:
+        contact_photo = (
+            _published(Photo, site)
+            .select_related("image")
+            .filter(title__icontains="Laurent Julliand", image__isnull=False)
+            .first()
+        )
+        contact_image = contact_photo.image if contact_photo else None
+    return render(
+        request,
+        _template(site, "contact.html"),
+        {
+            "contact_image": contact_image,
+            "status": _contact_status(request),
+        },
+    )
+
+
+def mentions_legales(request):
+    site = _site(request)
+    return render(request, _template(site, "mentions_legales.html"))
+
+
+def mentions_legales_alias(request):
+    return redirect("mentions_legales")
 
 
 def musique(request):
@@ -224,6 +262,37 @@ def post_detail(request, slug):
 @require_POST
 def newsletter_signup(request):
     return redirect("/?newsletter=success#newsletter")
+
+
+def _handle_contact_submission(request, site):
+    email = request.POST.get("email", "").strip().lower()
+    message = request.POST.get("message", "").strip()
+    company = request.POST.get("company", "").strip()
+
+    if company:
+        return redirect("/contact?sent=1")
+
+    if not _is_valid_contact_message(email, message):
+        return redirect("/contact?error=1")
+
+    ContactSubmission.objects.create(site=site, email=email, message=message)
+    return redirect("/contact?sent=1")
+
+
+def _is_valid_contact_message(email: str, message: str) -> bool:
+    try:
+        validate_email(email)
+    except ValidationError:
+        return False
+    return 10 <= len(message) <= 5000
+
+
+def _contact_status(request) -> str:
+    if request.GET.get("sent") == "1":
+        return "sent"
+    if request.GET.get("error") == "1":
+        return "error"
+    return ""
 
 
 def _published(model, site):

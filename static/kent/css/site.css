@@ -847,6 +847,196 @@ img {
   object-fit: cover;
 }
 
+.contact-page {
+  max-width: 86rem;
+}
+
+.contact-page__title {
+  margin: 0 0 2rem;
+  font-family: var(--font-frama);
+  font-size: 2.25rem;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.contact-page__grid {
+  display: grid;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.contact-page__subtitle,
+.contact-info h3 {
+  margin: 0 0 1rem;
+  font-family: var(--font-frama);
+  font-weight: 400;
+}
+
+.contact-page__subtitle {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.contact-page__intro {
+  margin-bottom: 1.5rem;
+}
+
+.contact-form-wrap {
+  position: relative;
+  max-width: 100%;
+}
+
+.contact-form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.contact-form--inactive {
+  filter: blur(2px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.contact-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.625rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--background);
+  color: var(--foreground);
+  font: inherit;
+}
+
+.contact-form input {
+  min-height: 2.75rem;
+}
+
+.contact-form textarea {
+  resize: vertical;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  border-color: var(--primary);
+  outline: 2px solid color-mix(in srgb, var(--primary) 25%, transparent);
+  outline-offset: 2px;
+}
+
+.contact-form__honeypot {
+  display: none;
+}
+
+.contact-form button,
+.contact-status a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 500;
+}
+
+.contact-form button {
+  width: 100%;
+}
+
+.contact-form button:hover {
+  background: color-mix(in srgb, var(--primary) 90%, black);
+}
+
+.contact-status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--background) 85%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.contact-status > div {
+  max-width: 28rem;
+  padding: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--background);
+  text-align: center;
+  box-shadow: 0 18px 40px rgb(0 0 0 / 16%);
+}
+
+.contact-status__title {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-frama);
+  font-size: 1.75rem;
+}
+
+.contact-status a {
+  margin-top: 1rem;
+  background: transparent;
+  color: var(--foreground);
+  border: 1px solid var(--border);
+}
+
+.contact-info {
+  margin-top: 3rem;
+  max-width: 42rem;
+}
+
+.contact-info h3 {
+  margin-top: 1.75rem;
+  font-size: 1.375rem;
+}
+
+.contact-info p {
+  margin: 0 0 1.5rem;
+  color: var(--muted-foreground);
+  line-height: 1.65;
+}
+
+.contact-info a {
+  color: var(--primary);
+}
+
+.contact-info a:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+.contact-page__image-wrap img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  object-fit: cover;
+}
+
+.legal-page {
+  max-width: 56rem;
+}
+
+.legal-page h1 {
+  margin-top: 0;
+  font-family: var(--font-frama);
+  font-size: 2.75rem;
+  font-weight: 400;
+}
+
 .section-spacer {
   margin-block: 2rem;
 }
@@ -1960,6 +2150,11 @@ img {
 
   .dates-page-grid {
     grid-template-columns: minmax(0, 1.15fr) minmax(20rem, 0.85fr);
+  }
+
+  .contact-page__grid {
+    grid-template-columns: minmax(0, 3fr) minmax(20rem, 2.5fr);
+    gap: 3rem;
   }
 
   .about-page__intro {

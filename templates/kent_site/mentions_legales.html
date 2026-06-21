@@ -1,0 +1,36 @@
+{% extends "kent_site/base.html" %}
+
+{% block title %}Mentions légales - Kent{% endblock %}
+
+{% block body %}
+  <main class="container page-layout">
+    <a class="back-link" href="{% url 'home' %}">← Retour à l'accueil</a>
+
+    <article class="legal-page prose">
+      <h1>Mentions Légales</h1>
+
+      <h3>Éditeur du site</h3>
+      <p>Thoobett Éditions<br />31 Quai Gallieni<br />94500 Champigny sur Marne</p>
+      <p>Sarl au capital de 32 705 euro<br />Siret 384 447 02500022 – APE 5920Z<br />TVA intra : FR 29 384 447 025</p>
+
+      <h3>Conception et réalisation</h3>
+      <p>Site web conçu et réalisé par <a href="https://unhookstudio.com" target="_blank" rel="noreferrer">Unhook Studio</a>.</p>
+
+      <h3>Hébergement</h3>
+      <p>Vercel Inc.<br />340 S Lemon Ave #4133<br />Walnut, CA 91789, USA</p>
+      <p>Email: support@vercel.com<br />Website: <a href="https://vercel.com" target="_blank" rel="noreferrer">https://vercel.com</a></p>
+
+      <h3>Propriété intellectuelle</h3>
+      <p>L'ensemble du contenu de ce site (textes, images, vidéos, sons, logos, etc.) est protégé par le droit d'auteur. Toute reproduction, même partielle, est interdite sans autorisation préalable de Frédérique Despesse.</p>
+
+      <h3>Protection des données personnelles</h3>
+      <p>Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Pour exercer ces droits, contactez-nous via la page de contact.</p>
+
+      <h3>Cookies</h3>
+      <p>Ce site n'utilise que les cookies strictement nécessaires à son bon fonctionnement. Nous n'employons aucun cookie de surveillance ou de tracking publicitaire. Les solutions d'analyse statistique que nous utilisons ne nécessitent pas de cookies et ne collectent aucune donnée personnelle identifiable.</p>
+
+      <h3>Contact</h3>
+      <p>Pour toute question relative à ce site ou aux mentions légales, vous pouvez nous contacter via la page de contact.</p>
+    </article>
+  </main>
+{% endblock %}
