@@ -18,6 +18,25 @@ DEBUG = env("DEBUG")
 SECRET_KEY = env("SECRET_KEY", default="")
 validate_secret_key(DEBUG, SECRET_KEY)
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
+BREVO_API_KEY = env("BREVO_API_KEY", default="")
+BREVO_LIST_ID = env("BREVO_LIST_ID", default="")
+
+EMAIL_BACKEND = env(
+    "EMAIL_BACKEND",
+    default="django.core.mail.backends.smtp.EmailBackend",
+)
+EMAIL_HOST = env("BREVO_SMTP_HOST", default="smtp-relay.brevo.com")
+EMAIL_PORT = env.int("BREVO_SMTP_PORT", default=587)
+EMAIL_HOST_USER = env("BREVO_SMTP_LOGIN", default="")
+EMAIL_HOST_PASSWORD = env("BREVO_SMTP_PASSWORD", default="")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)
+CONTACT_NOTIFICATION_TO = env.list("CONTACT_NOTIFICATION_TO", default=[])
+CONTACT_NOTIFICATION_FROM_EMAIL = env("CONTACT_NOTIFICATION_FROM_EMAIL", default="")
+CONTACT_NOTIFICATION_FROM_NAME = env(
+    "CONTACT_NOTIFICATION_FROM_NAME",
+    default="Website contact form",
+)
 
 
 INSTALLED_APPS = [

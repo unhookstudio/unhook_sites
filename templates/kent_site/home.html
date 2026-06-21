@@ -120,6 +120,11 @@
             <input class="newsletter-form__input" id="newsletter-email" name="email" placeholder="Votre email" required type="email" />
             <button class="newsletter-form__button" type="submit">Oui, je veux la newslettre</button>
           </form>
+          {% if request.GET.newsletter == "success" %}
+            <p class="newsletter-status newsletter-status--success">Merci, votre inscription est confirmée.</p>
+          {% elif request.GET.newsletter == "error" %}
+            <p class="newsletter-status newsletter-status--error">L'inscription n'a pas pu aboutir. Réessayez dans un instant.</p>
+          {% endif %}
         </div>
         <div class="newsletter-section__image-wrap">
           <img class="newsletter-section__image" src="{% static 'kent/assets/kent_gauche.jpg' %}" alt="Kent" />

@@ -8,7 +8,7 @@ from media_library.models import Image
 from music.models import Album, Artist, Song, Track, VideoClip
 from events.models import Event, KeyDate
 from photos.models import Photo, PhotoCollection, PhotoCollectionItem
-from public_site.models import ContactSubmission
+from public_site.models import ContactSubmission, NewsletterSubscription
 from sites_core.models import Site, SiteSettings
 from tests.test_media_library import png_bytes
 from visual_art.models import BD, Drawing
@@ -157,8 +157,13 @@ def test_contact_page_renders_live_content_and_photo(client, db, settings, tmp_p
     assert 'name="company"' in response.text
 
 
-def test_contact_post_stores_submission_and_redirects(client, db, settings):
+def test_contact_post_stores_submission_sends_email_and_redirects(
+    client, db, settings, mailoutbox
+):
     settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    settings.CONTACT_NOTIFICATION_TO = ["flavie@example.com"]
+    settings.CONTACT_NOTIFICATION_FROM_EMAIL = "noreply@example.com"
+    settings.CONTACT_NOTIFICATION_FROM_NAME = "Kent artiste"
     site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
 
     response = client.post(
@@ -173,6 +178,58 @@ def test_contact_post_stores_submission_and_redirects(client, db, settings):
     assert submission.site == site
     assert submission.email == "reader@example.com"
     assert "Bonjour Kent" in submission.message
+    assert submission.notification_sent_at is not None
+    assert submission.notification_error == ""
+    assert len(mailoutbox) == 1
+    message = mailoutbox[0]
+    assert message.to == ["flavie@example.com"]
+    assert message.reply_to == ["reader@example.com"]
+    assert message.from_email == "Kent artiste <noreply@example.com>"
+    assert "reader@example.com" in message.body
+    assert "Bonjour Kent" in message.body
+
+
+def test_contact_post_keeps_submission_if_notification_fails(
+    client, db, settings, monkeypatch
+):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    settings.CONTACT_NOTIFICATION_TO = ["flavie@example.com"]
+    Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+
+    def broken_send(self, fail_silently=False):
+        raise RuntimeError("smtp unavailable")
+
+    monkeypatch.setattr("public_site.views.EmailMultiAlternatives.send", broken_send)
+
+    response = client.post(
+        reverse("contact"),
+        {"email": "reader@example.com", "message": "Bonjour Kent, bravo pour le site."},
+        HTTP_HOST="kent-artiste.com",
+    )
+
+    assert response.status_code == 302
+    assert response["Location"] == "/contact?sent=1"
+    submission = ContactSubmission.objects.get()
+    assert submission.notification_sent_at is None
+    assert submission.notification_error == "smtp unavailable"
+
+
+def test_contact_post_records_missing_notification_recipient(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    settings.CONTACT_NOTIFICATION_TO = []
+    Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+
+    response = client.post(
+        reverse("contact"),
+        {"email": "reader@example.com", "message": "Bonjour Kent, bravo pour le site."},
+        HTTP_HOST="kent-artiste.com",
+    )
+
+    assert response.status_code == 302
+    assert response["Location"] == "/contact?sent=1"
+    submission = ContactSubmission.objects.get()
+    assert submission.notification_sent_at is None
+    assert submission.notification_error == "CONTACT_NOTIFICATION_TO is not configured."
 
 
 def test_contact_post_rejects_invalid_message(client, db, settings):
@@ -342,18 +399,71 @@ def test_home_renders_newsletter_and_quick_links(client, db, settings):
     assert "quick-link-card--books" in response.text
 
 
-def test_newsletter_signup_redirects_to_home_anchor(client, db, settings):
+def test_newsletter_signup_stores_subscription_and_syncs_brevo(
+    client, db, settings, monkeypatch
+):
     settings.ALLOWED_HOSTS = ["kent-artiste.com"]
     Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    synced_emails = []
+
+    def sync(email):
+        synced_emails.append(email)
+
+    monkeypatch.setattr("public_site.views._sync_brevo_newsletter_contact", sync)
 
     response = client.post(
         reverse("newsletter_signup"),
-        {"email": "reader@example.com"},
+        {"email": " Reader@Example.COM "},
         HTTP_HOST="kent-artiste.com",
     )
 
     assert response.status_code == 302
     assert response["Location"] == "/?newsletter=success#newsletter"
+    subscription = NewsletterSubscription.objects.get()
+    assert subscription.email == "reader@example.com"
+    assert subscription.status == NewsletterSubscription.Status.SUBSCRIBED
+    assert subscription.source == "homepage"
+    assert subscription.last_synced_at is not None
+    assert subscription.last_error == ""
+    assert synced_emails == ["reader@example.com"]
+
+
+def test_newsletter_signup_rejects_invalid_email(client, db, settings, monkeypatch):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    monkeypatch.setattr(
+        "public_site.views._sync_brevo_newsletter_contact",
+        lambda email: (_ for _ in ()).throw(AssertionError("Brevo should not be called")),
+    )
+
+    response = client.post(
+        reverse("newsletter_signup"),
+        {"email": "not-an-email"},
+        HTTP_HOST="kent-artiste.com",
+    )
+
+    assert response.status_code == 302
+    assert response["Location"] == "/?newsletter=error#newsletter"
+    assert NewsletterSubscription.objects.count() == 0
+
+
+def test_newsletter_signup_honeypot_pretends_success(client, db, settings, monkeypatch):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    monkeypatch.setattr(
+        "public_site.views._sync_brevo_newsletter_contact",
+        lambda email: (_ for _ in ()).throw(AssertionError("Brevo should not be called")),
+    )
+
+    response = client.post(
+        reverse("newsletter_signup"),
+        {"email": "reader@example.com", "company": "Spam Ltd"},
+        HTTP_HOST="kent-artiste.com",
+    )
+
+    assert response.status_code == 302
+    assert response["Location"] == "/?newsletter=success#newsletter"
+    assert NewsletterSubscription.objects.count() == 0
 
 
 def test_musique_lists_only_published_site_albums(client, db, settings):

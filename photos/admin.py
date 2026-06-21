@@ -91,3 +91,13 @@ class PhotoCollectionItemAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
         if request.user.is_superuser:
             return list_filter
         return [item for item in list_filter if item != "collection__site"]
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if not request.user.is_superuser:
+            if db_field.name == "collection":
+                kwargs["queryset"] = PhotoCollection.objects.filter(
+                    site__in=request.user.sites.all()
+                )
+            if db_field.name == "photo":
+                kwargs["queryset"] = Photo.objects.filter(site__in=request.user.sites.all())
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)

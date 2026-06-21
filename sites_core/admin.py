@@ -25,11 +25,23 @@ class ScopedObjectAdminMixin:
 class SiteScopedAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
     site_field = "site"
 
+    def has_add_permission(self, request):
+        has_permission = super().has_add_permission(request)
+        if request.user.is_superuser:
+            return has_permission
+        return has_permission and self._site_for_request(request) is not None
+
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         if request.user.is_superuser:
             return queryset
         return queryset.filter(**{f"{self.site_field}__in": request.user.sites.all()})
+
+    def get_exclude(self, request, obj=None):
+        exclude = list(super().get_exclude(request, obj) or [])
+        if self._should_hide_site_field(request) and self.site_field not in exclude:
+            exclude.append(self.site_field)
+        return exclude
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == self.site_field and not request.user.is_superuser:
@@ -44,9 +56,35 @@ class SiteScopedAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
 
     def get_changeform_initial_data(self, request):
         initial = super().get_changeform_initial_data(request)
-        if not request.user.is_superuser and request.user.default_site_id:
-            initial.setdefault(self.site_field, request.user.default_site_id)
+        site = self._site_for_request(request)
+        if not request.user.is_superuser and site is not None:
+            initial.setdefault(self.site_field, site.pk)
         return initial
+
+    def save_model(self, request, obj, form, change):
+        if not request.user.is_superuser and not getattr(obj, f"{self.site_field}_id", None):
+            site = self._site_for_request(request)
+            if site is not None:
+                setattr(obj, self.site_field, site)
+        super().save_model(request, obj, form, change)
+
+    def _site_for_request(self, request):
+        if request.user.is_superuser:
+            return None
+        if (
+            request.user.default_site_id
+            and request.user.sites.filter(pk=request.user.default_site_id).exists()
+        ):
+            return request.user.default_site
+        sites = list(request.user.sites.all()[:2])
+        if len(sites) == 1:
+            return sites[0]
+        return None
+
+    def _should_hide_site_field(self, request):
+        if request.user.is_superuser:
+            return False
+        return request.user.sites.count() == 1
 
 
 class SiteSettingsInline(admin.StackedInline):

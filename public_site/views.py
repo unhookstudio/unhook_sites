@@ -1,10 +1,18 @@
+import json
+from email.utils import formataddr
 from random import choice
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from django.http import Http404
 from django.db.models import F, Prefetch
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.utils.html import escape
 from django.views.decorators.http import require_http_methods, require_POST
 
 from events.models import Event, KeyDate
@@ -14,7 +22,10 @@ from photos.models import Photo, PhotoCollection
 from sites_core.models import SiteSettings
 from visual_art.models import BD, Drawing
 from writing.models import Article, Book
-from .models import ContactSubmission
+from .models import ContactSubmission, NewsletterSubscription
+
+
+BREVO_CONTACTS_API_URL = "https://api.brevo.com/v3/contacts"
 
 
 def _site(request):
@@ -261,6 +272,38 @@ def post_detail(request, slug):
 
 @require_POST
 def newsletter_signup(request):
+    site = _site(request)
+    email = request.POST.get("email", "").strip().lower()
+    company = request.POST.get("company", "").strip()
+
+    if company:
+        return redirect("/?newsletter=success#newsletter")
+
+    if not _is_valid_email(email):
+        return redirect("/?newsletter=error#newsletter")
+
+    subscription, _ = NewsletterSubscription.objects.update_or_create(
+        site=site,
+        email=email,
+        defaults={
+            "source": "homepage",
+            "status": NewsletterSubscription.Status.SUBSCRIBED,
+            "last_error": "",
+        },
+    )
+
+    try:
+        _sync_brevo_newsletter_contact(email)
+    except NewsletterSyncError as exc:
+        subscription.status = NewsletterSubscription.Status.ERROR
+        subscription.last_error = str(exc)
+        subscription.save(update_fields=["status", "last_error", "updated_at"])
+        return redirect("/?newsletter=error#newsletter")
+
+    subscription.status = NewsletterSubscription.Status.SUBSCRIBED
+    subscription.last_synced_at = timezone.now()
+    subscription.last_error = ""
+    subscription.save(update_fields=["status", "last_synced_at", "last_error", "updated_at"])
     return redirect("/?newsletter=success#newsletter")
 
 
@@ -275,16 +318,114 @@ def _handle_contact_submission(request, site):
     if not _is_valid_contact_message(email, message):
         return redirect("/contact?error=1")
 
-    ContactSubmission.objects.create(site=site, email=email, message=message)
+    submission = ContactSubmission.objects.create(site=site, email=email, message=message)
+    _send_contact_notification(submission)
     return redirect("/contact?sent=1")
 
 
 def _is_valid_contact_message(email: str, message: str) -> bool:
+    if not _is_valid_email(email):
+        return False
+    return 10 <= len(message) <= 5000
+
+
+def _is_valid_email(email: str) -> bool:
     try:
         validate_email(email)
     except ValidationError:
         return False
-    return 10 <= len(message) <= 5000
+    return True
+
+
+def _send_contact_notification(submission: ContactSubmission) -> None:
+    recipients = [email.strip() for email in settings.CONTACT_NOTIFICATION_TO if email.strip()]
+    if not recipients:
+        submission.notification_error = "CONTACT_NOTIFICATION_TO is not configured."
+        submission.save(update_fields=["notification_error", "updated_at"])
+        return
+
+    from_email = _contact_notification_from_email()
+    text_body = (
+        "A new message was submitted on the website contact form.\n\n"
+        f"From: {submission.email}\n\n"
+        f"Message:\n{submission.message}"
+    )
+    html_body = (
+        "<p>A new message was submitted on the website contact form.</p>"
+        f"<p><strong>From:</strong> {escape(submission.email)}</p>"
+        "<p><strong>Message:</strong></p>"
+        f"<p>{escape(submission.message).replace(chr(10), '<br>')}</p>"
+    )
+    message = EmailMultiAlternatives(
+        subject=f"New contact form submission from {submission.email}",
+        body=text_body,
+        from_email=from_email,
+        to=recipients,
+        reply_to=[submission.email],
+    )
+    message.attach_alternative(html_body, "text/html")
+
+    try:
+        message.send(fail_silently=False)
+    except Exception as exc:
+        submission.notification_error = str(exc)
+        submission.save(update_fields=["notification_error", "updated_at"])
+        return
+
+    submission.notification_sent_at = timezone.now()
+    submission.notification_error = ""
+    submission.save(update_fields=["notification_sent_at", "notification_error", "updated_at"])
+
+
+def _contact_notification_from_email() -> str:
+    email = settings.CONTACT_NOTIFICATION_FROM_EMAIL.strip() or settings.EMAIL_HOST_USER
+    name = settings.CONTACT_NOTIFICATION_FROM_NAME.strip()
+    if name and email:
+        return formataddr((name, email))
+    return email
+
+
+class NewsletterSyncError(RuntimeError):
+    pass
+
+
+def _sync_brevo_newsletter_contact(email: str) -> None:
+    api_key = settings.BREVO_API_KEY.strip()
+    try:
+        list_id = int(str(settings.BREVO_LIST_ID).strip())
+    except ValueError as exc:
+        raise NewsletterSyncError("Brevo list id is not configured.") from exc
+
+    if not api_key or list_id <= 0:
+        raise NewsletterSyncError("Brevo API credentials are not configured.")
+
+    payload = json.dumps(
+        {
+            "email": email,
+            "listIds": [list_id],
+            "updateEnabled": True,
+            "emailBlacklisted": False,
+        }
+    ).encode("utf-8")
+    request = Request(
+        BREVO_CONTACTS_API_URL,
+        data=payload,
+        method="POST",
+        headers={
+            "accept": "application/json",
+            "api-key": api_key,
+            "content-type": "application/json",
+        },
+    )
+
+    try:
+        with urlopen(request, timeout=10):
+            return
+    except HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")
+        raise NewsletterSyncError(f"Brevo returned HTTP {exc.code}: {detail}") from exc
+    except URLError as exc:
+        raise NewsletterSyncError(f"Brevo request failed: {exc.reason}") from exc
 
 
 def _contact_status(request) -> str:

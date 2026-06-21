@@ -76,6 +76,14 @@ class TrackAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
             return list_filter
         return [item for item in list_filter if item != "album__site"]
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if not request.user.is_superuser:
+            if db_field.name == "album":
+                kwargs["queryset"] = Album.objects.filter(site__in=request.user.sites.all())
+            if db_field.name == "song":
+                kwargs["queryset"] = Song.objects.filter(site__in=request.user.sites.all())
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 @admin.register(VideoClip)
 class VideoClipAdmin(DomainModelAdmin):
