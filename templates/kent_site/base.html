@@ -46,9 +46,35 @@
     <footer class="site-footer">
       <div class="container site-footer__inner">
         <div class="site-footer__top">
-          <a href="{% url 'home' %}" aria-label="Kent">
-            <span class="logo" aria-hidden="true"></span>
-          </a>
+          <div class="site-footer__brand">
+            <a href="{% url 'home' %}" aria-label="Kent">
+              <span class="logo" aria-hidden="true"></span>
+            </a>
+            {% if site_settings %}
+              <div class="site-footer__social" aria-label="Réseaux sociaux">
+                {% if site_settings.facebook_url %}
+                  <a href="{{ site_settings.facebook_url }}" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                    <span class="site-footer__social-icon site-footer__social-icon--facebook" aria-hidden="true"></span>
+                  </a>
+                {% endif %}
+                {% if site_settings.instagram_url %}
+                  <a href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                    <span class="site-footer__social-icon site-footer__social-icon--instagram" aria-hidden="true"></span>
+                  </a>
+                {% endif %}
+                {% if site_settings.bandcamp_url %}
+                  <a href="{{ site_settings.bandcamp_url }}" target="_blank" rel="noopener noreferrer" aria-label="Bandcamp">
+                    <span class="site-footer__social-icon site-footer__social-icon--bandcamp" aria-hidden="true"></span>
+                  </a>
+                {% endif %}
+                {% if site_settings.youtube_url %}
+                  <a href="{{ site_settings.youtube_url }}" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                    <span class="site-footer__social-icon site-footer__social-icon--youtube" aria-hidden="true"></span>
+                  </a>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
           <nav aria-label="Navigation secondaire">
             <a href="/mentions-legales">Mentions légales</a>
             <a href="/contact">Contact</a>

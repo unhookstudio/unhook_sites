@@ -79,6 +79,7 @@ class SiteSettings(models.Model):
     homepage_hero_button_url = models.CharField(max_length=500, default="/a-propos")
     instagram_url = models.URLField(blank=True)
     facebook_url = models.URLField(blank=True)
+    bandcamp_url = models.URLField(blank=True)
     youtube_url = models.URLField(blank=True)
 
     class Meta:

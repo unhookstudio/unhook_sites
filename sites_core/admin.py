@@ -106,6 +106,7 @@ class SiteSettingsInline(admin.StackedInline):
         "homepage_hero_button_url",
         "instagram_url",
         "facebook_url",
+        "bandcamp_url",
         "youtube_url",
     ]
     readonly_fields = ["homepage_hero_preview"]

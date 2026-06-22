@@ -2030,6 +2030,66 @@ img {
   gap: 2rem;
 }
 
+.site-footer__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.9rem;
+}
+
+.site-footer__social {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  color: var(--muted-foreground);
+}
+
+.site-footer__social a {
+  display: inline-flex;
+  width: 1.35rem;
+  height: 1.35rem;
+  color: inherit;
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.site-footer__social a:hover {
+  color: var(--foreground);
+  transform: translateY(-1px);
+}
+
+.site-footer__social-icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: currentColor;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+}
+
+.site-footer__social-icon--facebook {
+  mask-image: url("../assets/social-facebook.svg");
+  -webkit-mask-image: url("../assets/social-facebook.svg");
+}
+
+.site-footer__social-icon--instagram {
+  mask-image: url("../assets/social-instagram.svg");
+  -webkit-mask-image: url("../assets/social-instagram.svg");
+}
+
+.site-footer__social-icon--bandcamp {
+  mask-image: url("../assets/social-bandcamp.svg");
+  -webkit-mask-image: url("../assets/social-bandcamp.svg");
+}
+
+.site-footer__social-icon--youtube {
+  mask-image: url("../assets/social-youtube.svg");
+  -webkit-mask-image: url("../assets/social-youtube.svg");
+}
+
 .site-footer nav {
   display: flex;
   flex-direction: column;

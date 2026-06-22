@@ -77,6 +77,10 @@ def test_kent_static_assets_are_discoverable():
     assert find("kent/assets/line_horizontal_squiggly.svg") is not None
     assert find("kent/assets/line_horizontal_straight.svg") is not None
     assert find("kent/assets/musiquev.svg") is not None
+    assert find("kent/assets/social-facebook.svg") is not None
+    assert find("kent/assets/social-instagram.svg") is not None
+    assert find("kent/assets/social-bandcamp.svg") is not None
+    assert find("kent/assets/social-youtube.svg") is not None
 
 
 def test_kent_base_uses_configured_youtube_embed():

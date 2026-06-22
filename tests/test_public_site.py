@@ -56,6 +56,28 @@ def test_public_base_loads_kent_scoped_stylesheet(client, db, settings):
     assert "/static/kent/css/site.css" in response.text
 
 
+def test_public_footer_renders_site_social_links(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    SiteSettings.objects.create(
+        site=site,
+        facebook_url="https://www.facebook.com/kentartiste",
+        instagram_url="https://www.instagram.com/kent_artiste",
+        bandcamp_url="https://kent-artiste.bandcamp.com",
+        youtube_url="https://www.youtube.com/user/ChaineOfficielleKENT",
+    )
+
+    response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "site-footer__social" in response.text
+    assert "https://www.facebook.com/kentartiste" in response.text
+    assert "https://www.instagram.com/kent_artiste" in response.text
+    assert "https://kent-artiste.bandcamp.com" in response.text
+    assert "https://www.youtube.com/user/ChaineOfficielleKENT" in response.text
+    assert "site-footer__social-icon--bandcamp" in response.text
+
+
 def test_home_renders_news_cards_like_original_layout(client, db, settings):
     settings.ALLOWED_HOSTS = ["kent-artiste.com"]
     site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
