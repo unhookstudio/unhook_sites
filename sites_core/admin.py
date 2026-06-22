@@ -110,8 +110,12 @@ class SiteSettingsInline(admin.StackedInline):
         "facebook_url",
         "bandcamp_url",
         "youtube_url",
+        "favicon_preview",
+        "favicon_svg",
+        "favicon_ico",
+        "apple_touch_icon",
     ]
-    readonly_fields = ["homepage_hero_preview"]
+    readonly_fields = ["homepage_hero_preview", "favicon_preview"]
 
     @admin.display(description="Aperçu de l'image d'accueil")
     def homepage_hero_preview(self, obj):
@@ -125,6 +129,23 @@ class SiteSettingsInline(admin.StackedInline):
             '<img src="{}" alt="" style="max-width: 220px; max-height: 140px; height: auto;" />',
             url,
         )
+
+    @admin.display(description="Favicon actuel")
+    def favicon_preview(self, obj):
+        if not obj:
+            return "-"
+        links = []
+        for label, field_name in (
+            ("SVG", "favicon_svg"),
+            ("ICO/PNG", "favicon_ico"),
+            ("Apple", "apple_touch_icon"),
+        ):
+            file = getattr(obj, field_name)
+            if file:
+                links.append(format_html('<a href="{}" target="_blank">{}</a>', file.url, label))
+        if not links:
+            return "-"
+        return format_html(" · ".join(["{}"] * len(links)), *links)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "homepage_hero_image" and not request.user.is_superuser:

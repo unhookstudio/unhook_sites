@@ -56,6 +56,17 @@ def test_public_base_loads_kent_scoped_stylesheet(client, db, settings):
     assert "/static/kent/css/site.css" in response.text
 
 
+def test_public_base_loads_kent_favicon_fallbacks(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+
+    response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "/static/kent/favicons/favicon.svg" in response.text
+    assert "/static/kent/favicons/favicon.ico" in response.text
+
+
 def test_public_footer_renders_site_social_links(client, db, settings):
     settings.ALLOWED_HOSTS = ["kent-artiste.com"]
     site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")

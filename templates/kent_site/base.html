@@ -5,6 +5,19 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}Kent{% endblock %}</title>
+    {% if site_settings.favicon_svg %}
+      <link rel="icon" href="{{ site_settings.favicon_svg.url }}" type="image/svg+xml" />
+    {% elif request.site.slug == "kent" %}
+      <link rel="icon" href="{% static 'kent/favicons/favicon.svg' %}" type="image/svg+xml" />
+    {% endif %}
+    {% if site_settings.favicon_ico %}
+      <link rel="alternate icon" href="{{ site_settings.favicon_ico.url }}" />
+    {% elif request.site.slug == "kent" %}
+      <link rel="alternate icon" href="{% static 'kent/favicons/favicon.ico' %}" />
+    {% endif %}
+    {% if site_settings.apple_touch_icon %}
+      <link rel="apple-touch-icon" href="{{ site_settings.apple_touch_icon.url }}" />
+    {% endif %}
     {% if request.site.slug == "kent" %}
       <link rel="stylesheet" href="{% static 'kent/css/site.css' %}" />
     {% endif %}

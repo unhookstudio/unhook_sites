@@ -53,6 +53,11 @@ class PublishableModel(models.Model):
             self.published_at = timezone.now()
 
 
+def site_settings_file_upload_to(instance, filename):
+    site_slug = instance.site.slug if instance.site_id else "unknown"
+    return f"sites/{site_slug}/site/{filename}"
+
+
 class SiteSettings(models.Model):
     site = models.OneToOneField(Site, on_delete=models.CASCADE, related_name="settings")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -83,6 +88,21 @@ class SiteSettings(models.Model):
     facebook_url = models.URLField(blank=True)
     bandcamp_url = models.URLField(blank=True)
     youtube_url = models.URLField(blank=True)
+    favicon_svg = models.FileField(
+        upload_to=site_settings_file_upload_to,
+        blank=True,
+        help_text="Optional SVG favicon for this site.",
+    )
+    favicon_ico = models.FileField(
+        upload_to=site_settings_file_upload_to,
+        blank=True,
+        help_text="Optional .ico or PNG favicon fallback for this site.",
+    )
+    apple_touch_icon = models.FileField(
+        upload_to=site_settings_file_upload_to,
+        blank=True,
+        help_text="Optional iOS home-screen icon.",
+    )
 
     class Meta:
         verbose_name = "réglages du site"

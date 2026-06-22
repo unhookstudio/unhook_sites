@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    :root {
+      --favicon-bg: #f4efe6;
+      --favicon-fg: #101010;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --favicon-bg: #101010;
+        --favicon-fg: #f4efe6;
+      }
+    }
+  </style>
+  <rect width="64" height="64" rx="14" fill="var(--favicon-bg)" />
+  <path
+    d="M19 14V50M24 32L45 14M24 32L47 50"
+    fill="none"
+    stroke="var(--favicon-fg)"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="8"
+  />
+</svg>
