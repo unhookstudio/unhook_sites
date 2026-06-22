@@ -59,6 +59,8 @@ class SiteSettings(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     footer_text = models.TextField(blank=True)
     newsletter_text = models.TextField(blank=True)
+    contact_title = models.CharField(max_length=255, blank=True)
+    contact_intro_text = models.TextField(blank=True)
     show_homepage_hero = models.BooleanField(default=False)
     homepage_hero_image = models.ForeignKey(
         "media_library.Image",
@@ -128,6 +130,26 @@ class NavigationLink(SiteOwnedModel):
         verbose_name = "lien de navigation"
         verbose_name_plural = "liens de navigation"
         ordering = ["site", "order", "label"]
+
+    def __str__(self) -> str:
+        return self.label
+
+
+class TextSnippet(SiteOwnedModel):
+    key = models.SlugField(max_length=120)
+    label = models.CharField(max_length=160)
+    text = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = "texte éditorial"
+        verbose_name_plural = "textes éditoriaux"
+        ordering = ["site", "label"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["site", "key"],
+                name="unique_text_snippet_key_per_site",
+            )
+        ]
 
     def __str__(self) -> str:
         return self.label

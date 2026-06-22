@@ -7,9 +7,8 @@
   <main class="container page-layout">
     {% include "kent_site/includes/section_title.html" with src="kent/assets/dessins.svg" alt="Dessins" %}
     <figure class="quote quote--dessins">
-      <blockquote>Son coup de crayon est un mélange de sécheresse et d'amour.
-De sécheresse parce qu'il n'y a pas un trait de trop et d'amour du dessin.</blockquote>
-      <figcaption>Jean-Pierre Dionnet</figcaption>
+      <blockquote>{{ text_snippets.dessins_quote_text|linebreaksbr }}</blockquote>
+      <figcaption>{{ text_snippets.dessins_quote_credit }}</figcaption>
     </figure>
 
     {% if adult_bds %}

@@ -7,8 +7,8 @@
   <main class="container page-layout">
     {% include "kent_site/includes/section_title.html" with src="kent/assets/livres.svg" alt="Livres" class_name="section-title--large" %}
     <figure class="quote quote--livres">
-      <blockquote>Entre chanson, bande dessinée et romans, l'homme déborde de créativité depuis quatre décennies. Il est rare de croiser le chemin d'un homme aussi épanoui.</blockquote>
-      <figcaption>Olivier Nuc, Le Figaro</figcaption>
+      <blockquote>{{ text_snippets.livres_quote_text|linebreaksbr }}</blockquote>
+      <figcaption>{{ text_snippets.livres_quote_credit }}</figcaption>
     </figure>
     {% for title, books in sections %}
       {% if books %}

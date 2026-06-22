@@ -6,7 +6,7 @@ from django.utils.html import format_html
 
 from media_library.models import Image
 
-from .models import NavigationLink, Redirect, Site, SiteSettings, User
+from .models import NavigationLink, Redirect, Site, SiteSettings, TextSnippet, User
 
 admin.site.site_header = "Administration Kent"
 admin.site.site_title = "Administration Kent"
@@ -98,6 +98,8 @@ class SiteSettingsInline(admin.StackedInline):
     fields = [
         "footer_text",
         "newsletter_text",
+        "contact_title",
+        "contact_intro_text",
         "show_homepage_hero",
         "homepage_hero_preview",
         "homepage_hero_image",
@@ -157,6 +159,14 @@ class NavigationLinkAdmin(SiteScopedAdmin):
     list_display = ["label", "site", "url", "order", "is_active"]
     list_filter = ["site", "is_active"]
     search_fields = ["label", "url"]
+
+
+@admin.register(TextSnippet)
+class TextSnippetAdmin(SiteScopedAdmin):
+    list_display = ["label", "key", "site", "updated_at"]
+    list_filter = ["site"]
+    search_fields = ["label", "key", "text"]
+    readonly_fields = ["created_at", "updated_at"]
 
 
 @admin.register(Redirect)

@@ -9,7 +9,7 @@ from music.models import Album, Artist, Song, Track, VideoClip
 from events.models import Event, KeyDate
 from photos.models import Photo, PhotoCollection, PhotoCollectionItem
 from public_site.models import ContactSubmission, NewsletterSubscription
-from sites_core.models import Site, SiteSettings
+from sites_core.models import Site, SiteSettings, TextSnippet
 from tests.test_media_library import png_bytes
 from visual_art.models import BD, Drawing
 from writing.models import Article, Book
@@ -76,6 +76,59 @@ def test_public_footer_renders_site_social_links(client, db, settings):
     assert "https://kent-artiste.bandcamp.com" in response.text
     assert "https://www.youtube.com/user/ChaineOfficielleKENT" in response.text
     assert "site-footer__social-icon--bandcamp" in response.text
+
+
+def test_editorial_text_snippets_override_public_copy(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    TextSnippet.objects.create(
+        site=site,
+        key="home_card_music_text",
+        label="Accueil - carte Musique - texte",
+        text="Texte musique éditable.",
+    )
+    TextSnippet.objects.create(
+        site=site,
+        key="musique_quote_text",
+        label="Musique - citation",
+        text="Citation musique éditable.",
+    )
+    TextSnippet.objects.create(
+        site=site,
+        key="musique_quote_credit",
+        label="Musique - auteur de la citation",
+        text="Auteur éditable",
+    )
+
+    home_response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+    musique_response = client.get(reverse("musique"), HTTP_HOST="kent-artiste.com")
+
+    assert home_response.status_code == 200
+    assert "Texte musique éditable." in home_response.text
+    assert "Juste quelqu&#x27;un de bien" not in home_response.text
+    assert musique_response.status_code == 200
+    assert "Citation musique éditable." in musique_response.text
+    assert "Auteur éditable" in musique_response.text
+
+
+def test_site_settings_override_contact_and_newsletter_copy(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    SiteSettings.objects.create(
+        site=site,
+        contact_title="Titre contact éditable",
+        contact_intro_text="Première ligne\nDeuxième ligne",
+        newsletter_text="Texte newsletter éditable.",
+    )
+
+    contact_response = client.get(reverse("contact"), HTTP_HOST="kent-artiste.com")
+    home_response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert contact_response.status_code == 200
+    assert "Titre contact éditable" in contact_response.text
+    assert "Première ligne<br>Deuxième ligne" in contact_response.text
+    assert home_response.status_code == 200
+    assert "Texte newsletter éditable." in home_response.text
 
 
 def test_home_renders_news_cards_like_original_layout(client, db, settings):
@@ -171,7 +224,7 @@ def test_contact_page_renders_live_content_and_photo(client, db, settings, tmp_p
     response = client.get(reverse("contact"), HTTP_HOST="kent-artiste.com")
 
     assert response.status_code == 200
-    assert "Kent est à l'écoute" in response.text
+    assert "Kent est à l&#x27;écoute" in response.text
     assert "Flavie Rodriguez" in response.text
     assert "Label At(h)ome" in response.text
     assert "Editions Thoobett" in response.text

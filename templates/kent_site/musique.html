@@ -8,9 +8,9 @@
     {% include "kent_site/includes/section_title.html" with src="kent/assets/musiquev.svg" alt="Musique" class_name="section-title--musique" mask=True %}
     <figure class="quote quote--musique">
       <blockquote>
-        Du jeune punk rocker du groupe Starshooter à sa carrière solo d’auteur-compositeur reconnu, Kent s’est inventé mille vies et autant de pseudos. Mieux vaut changer pour ne jamais tourner en rond, et devenir un autre pour rester, en fait, au plus près de soi-même.
+        {{ text_snippets.musique_quote_text|linebreaksbr }}
       </blockquote>
-      <figcaption>Thomas Boujut</figcaption>
+      <figcaption>{{ text_snippets.musique_quote_credit }}</figcaption>
     </figure>
 
     {% if official_albums %}

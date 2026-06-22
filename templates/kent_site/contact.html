@@ -10,9 +10,9 @@
     <div class="contact-page__grid">
       <div>
         <section>
-          <h2 class="contact-page__subtitle">Kent est à l'écoute !</h2>
+          <h2 class="contact-page__subtitle">{{ site_copy.contact_title }}</h2>
           <div class="prose contact-page__intro">
-            <p>Pour engager Kent, exprimer votre admiration, ou simplement dire Bonjour,<br />vous pouvez utiliser ce formulaire.</p>
+            <p>{{ site_copy.contact_intro_text|linebreaksbr }}</p>
           </div>
 
           <div class="contact-form-wrap{% if status %} contact-form-wrap--has-status{% endif %}">
