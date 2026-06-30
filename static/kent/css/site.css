@@ -763,12 +763,24 @@ img {
 
 .home-date-card__description {
   margin-top: 0.5rem;
-  color: var(--muted-foreground);
+  color: var(--ink);
+  font-weight: 500;
+  line-height: 1.6;
 }
 
 .home-date-card__description p {
   margin-block: 0.5rem;
-  color: var(--muted-foreground);
+  color: inherit;
+}
+
+.home-date-card__description a {
+  color: var(--link);
+  text-decoration: none;
+  transition: color 180ms ease;
+}
+
+.home-date-card__description a:hover {
+  color: var(--link-hover);
 }
 
 .dates-page-grid {
@@ -832,12 +844,24 @@ img {
 
 .date-card__description {
   margin-top: 0.5rem;
-  color: var(--muted-foreground);
+  color: var(--ink);
+  font-weight: 500;
+  line-height: 1.6;
 }
 
 .date-card__description p {
   margin-block: 0.5rem;
-  color: var(--muted-foreground);
+  color: inherit;
+}
+
+.date-card__description a {
+  color: var(--link);
+  text-decoration: none;
+  transition: color 180ms ease;
+}
+
+.date-card__description a:hover {
+  color: var(--link-hover);
 }
 
 .dates-page-image {
@@ -881,20 +905,9 @@ img {
   margin-bottom: 1.5rem;
 }
 
-.contact-form-wrap {
-  position: relative;
-  max-width: 100%;
-}
-
 .contact-form {
   display: grid;
   gap: 1.5rem;
-}
-
-.contact-form--inactive {
-  filter: blur(2px);
-  pointer-events: none;
-  user-select: none;
 }
 
 .contact-form label {
@@ -935,8 +948,7 @@ img {
   display: none;
 }
 
-.contact-form button,
-.contact-status a {
+.contact-form button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -959,38 +971,27 @@ img {
 }
 
 .contact-status {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--background) 85%, transparent);
-  backdrop-filter: blur(6px);
+  max-width: 28rem;
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--background) 88%, var(--primary) 12%);
 }
 
-.contact-status > div {
-  max-width: 28rem;
-  padding: 2rem;
-  border: 1px solid var(--border);
-  border-radius: 1rem;
-  background: var(--background);
-  text-align: center;
-  box-shadow: 0 18px 40px rgb(0 0 0 / 16%);
+.contact-status--error {
+  background: color-mix(in srgb, var(--background) 90%, var(--accent-1) 10%);
+  border-color: color-mix(in srgb, var(--accent-1) 35%, var(--border));
 }
 
 .contact-status__title {
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.5rem;
   font-family: var(--font-frama);
-  font-size: 1.75rem;
+  font-size: 1.5rem;
 }
 
-.contact-status a {
-  margin-top: 1rem;
-  background: transparent;
-  color: var(--foreground);
-  border: 1px solid var(--border);
+.contact-status p:last-child {
+  margin-bottom: 0;
 }
 
 .contact-info {

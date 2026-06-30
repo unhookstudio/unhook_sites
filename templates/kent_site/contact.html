@@ -15,8 +15,19 @@
             <p>{{ site_copy.contact_intro_text|linebreaksbr }}</p>
           </div>
 
-          <div class="contact-form-wrap{% if status %} contact-form-wrap--has-status{% endif %}">
-            <form class="contact-form{% if status %} contact-form--inactive{% endif %}" action="{% url 'contact' %}" method="post">
+          {% if status == "sent" %}
+            <div class="contact-status contact-status--sent" role="status">
+              <p class="contact-status__title">Message envoyé</p>
+              <p>Merci, votre message a bien été reçu. Nous vous répondrons dès que possible.</p>
+            </div>
+          {% else %}
+            {% if status == "error" %}
+              <div class="contact-status contact-status--error" role="alert">
+                <p class="contact-status__title">Envoi impossible</p>
+                <p>Impossible d'envoyer votre message. Vérifiez les champs et réessayez.</p>
+              </div>
+            {% endif %}
+            <form class="contact-form" action="{% url 'contact' %}" method="post">
               {% csrf_token %}
               <div>
                 <label for="contact-email">Email</label>
@@ -32,17 +43,7 @@
               </div>
               <button type="submit">Envoyer</button>
             </form>
-
-            {% if status %}
-              <div class="contact-status contact-status--{{ status }}">
-                <div>
-                  <p class="contact-status__title">{% if status == "sent" %}Message envoyé{% else %}Envoi impossible{% endif %}</p>
-                  <p>{% if status == "sent" %}Merci, votre message a bien été reçu.{% else %}Impossible d'envoyer votre message. Vérifiez les champs et réessayez.{% endif %}</p>
-                  <a href="{% url 'contact' %}">{% if status == "sent" %}Envoyer un autre message{% else %}Réessayer{% endif %}</a>
-                </div>
-              </div>
-            {% endif %}
-          </div>
+          {% endif %}
         </section>
 
         <section class="contact-info">

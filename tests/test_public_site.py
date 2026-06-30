@@ -243,6 +243,31 @@ def test_contact_page_renders_live_content_and_photo(client, db, settings, tmp_p
     assert 'name="company"' in response.text
 
 
+def test_contact_success_replaces_form_with_inline_message(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+
+    response = client.get("/contact?sent=1", HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "Message envoyé" in response.text
+    assert "Nous vous répondrons dès que possible" in response.text
+    assert 'class="contact-form"' not in response.text
+    assert "Envoyer un autre message" not in response.text
+
+
+def test_contact_error_keeps_form_visible(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+
+    response = client.get("/contact?error=1", HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "Envoi impossible" in response.text
+    assert 'class="contact-form"' in response.text
+    assert 'name="message"' in response.text
+
+
 def test_contact_post_stores_submission_sends_email_and_redirects(
     client, db, settings, mailoutbox
 ):
@@ -344,7 +369,8 @@ def test_mentions_legales_renders_legal_content_and_alias_redirects(client, db, 
     assert "Mentions Légales" in response.text
     assert "Thoobett Éditions" in response.text
     assert "Unhook Studio" in response.text
-    assert "Vercel Inc." in response.text
+    assert "Hetzner Online GmbH" in response.text
+    assert "91710 Gunzenhausen" in response.text
     assert alias_response.status_code == 302
     assert alias_response["Location"] == "/mentions-legales"
 
