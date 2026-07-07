@@ -261,12 +261,23 @@ img {
   color: var(--accent-4);
 }
 
+.shop-link--desktop {
+  display: none;
+}
+
 .menu-button {
+  display: inline-flex;
+  width: 2.75rem;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
   border: 0;
   background: transparent;
   color: inherit;
-  padding: 0.5rem;
+  padding: 0;
   font: inherit;
+  font-size: 1.75rem;
+  line-height: 1;
 }
 
 .mobile-menu {
@@ -1939,7 +1950,8 @@ img {
 .quick-link-card {
   display: flex;
   min-height: 17rem;
-  aspect-ratio: 2 / 1;
+  width: 100%;
+  min-width: 0;
   flex-direction: column;
   padding: 1.5rem;
   border: 1px solid transparent;
@@ -1996,6 +2008,7 @@ img {
   font-weight: 300;
   line-height: 1.45;
   text-overflow: ellipsis;
+  overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 7;
 }
@@ -2122,12 +2135,20 @@ img {
     display: flex;
   }
 
+  .shop-link--desktop {
+    display: inline;
+  }
+
   .menu-button {
     display: none;
   }
 
   .grid--two {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .quick-link-card {
+    aspect-ratio: 2 / 1;
   }
 
   .drawing-grid {

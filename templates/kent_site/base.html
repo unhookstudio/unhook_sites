@@ -37,7 +37,7 @@
             <a class="nav-dates" href="{% url 'dates' %}">Actualités</a>
           {% endif %}
         </nav>
-        <a class="shop-link" href="https://shop.kent-artiste.com" target="_blank" rel="noopener noreferrer">Shop</a>
+        <a class="shop-link shop-link--desktop" href="https://shop.kent-artiste.com" target="_blank" rel="noopener noreferrer">Shop</a>
         <button class="menu-button" type="button" aria-label="Ouvrir le menu" data-menu-toggle>☰</button>
       </div>
     </header>
@@ -48,6 +48,7 @@
           <a class="nav-musique" href="{% url 'musique' %}">Musique</a>
           <a class="nav-dessins" href="{% url 'dessins' %}">Dessins</a>
           <a class="nav-livres" href="{% url 'livres' %}">Livres</a>
+          <a href="{% url 'a_propos' %}">À propos</a>
           {% if has_published_events %}
             <a class="nav-dates" href="{% url 'dates' %}">Actualités</a>
           {% endif %}

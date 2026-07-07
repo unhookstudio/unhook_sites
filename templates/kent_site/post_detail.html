@@ -5,7 +5,11 @@
 
 {% block body %}
   <main class="container page-layout">
-    <a class="back-link" href="{% url 'posts' %}">← Retour aux actualités</a>
+    {% if request.GET.from == "home" %}
+      <a class="back-link" href="{% url 'home' %}">← Retour à l'accueil</a>
+    {% else %}
+      <a class="back-link" href="{% url 'posts' %}">← Retour aux actualités</a>
+    {% endif %}
     <article class="prose" style="margin-inline: auto;">
       <header>
         <h1 class="detail-title">{{ article.title }}</h1>

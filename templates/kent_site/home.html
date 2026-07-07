@@ -62,7 +62,7 @@
         {% include "kent_site/includes/section_title.html" with src="kent/assets/au_fil_derniers.svg" alt="Au fil du temps, derniers épisodes" class_name="section-title--news" mask=True %}
         <div class="grid grid--two">
           {% for article in latest_posts %}
-            {% include "kent_site/includes/article_card.html" with article=article %}
+            {% include "kent_site/includes/article_card.html" with article=article source="home" %}
           {% endfor %}
         </div>
       </section>

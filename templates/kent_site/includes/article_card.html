@@ -1,5 +1,5 @@
 {% load public_site_tags %}
-<a class="news-card" href="{% url 'post_detail' article.slug %}">
+<a class="news-card" href="{% url 'post_detail' article.slug %}{% if source == 'home' %}?from=home{% endif %}">
   <article class="news-card__article">
     <div class="news-card__content">
       <div class="news-card__meta">

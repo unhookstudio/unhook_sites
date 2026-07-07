@@ -56,6 +56,18 @@ def test_public_base_loads_kent_scoped_stylesheet(client, db, settings):
     assert "/static/kent/css/site.css" in response.text
 
 
+def test_public_base_mobile_menu_has_about_and_shop_is_desktop_only(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+
+    response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert 'class="shop-link shop-link--desktop"' in response.text
+    assert '<a href="/a-propos">À propos</a>' in response.text
+    assert response.text.count('href="https://shop.kent-artiste.com"') == 2
+
+
 def test_public_base_loads_kent_favicon_fallbacks(client, db, settings):
     settings.ALLOWED_HOSTS = ["kent-artiste.com"]
     Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
@@ -887,6 +899,51 @@ def test_bd_detail_renders_dessins_back_link_and_gallery(client, db, settings, t
     assert "detail-gallery" in response.text
     assert "/media/sites/kent/images/originals/gallery-1.png" in response.text
     assert "/media/sites/kent/images/originals/gallery-2.png" in response.text
+
+
+def test_home_article_cards_mark_home_source(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    Article.objects.create(
+        site=site,
+        title="Journal entry",
+        slug="journal-entry",
+        category=Article.Category.NEWS,
+        content_plain="A readable excerpt.",
+        is_published=True,
+    )
+
+    home_response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+    posts_response = client.get(reverse("posts"), HTTP_HOST="kent-artiste.com")
+
+    assert home_response.status_code == 200
+    assert 'href="/post/journal-entry?from=home"' in home_response.text
+    assert posts_response.status_code == 200
+    assert 'href="/post/journal-entry?from=home"' not in posts_response.text
+    assert 'href="/post/journal-entry"' in posts_response.text
+
+
+def test_post_detail_back_link_uses_home_source(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    Article.objects.create(site=site, title="Journal entry", slug="journal-entry", is_published=True)
+
+    home_source_response = client.get(
+        f"{reverse('post_detail', args=['journal-entry'])}?from=home",
+        HTTP_HOST="kent-artiste.com",
+    )
+    default_response = client.get(
+        reverse("post_detail", args=["journal-entry"]),
+        HTTP_HOST="kent-artiste.com",
+    )
+
+    assert home_source_response.status_code == 200
+    assert 'href="/"' in home_source_response.text
+    assert "Retour à l'accueil" in home_source_response.text
+    assert "Retour aux actualités" not in home_source_response.text
+    assert default_response.status_code == 200
+    assert 'href="/posts"' in default_response.text
+    assert "Retour aux actualités" in default_response.text
 
 
 def test_post_detail_404s_for_drafts(client, db, settings):
