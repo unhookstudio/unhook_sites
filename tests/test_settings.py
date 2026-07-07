@@ -3,6 +3,7 @@ from django.core.exceptions import ImproperlyConfigured
 from environ import Env
 
 from unhook_sites.config import validate_secret_key
+from unhook_sites.settings import STATICFILES_STORAGE_BACKEND
 
 
 @pytest.mark.parametrize(
@@ -30,3 +31,7 @@ def test_secure_proxy_ssl_header_parses_as_tuple(monkeypatch):
         "HTTP_X_FORWARDED_PROTO",
         "https",
     )
+
+
+def test_staticfiles_storage_is_plain_in_debug():
+    assert STATICFILES_STORAGE_BACKEND == "django.contrib.staticfiles.storage.StaticFilesStorage"
