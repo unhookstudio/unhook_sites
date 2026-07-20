@@ -1,0 +1,8 @@
+[Unit]
+Description=Back up unhook_sites SQLite database and media to R2 with restic
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/unhook-sites-backup

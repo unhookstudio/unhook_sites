@@ -1087,6 +1087,11 @@ img {
   margin-bottom: 0;
 }
 
+.section-title-link {
+  display: block;
+  color: inherit;
+}
+
 .section-link {
   display: inline-flex;
   align-items: center;
@@ -1098,6 +1103,10 @@ img {
 
 .section-link:hover {
   color: var(--musique);
+}
+
+.section-link--news:hover {
+  color: var(--accent-1);
 }
 
 .section-link img {

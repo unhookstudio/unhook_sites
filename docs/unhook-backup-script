@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ENV_FILE="/etc/unhook_sites/backup.env"
+DATA_DIR="/srv/unhook_sites/data"
+DB_FILE="$DATA_DIR/db.sqlite3"
+MEDIA_DIR="$DATA_DIR/media"
+WORK_DIR="$DATA_DIR/backups"
+DB_BACKUP="$WORK_DIR/db.sqlite3"
+
+mkdir -p "$WORK_DIR"
+
+set -a
+source "$ENV_FILE"
+set +a
+
+if [ ! -f "$DB_FILE" ]; then
+  echo "Database not found: $DB_FILE" >&2
+  exit 1
+fi
+
+sqlite3 "$DB_FILE" ".backup '$DB_BACKUP'"
+
+restic backup \
+  "$DB_BACKUP" \
+  "$MEDIA_DIR" \
+  --tag unhook-sites \
+  --tag sqlite \
+  --tag media
+
+restic forget \
+  --tag unhook-sites \
+  --keep-daily 14 \
+  --keep-weekly 8 \
+  --keep-monthly 12 \
+  --prune
+
+rm -f "$DB_BACKUP"

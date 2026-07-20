@@ -171,6 +171,8 @@ def test_home_renders_news_cards_like_original_layout(client, db, settings):
     assert response.status_code == 200
     assert 'class="news-card"' in response.text
     assert "au_fil_derniers.svg" in response.text
+    assert "Tous les épisodes" in response.text
+    assert 'class="section-link section-link--news" href="/posts"' in response.text
     assert "Actualités" in response.text
     assert "News" not in response.text
     assert "A readable excerpt for the news card." in response.text
