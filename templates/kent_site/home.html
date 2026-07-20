@@ -60,9 +60,7 @@
     {% if latest_posts %}
       <section class="section">
         <div class="section-heading-row">
-          <a class="section-title-link" href="{% url 'posts' %}" aria-label="Tous les épisodes">
-            {% include "kent_site/includes/section_title.html" with src="kent/assets/au_fil_derniers.svg" alt="Au fil du temps, derniers épisodes" class_name="section-title--news" mask=True %}
-          </a>
+          {% include "kent_site/includes/section_title.html" with src="kent/assets/au_fil_derniers.svg" alt="Au fil du temps, derniers épisodes" class_name="section-title--news" mask=True %}
           <a class="section-link section-link--news" href="{% url 'posts' %}">
             <span>Tous les épisodes</span>
             <img src="{% static 'kent/assets/arrow_right.svg' %}" alt="" />

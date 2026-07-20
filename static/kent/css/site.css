@@ -1087,11 +1087,6 @@ img {
   margin-bottom: 0;
 }
 
-.section-title-link {
-  display: block;
-  color: inherit;
-}
-
 .section-link {
   display: inline-flex;
   align-items: center;
