@@ -7,6 +7,36 @@ from unhook_sites.admin import DomainModelAdmin
 from .models import Photo, PhotoCollection, PhotoCollectionItem, PhotoStory
 
 
+class PhotoCollectionMembershipInline(admin.TabularInline):
+    model = PhotoCollectionItem
+    fk_name = "photo"
+    extra = 0
+    fields = ["collection", "collection_status", "order", "caption"]
+    readonly_fields = ["collection_status"]
+    autocomplete_fields = ["collection"]
+    verbose_name = "collection"
+    verbose_name_plural = "collections où apparaît cette photo"
+
+    @admin.display(description="Publiée")
+    def collection_status(self, obj):
+        if not obj.collection_id:
+            return "-"
+        return "oui" if obj.collection.is_published else "non"
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "collection":
+            queryset = PhotoCollection.objects.all()
+            photo_id = request.resolver_match.kwargs.get("object_id") if request.resolver_match else None
+            if photo_id:
+                photo = Photo.objects.filter(pk=photo_id).only("site_id").first()
+                if photo:
+                    queryset = queryset.filter(site=photo.site)
+            elif not request.user.is_superuser:
+                queryset = queryset.filter(site__in=request.user.sites.all())
+            kwargs["queryset"] = queryset
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
 @admin.register(Photo)
 class PhotoAdmin(DomainModelAdmin):
     rich_text_fields = ("description_html",)
@@ -25,6 +55,7 @@ class PhotoAdmin(DomainModelAdmin):
     prepopulated_fields = {"slug": ["title"]}
     autocomplete_fields = ["image"]
     readonly_fields = [*DomainModelAdmin.readonly_fields, "preview"]
+    inlines = [PhotoCollectionMembershipInline]
 
     @admin.display(description="Aperçu")
     def preview(self, obj):

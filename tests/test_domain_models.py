@@ -3,13 +3,18 @@ from django.contrib.auth.models import Permission
 from django.core.files.base import ContentFile
 from django.db import IntegrityError
 from django.test import RequestFactory
-from django.urls import reverse
+from django.urls import resolve, reverse
 import pytest
 
 from media_library.models import Image
 from music.admin import AlbumAdmin
 from music.models import Album, Artist, Song, Track
-from photos.admin import PhotoAdmin, PhotoCollectionItemAdmin, PhotoCollectionItemInline
+from photos.admin import (
+    PhotoAdmin,
+    PhotoCollectionItemAdmin,
+    PhotoCollectionItemInline,
+    PhotoCollectionMembershipInline,
+)
 from photos.models import Photo, PhotoCollection, PhotoCollectionItem, PhotoStory
 from sites_core.models import Site, User
 from visual_art.admin import BDAdmin, DrawingAdmin
@@ -113,6 +118,7 @@ def test_photo_admin_preview_uses_photo_image_file(db, settings, tmp_path):
     assert '<img src="/media/sites/kent/images/originals/photo.png"' in preview
     assert "preview" in PhotoAdmin.readonly_fields
     assert "payload_id" in PhotoAdmin.readonly_fields
+    assert PhotoCollectionMembershipInline in PhotoAdmin.inlines
 
 
 def test_book_admin_cover_preview_uses_cover_image_file(db, settings, tmp_path):
@@ -184,6 +190,46 @@ def test_photo_collection_item_admin_previews_related_photo_image(db, settings, 
     assert '<img src="/media/sites/kent/images/originals/photo.png"' in inline_preview
     assert "preview" in PhotoCollectionItemAdmin.list_display
     assert "preview" in PhotoCollectionItemInline.readonly_fields
+
+
+def test_photo_collection_membership_inline_scopes_collections_for_staff_add(db):
+    kent = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    other = Site.objects.create(name="Other", slug="other", domain="example.com")
+    kent_collection = PhotoCollection.objects.create(site=kent, title="Kent older", slug="kent-older")
+    other_collection = PhotoCollection.objects.create(site=other, title="Other older", slug="other-older")
+    user = User.objects.create_user(username="editor", is_staff=True)
+    user.sites.add(kent)
+    request = RequestFactory().get("/admin/photos/photo/add/")
+    request.user = user
+
+    field = PhotoCollectionMembershipInline(Photo, admin.site).formfield_for_foreignkey(
+        PhotoCollectionItem._meta.get_field("collection"),
+        request,
+    )
+
+    assert list(field.queryset) == [kent_collection]
+    assert other_collection not in field.queryset
+
+
+def test_photo_collection_membership_inline_scopes_collections_to_existing_photo_site(db):
+    kent = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    other = Site.objects.create(name="Other", slug="other", domain="example.com")
+    photo = Photo.objects.create(site=kent, title="Photo", slug="photo")
+    kent_collection = PhotoCollection.objects.create(site=kent, title="Kent older", slug="kent-older")
+    other_collection = PhotoCollection.objects.create(site=other, title="Other older", slug="other-older")
+    user = User.objects.create_superuser(username="admin")
+    path = reverse("admin:photos_photo_change", args=[photo.pk])
+    request = RequestFactory().get(path)
+    request.user = user
+    request.resolver_match = resolve(path)
+
+    field = PhotoCollectionMembershipInline(Photo, admin.site).formfield_for_foreignkey(
+        PhotoCollectionItem._meta.get_field("collection"),
+        request,
+    )
+
+    assert list(field.queryset) == [kent_collection]
+    assert other_collection not in field.queryset
 
 
 def test_photo_story_uses_image_field_for_payload_upload_media(db):
