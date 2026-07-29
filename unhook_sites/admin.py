@@ -1,7 +1,24 @@
+from django import forms
 from django.db import models
+from django.contrib.admin.widgets import AdminSplitDateTime
+from django.forms.fields import from_current_timezone
 from django_prose_editor.widgets import AdminProseEditorWidget
 
 from sites_core.admin import SiteScopedAdmin
+
+
+class DateOnlyFriendlySplitDateTimeField(forms.SplitDateTimeField):
+    widget = AdminSplitDateTime
+
+    def __init__(self, *args, default_time: str = "00:00", **kwargs):
+        self.default_time = default_time
+        super().__init__(*args, **kwargs)
+
+    def clean(self, value):
+        if isinstance(value, (list, tuple)) and len(value) == 2 and value[0] and not value[1]:
+            value = [value[0], self.default_time]
+        cleaned = super().clean(value)
+        return from_current_timezone(cleaned) if cleaned else cleaned
 
 
 class RichTextAdminMixin:

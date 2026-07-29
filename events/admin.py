@@ -1,21 +1,9 @@
 from django import forms
 from django.contrib import admin
-from django.contrib.admin.widgets import AdminSplitDateTime
-from django.forms.fields import from_current_timezone
 
-from unhook_sites.admin import DomainModelAdmin
+from unhook_sites.admin import DateOnlyFriendlySplitDateTimeField, DomainModelAdmin
 
 from .models import Event, KeyDate
-
-
-class DateOnlyFriendlySplitDateTimeField(forms.SplitDateTimeField):
-    widget = AdminSplitDateTime
-
-    def clean(self, value):
-        if isinstance(value, (list, tuple)) and len(value) == 2 and value[0] and not value[1]:
-            value = [value[0], "00:00"]
-        cleaned = super().clean(value)
-        return from_current_timezone(cleaned) if cleaned else cleaned
 
 
 class EventAdminForm(forms.ModelForm):

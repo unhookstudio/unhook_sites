@@ -1,19 +1,44 @@
+import re
+from html import unescape
+
+from django import forms
 from django.contrib import admin
+from django.utils.html import strip_tags
+from django_prose_editor.widgets import AdminProseEditorWidget
 
 from media_library.admin import image_preview
-from unhook_sites.admin import DomainModelAdmin
+from unhook_sites.admin import DateOnlyFriendlySplitDateTimeField, DomainModelAdmin
 
 from .models import Article, Book
 
 
+class ArticleAdminForm(forms.ModelForm):
+    published_at = DateOnlyFriendlySplitDateTimeField(
+        label="Publié le",
+        required=False,
+        default_time="15:00",
+    )
+
+    class Meta:
+        model = Article
+        exclude = ["content_plain"]
+        widgets = {
+            "content_html": AdminProseEditorWidget(attrs={"rows": 8}),
+        }
+
+
 @admin.register(Article)
 class ArticleAdmin(DomainModelAdmin):
-    rich_text_fields = ("content_html",)
+    form = ArticleAdminForm
     list_display = ["title", "site", "category", "published_at", "is_published", "payload_id"]
     list_filter = ["site", "category", "is_published"]
     search_fields = ["title", "slug", "content_plain", "payload_id"]
     prepopulated_fields = {"slug": ["title"]}
     autocomplete_fields = ["featured_image"]
+
+    def save_model(self, request, obj, form, change):
+        obj.content_plain = _plain_text_from_html(obj.content_html)
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(Book)
@@ -41,3 +66,7 @@ class BookAdmin(DomainModelAdmin):
         if not obj.cover_image:
             return "-"
         return image_preview(obj.cover_image.original)
+
+
+def _plain_text_from_html(value: str) -> str:
+    return re.sub(r"\s+", " ", unescape(strip_tags(value or ""))).strip()

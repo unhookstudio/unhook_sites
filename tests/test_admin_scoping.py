@@ -10,6 +10,8 @@ from events.models import Event
 from music.models import Album, Artist, Song, Track
 from photos.models import Photo, PhotoCollection, PhotoCollectionItem
 from sites_core.models import NavigationLink, Site, SiteSettings, User
+from writing.admin import ArticleAdminForm
+from writing.models import Article
 
 
 def test_site_admin_limits_staff_to_allowed_sites(db):
@@ -136,6 +138,85 @@ def test_event_admin_form_keeps_time_visible_when_time_is_entered(db):
         timezone.datetime(2026, 5, 29, 17, 30)
     )
     assert form.cleaned_data["hide_time"] is False
+
+
+def test_article_admin_add_form_uses_french_editor_labels(db):
+    user = User.objects.create_superuser(username="admin")
+    request = RequestFactory().get("/admin/writing/article/add/")
+    request.user = user
+    model_admin = admin.site._registry[Article]
+
+    labels = {
+        field_name: model_admin.formfield_for_dbfield(
+            Article._meta.get_field(field_name),
+            request,
+        ).label
+        for field_name in ["title", "content_html", "category", "featured_image", "is_published"]
+    }
+
+    assert labels == {
+        "title": "Titre",
+        "content_html": "Contenu",
+        "category": "Catégorie",
+        "featured_image": "Image",
+        "is_published": "Publié",
+    }
+
+
+def test_article_admin_form_accepts_publication_date_without_time_as_3pm(db):
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    form = ArticleAdminForm(
+        data={
+            "site": str(site.pk),
+            "title": "Journal",
+            "slug": "journal",
+            "published_at_0": "2026-05-22",
+            "published_at_1": "",
+            "content_html": "<p>Texte</p>",
+            "category": Article.Category.NEWS,
+            "meta_title": "",
+            "meta_description": "",
+        }
+    )
+
+    assert form.is_valid(), form.errors
+    assert form.cleaned_data["published_at"] == timezone.make_aware(
+        timezone.datetime(2026, 5, 22, 15, 0)
+    )
+
+
+def test_article_admin_form_hides_plain_text_and_uses_larger_content_editor(db):
+    form = ArticleAdminForm()
+
+    assert "content_plain" not in form.fields
+    assert isinstance(form.fields["content_html"].widget, AdminProseEditorWidget)
+    assert form.fields["content_html"].widget.attrs["rows"] == 8
+
+
+def test_article_admin_syncs_plain_text_when_saved(db):
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    user = User.objects.create_superuser(username="admin")
+    request = RequestFactory().post("/admin/writing/article/add/")
+    request.user = user
+    form = ArticleAdminForm(
+        data={
+            "site": str(site.pk),
+            "title": "Journal",
+            "slug": "journal",
+            "published_at_0": "",
+            "published_at_1": "",
+            "content_html": "<p>Un <strong>texte</strong>&nbsp;lié.</p>",
+            "category": Article.Category.NEWS,
+            "meta_title": "",
+            "meta_description": "",
+        }
+    )
+
+    assert form.is_valid(), form.errors
+    article = form.save(commit=False)
+    admin.site._registry[Article].save_model(request, article, form, change=False)
+
+    assert article.content_plain == "Un texte lié."
 
 
 def test_site_scoped_admin_uses_default_site_as_initial_data(db):

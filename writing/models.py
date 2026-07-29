@@ -11,19 +11,31 @@ class Article(SiteOwnedModel, PublishableModel):
         HEART = "coup-de-coeur", "Coup de coeur"
         OTHER = "other", "Autre"
 
-    title = models.CharField(max_length=255)
-    slug = models.SlugField()
-    content_html = models.TextField(blank=True)
+    title = models.CharField("titre", max_length=255)
+    slug = models.SlugField("slug")
+    content_html = models.TextField("contenu", blank=True)
     content_plain = models.TextField(
+        "texte brut",
         blank=True,
         help_text="Importer-maintained plain text extracted from content_html for search.",
     )
-    payload_content = models.JSONField(blank=True, null=True)
-    category = models.CharField(max_length=60, choices=Category.choices, default=Category.NEWS)
-    featured_image = models.ForeignKey(Image, blank=True, null=True, on_delete=models.SET_NULL)
-    meta_title = models.CharField(max_length=255, blank=True)
-    meta_description = models.TextField(blank=True)
-    payload_id = models.PositiveIntegerField(blank=True, null=True)
+    payload_content = models.JSONField("contenu Payload", blank=True, null=True)
+    category = models.CharField(
+        "catégorie",
+        max_length=60,
+        choices=Category.choices,
+        default=Category.NEWS,
+    )
+    featured_image = models.ForeignKey(
+        Image,
+        verbose_name="image",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    meta_title = models.CharField("titre SEO", max_length=255, blank=True)
+    meta_description = models.TextField("description SEO", blank=True)
+    payload_id = models.PositiveIntegerField("ID Payload", blank=True, null=True)
 
     class Meta:
         verbose_name = "article"
