@@ -194,6 +194,78 @@ def test_home_renders_actualites_section_with_image_left_layout(client, db, sett
     assert 'href="/dates">Actualités</a>' in response.text
 
 
+def test_dates_intro_renders_on_home_and_dates_pages_when_configured(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    SiteSettings.objects.create(
+        site=site,
+        dates_title="40 ans sur scène",
+        dates_description=(
+            "<p>Une tournée <strong>anniversaire</strong>.</p>"
+            '<p>Avec <a href="/post/tour">de nouvelles chansons</a>.</p>'
+        ),
+        dates_secondary_title="Rencontres et dédicaces",
+    )
+    Event.objects.create(site=site, title="Concert", slug="concert", is_published=True)
+
+    home_response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+    dates_response = client.get(reverse("dates"), HTTP_HOST="kent-artiste.com")
+
+    assert home_response.status_code == 200
+    assert "40 ans sur scène" in home_response.text
+    assert "Une tournée <strong>anniversaire</strong>." in home_response.text
+    assert '<a href="/post/tour" target="_blank" rel="noopener noreferrer">de nouvelles chansons</a>' in home_response.text
+    assert "Rencontres et dédicaces" in home_response.text
+    assert dates_response.status_code == 200
+    assert "40 ans sur scène" in dates_response.text
+    assert "Une tournée <strong>anniversaire</strong>." in dates_response.text
+    assert '<a href="/post/tour" target="_blank" rel="noopener noreferrer">de nouvelles chansons</a>' in dates_response.text
+    assert "Rencontres et dédicaces" in dates_response.text
+
+
+def test_dates_intro_is_hidden_when_blank(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    SiteSettings.objects.create(site=site)
+    Event.objects.create(site=site, title="Concert", slug="concert", is_published=True)
+
+    response = client.get(reverse("dates"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "dates-intro" not in response.text
+
+
+def test_home_dates_links_to_full_dates_page_when_more_dates_exist(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    for index in range(4):
+        Event.objects.create(
+            site=site,
+            title=f"Date {index}",
+            slug=f"date-{index}",
+            date=timezone.make_aware(datetime(2026, 5, index + 1, 0, 0)),
+            is_published=True,
+        )
+
+    response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert response.text.count('<article class="home-date-card">') == 3
+    assert 'class="section-link section-link--dates home-dates__all-link" href="/dates"' in response.text
+    assert "Voir toutes les dates" in response.text
+
+
+def test_home_dates_hides_full_dates_link_when_all_dates_are_shown(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    Event.objects.create(site=site, title="Concert", slug="concert", is_published=True)
+
+    response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "home-dates__all-link" not in response.text
+
+
 def test_base_hides_actualites_nav_without_published_events(client, db, settings):
     settings.ALLOWED_HOSTS = ["kent-artiste.com"]
     Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
@@ -230,6 +302,56 @@ def test_dates_page_lists_published_events(client, db, settings):
     assert "Published date" in response.text
     assert "On stage." in response.text
     assert "Draft date" not in response.text
+
+
+def test_dates_page_renders_event_range_link_location_and_hidden_time(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    Event.objects.create(
+        site=site,
+        title="Galerie Collin",
+        slug="galerie-collin",
+        date=timezone.make_aware(datetime(2026, 6, 4, 16, 0)),
+        end_date=timezone.make_aware(datetime(2026, 6, 20, 0, 0)),
+        hide_time=True,
+        url="https://www.galeriecollin.com/exposition",
+        location_details="- 8 rue de l'Odéon 75006 Paris",
+        description_html='<p>Exposition des <a href="https://example.com">planches originales</a></p>',
+        is_published=True,
+    )
+
+    response = client.get(reverse("dates"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert 'href="https://www.galeriecollin.com/exposition"' in response.text
+    assert "Galerie Collin" in response.text
+    assert '<span class="date-card__day date-card__day--range">4-20</span>' in response.text
+    assert '<span class="date-card__month">juin</span>' in response.text
+    assert "Du jeudi 4 juin au samedi 20 juin 2026" in response.text
+    assert "16:00" not in response.text
+    assert "- 8 rue de l&#x27;Odéon 75006 Paris" in response.text
+    assert '<a href="https://example.com" target="_blank" rel="noopener noreferrer">planches originales</a>' in response.text
+
+
+def test_home_dates_renders_single_event_time_and_location(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    Event.objects.create(
+        site=site,
+        title="Librairie Expérience",
+        slug="librairie-experience",
+        date=timezone.make_aware(datetime(2026, 5, 29, 17, 30)),
+        location_details="- 5 place Antonin Poncet 69002 Lyon",
+        is_published=True,
+    )
+
+    response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "Librairie Expérience" in response.text
+    assert '<span class="home-date-card__month">mai</span>' in response.text
+    assert "vendredi 29 mai 2026 à 17:30" in response.text
+    assert "- 5 place Antonin Poncet 69002 Lyon" in response.text
 
 
 def test_contact_page_renders_live_content_and_photo(client, db, settings, tmp_path):

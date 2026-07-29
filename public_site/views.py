@@ -40,7 +40,9 @@ def home(request):
         SiteSettings.objects.filter(site=site).select_related("homepage_hero_image").first()
     )
     latest_posts = _published(Article, site).select_related("featured_image")[:4]
-    events = _published(Event, site).select_related("cover_image")[:3]
+    events_queryset = _published(Event, site).select_related("cover_image")
+    events = list(events_queryset[:3])
+    has_more_events = events_queryset.count() > len(events)
     albums = list(_published(Album, site).select_related("artist", "cover_image")[:100])
     featured_album = choice(albums) if albums else None
     return render(
@@ -50,6 +52,7 @@ def home(request):
             "homepage_settings": homepage_settings,
             "latest_posts": latest_posts,
             "events": events,
+            "has_more_events": has_more_events,
             "featured_album": featured_album,
         },
     )

@@ -1,0 +1,14 @@
+{% load public_site_tags %}
+{% if site_settings.dates_title or site_settings.dates_description or site_settings.dates_secondary_title %}
+  <div class="dates-intro">
+    {% if site_settings.dates_title %}
+      <h2>{{ site_settings.dates_title }}</h2>
+    {% endif %}
+    {% if site_settings.dates_description %}
+      <div class="dates-intro__description">{{ site_settings.dates_description|links_new_tab }}</div>
+    {% endif %}
+    {% if site_settings.dates_secondary_title %}
+      <h3>{{ site_settings.dates_secondary_title }}</h3>
+    {% endif %}
+  </div>
+{% endif %}

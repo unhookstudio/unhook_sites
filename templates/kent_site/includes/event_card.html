@@ -1,0 +1,29 @@
+{% load public_site_tags %}
+<article class="{{ card_class }}">
+  {% if event.date %}
+    {% event_date_badge event as date_badge %}
+    <div class="{{ card_class }}__date">
+      <span class="{{ card_class }}__day{% if date_badge.is_range %} {{ card_class }}__day--range{% endif %}">{{ date_badge.day }}</span>
+      <span class="{{ card_class }}__month">{{ date_badge.month }}</span>
+    </div>
+  {% endif %}
+  <div class="{{ card_class }}__content">
+    <h2 class="{{ card_class }}__title">
+      {% if event.url %}
+        <a href="{{ event.url }}" target="_blank" rel="noopener noreferrer">{{ event.title }}</a>
+      {% else %}
+        {{ event.title }}
+      {% endif %}
+    </h2>
+    {% event_date_label event as date_label %}
+    {% if date_label %}
+      <p class="{{ card_class }}__meta">{{ date_label }}</p>
+    {% endif %}
+    {% if event.location_details %}
+      <p class="{{ card_class }}__location">{{ event.location_details }}</p>
+    {% endif %}
+    {% if event.description_html %}
+      <div class="{{ card_class }}__description">{{ event.description_html|links_new_tab }}</div>
+    {% endif %}
+  </div>
+</article>

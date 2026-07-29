@@ -1,6 +1,8 @@
+import mimetypes
 from pathlib import PurePath
 
 from django.db import models
+from PIL import Image as PillowImage
 
 from sites_core.models import SiteOwnedModel
 
@@ -49,6 +51,39 @@ class Image(SiteOwnedModel):
 
     def __str__(self) -> str:
         return self.title or self.alt_text or self.filename or f"Image {self.pk}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self._refresh_original_metadata()
+
+    def _refresh_original_metadata(self) -> None:
+        if not self.pk or not self.original:
+            return
+
+        metadata = {
+            "filename": _clean_filename(self.original.name),
+            "filesize": self.original.size,
+            "mime_type": mimetypes.guess_type(self.original.name)[0] or "",
+        }
+        try:
+            with self.original.open("rb") as file:
+                with PillowImage.open(file) as image:
+                    metadata["width"], metadata["height"] = image.size
+        except OSError:
+            metadata["width"] = None
+            metadata["height"] = None
+
+        changed = {
+            key: value
+            for key, value in metadata.items()
+            if getattr(self, key) != value
+        }
+        if not changed:
+            return
+
+        type(self).objects.filter(pk=self.pk).update(**changed)
+        for key, value in changed.items():
+            setattr(self, key, value)
 
 
 class ImageVariant(models.Model):

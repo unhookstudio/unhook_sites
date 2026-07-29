@@ -15,6 +15,19 @@ class RichTextAdminMixin:
 
 class DomainModelAdmin(RichTextAdminMixin, SiteScopedAdmin):
     readonly_fields = ["payload_id", "created_at", "updated_at"]
+    admin_field_labels = {
+        "is_published": "Publié",
+        "published_at": "Publié le",
+        "payload_id": "ID Payload",
+        "payload_description": "description Payload",
+        "created_at": "Créé le",
+        "updated_at": "Modifié le",
+    }
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name in self.admin_field_labels:
+            kwargs.setdefault("label", self.admin_field_labels[db_field.name])
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = list(super().get_readonly_fields(request, obj))

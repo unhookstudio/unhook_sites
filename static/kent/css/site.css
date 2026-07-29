@@ -721,13 +721,77 @@ img {
 .home-dates__cards {
   display: grid;
   gap: 1rem;
+  grid-auto-rows: max-content;
+  align-content: start;
+}
+
+.dates-intro {
+  max-width: 100%;
+  margin: 0 0 0.75rem;
+  color: var(--ink);
+}
+
+.dates-intro h2 {
+  margin: 0 0 0.5rem;
+  color: var(--primary);
+  font-family: var(--font-frama);
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.dates-intro h3 {
+  margin: 2rem 0 -0.25rem;
+  color: var(--ink);
+  font-family: var(--font-frama);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.dates-intro__description {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.65;
+}
+
+.dates-intro__description p {
+  margin: 0.5rem 0 0;
+}
+
+.dates-intro__description p:first-child {
+  margin-top: 0;
+}
+
+.dates-intro__description a {
+  color: var(--link);
+}
+
+.dates-intro__description a:hover {
+  color: var(--link-hover);
+}
+
+.home-dates__all-link {
+  justify-self: end;
+  margin-top: 0.25rem;
+}
+
+.section-link--dates:hover {
+  color: var(--primary);
+}
+
+.home-dates__all-link img {
+  display: block;
 }
 
 .home-date-card {
   display: flex;
   gap: 1rem;
-  min-height: 10rem;
-  padding: 1rem;
+  height: max-content;
+  align-items: flex-start;
+  padding: 0.9rem 1rem;
   border: 1px solid var(--border-warm);
   border-radius: 0.5rem;
   background: var(--card);
@@ -753,6 +817,10 @@ img {
   line-height: 1;
 }
 
+.home-date-card__day--range {
+  font-size: 1.15rem;
+}
+
 .home-date-card__month {
   margin-top: 0.25rem;
   color: var(--muted-foreground);
@@ -767,9 +835,47 @@ img {
 .home-date-card__title {
   margin: 0;
   font-family: var(--font-frama);
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 400;
   line-height: 1.25;
+}
+
+.home-date-card__title a,
+.date-card__title a {
+  display: inline-block;
+  color: var(--link);
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 0.14em;
+  transition:
+    color 180ms ease,
+    text-decoration-color 180ms ease,
+    transform 180ms ease;
+}
+
+.home-date-card__title a:hover,
+.date-card__title a:hover {
+  color: var(--link-hover);
+  text-decoration-color: currentColor;
+  transform: translateX(0.12rem);
+}
+
+.home-date-card__meta,
+.date-card__meta {
+  margin: 0.35rem 0 0;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.home-date-card__location,
+.date-card__location {
+  margin: 0.25rem 0 0;
+  color: var(--ink-light);
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.45;
 }
 
 .home-date-card__description {
@@ -803,12 +909,18 @@ img {
 .dates-list {
   display: grid;
   gap: 1rem;
+  grid-auto-rows: max-content;
+  align-self: start;
+  align-content: start;
 }
 
 .date-card {
   display: flex;
   gap: 1rem;
-  padding: 1rem;
+  height: max-content;
+  align-items: flex-start;
+  align-self: start;
+  padding: 0.9rem 1rem;
   border: 1px solid var(--border-warm);
   border-radius: 0.5rem;
   background: var(--card);
@@ -834,6 +946,10 @@ img {
   line-height: 1;
 }
 
+.date-card__day--range {
+  font-size: 1.15rem;
+}
+
 .date-card__month {
   margin-top: 0.25rem;
   color: var(--muted-foreground);
@@ -848,7 +964,7 @@ img {
 .date-card__title {
   margin: 0;
   font-family: var(--font-frama);
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 400;
   line-height: 1.25;
 }
@@ -1126,6 +1242,20 @@ img {
 .section h3 {
   margin: 0 0 1rem;
   font-size: 1.5rem;
+}
+
+.section .dates-intro h3 {
+  margin: 2rem 0 -0.25rem;
+  font-size: 1rem;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.section .home-date-card__title,
+.section .date-card__title {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.25;
 }
 
 .card {

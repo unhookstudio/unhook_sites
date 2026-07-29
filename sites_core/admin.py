@@ -1,8 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.core.exceptions import ValidationError
+from django.db import models
 from django.http import Http404
 from django.utils.html import format_html
+from django_prose_editor.widgets import AdminProseEditorWidget
 
 from media_library.models import Image
 
@@ -100,6 +102,9 @@ class SiteSettingsInline(admin.StackedInline):
         "newsletter_text",
         "contact_title",
         "contact_intro_text",
+        "dates_title",
+        "dates_description",
+        "dates_secondary_title",
         "show_homepage_hero",
         "homepage_hero_preview",
         "homepage_hero_image",
@@ -116,6 +121,11 @@ class SiteSettingsInline(admin.StackedInline):
         "apple_touch_icon",
     ]
     readonly_fields = ["homepage_hero_preview", "favicon_preview"]
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if isinstance(db_field, models.TextField) and db_field.name == "dates_description":
+            kwargs["widget"] = AdminProseEditorWidget
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     @admin.display(description="Aperçu de l'image d'accueil")
     def homepage_hero_preview(self, obj):

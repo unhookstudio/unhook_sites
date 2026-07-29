@@ -48,6 +48,11 @@ class ImageAdmin(SiteScopedAdmin):
     search_fields = ["title", "alt_text", "filename", "payload_id"]
     readonly_fields = [
         "preview",
+        "width",
+        "height",
+        "filesize",
+        "mime_type",
+        "filename",
         "payload_id",
         "payload_url",
         "payload_thumbnail_url",

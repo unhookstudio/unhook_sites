@@ -66,6 +66,13 @@ class SiteSettings(models.Model):
     newsletter_text = models.TextField(blank=True)
     contact_title = models.CharField(max_length=255, blank=True)
     contact_intro_text = models.TextField(blank=True)
+    dates_title = models.CharField("titre des dates", max_length=255, blank=True)
+    dates_description = models.TextField("description des dates", blank=True)
+    dates_secondary_title = models.CharField(
+        "titre secondaire des dates",
+        max_length=255,
+        blank=True,
+    )
     show_homepage_hero = models.BooleanField(default=False)
     homepage_hero_image = models.ForeignKey(
         "media_library.Image",

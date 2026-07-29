@@ -7,7 +7,7 @@ from django.core.management.base import CommandError
 from django.db import IntegrityError
 from PIL import Image as PillowImage
 
-from media_library.admin import image_preview
+from media_library.admin import ImageAdmin, image_preview
 from media_library.management.commands.download_payload_media import Command
 from media_library.models import Image, ImageVariant
 from media_library.payload import absolute_payload_url, upsert_payload_media_doc
@@ -51,6 +51,30 @@ def test_admin_image_preview_renders_image_tag(db, settings, tmp_path):
     preview = str(image_preview(image.original))
 
     assert '<img src="/media/sites/kent/images/originals/cover.png"' in preview
+
+
+def test_image_upload_refreshes_metadata(db, settings, tmp_path):
+    settings.MEDIA_ROOT = tmp_path
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    image = Image.objects.create(site=site, title="Cover")
+    content = png_bytes(width=13, height=17)
+
+    image.original.save("cover.png", ContentFile(content), save=True)
+    image.refresh_from_db()
+
+    assert image.width == 13
+    assert image.height == 17
+    assert image.filesize == len(content)
+    assert image.filename == "cover.png"
+    assert image.mime_type == "image/png"
+
+
+def test_image_admin_technical_metadata_is_readonly():
+    assert "width" in ImageAdmin.readonly_fields
+    assert "height" in ImageAdmin.readonly_fields
+    assert "filesize" in ImageAdmin.readonly_fields
+    assert "mime_type" in ImageAdmin.readonly_fields
+    assert "filename" in ImageAdmin.readonly_fields
 
 
 def test_variant_upload_path_prefers_raw_payload_kind(db, settings, tmp_path):

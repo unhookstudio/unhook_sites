@@ -9,22 +9,10 @@
 
     <div class="dates-page-grid">
       <div class="dates-list">
+        {% include "kent_site/includes/dates_intro.html" %}
         {% if events %}
           {% for event in events %}
-            <article class="date-card">
-              {% if event.date %}
-                <div class="date-card__date">
-                  <span class="date-card__day">{{ event.date|date:"j" }}</span>
-                  <span class="date-card__month">{{ event.date|date:"M" }}</span>
-                </div>
-              {% endif %}
-              <div class="date-card__content">
-                <h2 class="date-card__title">{{ event.title }}</h2>
-                {% if event.description_html %}
-                  <div class="date-card__description">{{ event.description_html|safe }}</div>
-                {% endif %}
-              </div>
-            </article>
+            {% include "kent_site/includes/event_card.html" with card_class="date-card" %}
           {% endfor %}
         {% else %}
           <p class="empty">Aucune date à venir pour le moment.</p>

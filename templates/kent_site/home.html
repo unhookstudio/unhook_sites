@@ -34,20 +34,16 @@
             <img class="home-dates__image" src="{% static 'kent/assets/Cabaret_Voltaire_md.webp' %}" alt="Kent" />
           </div>
           <div class="home-dates__cards">
+            {% include "kent_site/includes/dates_intro.html" %}
             {% for event in events %}
-              <article class="home-date-card">
-                {% if event.date %}
-                  <div class="home-date-card__date">
-                    <span class="home-date-card__day">{{ event.date|date:"j" }}</span>
-                    <span class="home-date-card__month">{{ event.date|date:"M" }}</span>
-                  </div>
-                {% endif %}
-                <div class="home-date-card__content">
-                  <h2 class="home-date-card__title">{{ event.title }}</h2>
-                  {% if event.description_html %}<div class="home-date-card__description">{{ event.description_html|safe }}</div>{% endif %}
-                </div>
-              </article>
+              {% include "kent_site/includes/event_card.html" with card_class="home-date-card" %}
             {% endfor %}
+            {% if has_more_events %}
+              <a class="section-link section-link--dates home-dates__all-link" href="{% url 'dates' %}">
+                <span>Voir toutes les dates</span>
+                <img src="{% static 'kent/assets/arrow_right.svg' %}" alt="" />
+              </a>
+            {% endif %}
           </div>
         </div>
       </section>

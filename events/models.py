@@ -5,13 +5,23 @@ from sites_core.models import PublishableModel, SiteOwnedModel
 
 
 class Event(SiteOwnedModel, PublishableModel):
-    title = models.CharField(max_length=255)
+    title = models.CharField("titre", max_length=255)
     slug = models.SlugField()
-    date = models.DateTimeField(blank=True, null=True)
-    description_html = models.TextField(blank=True)
-    payload_description = models.JSONField(blank=True, null=True)
-    cover_image = models.ForeignKey(Image, blank=True, null=True, on_delete=models.SET_NULL)
-    payload_id = models.PositiveIntegerField(blank=True, null=True)
+    date = models.DateTimeField("date", blank=True, null=True)
+    end_date = models.DateTimeField("date de fin", blank=True, null=True)
+    hide_time = models.BooleanField("masquer l'heure", default=False)
+    url = models.URLField("lien", blank=True)
+    location_details = models.CharField("lieu / ville", max_length=500, blank=True)
+    description_html = models.TextField("description", blank=True)
+    payload_description = models.JSONField("description Payload", blank=True, null=True)
+    cover_image = models.ForeignKey(
+        Image,
+        verbose_name="image",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    payload_id = models.PositiveIntegerField("ID Payload", blank=True, null=True)
 
     class Meta:
         verbose_name = "date"
@@ -30,12 +40,12 @@ class Event(SiteOwnedModel, PublishableModel):
 
 
 class KeyDate(SiteOwnedModel, PublishableModel):
-    title = models.CharField(max_length=255)
+    title = models.CharField("titre", max_length=255)
     slug = models.SlugField()
-    date = models.DateTimeField(blank=True, null=True)
-    description_html = models.TextField(blank=True)
-    payload_description = models.JSONField(blank=True, null=True)
-    payload_id = models.PositiveIntegerField(blank=True, null=True)
+    date = models.DateTimeField("date", blank=True, null=True)
+    description_html = models.TextField("description", blank=True)
+    payload_description = models.JSONField("description Payload", blank=True, null=True)
+    payload_id = models.PositiveIntegerField("ID Payload", blank=True, null=True)
 
     class Meta:
         verbose_name = "date clé"

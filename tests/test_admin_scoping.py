@@ -2,10 +2,14 @@ from django.contrib import admin
 from django.contrib.auth.models import Permission
 from django.test import RequestFactory
 from django.urls import reverse
+from django.utils import timezone
+from django_prose_editor.widgets import AdminProseEditorWidget
 
+from events.admin import EventAdminForm
+from events.models import Event
 from music.models import Album, Artist, Song, Track
 from photos.models import Photo, PhotoCollection, PhotoCollectionItem
-from sites_core.models import NavigationLink, Site, User
+from sites_core.models import NavigationLink, Site, SiteSettings, User
 
 
 def test_site_admin_limits_staff_to_allowed_sites(db):
@@ -32,6 +36,106 @@ def test_site_admin_shows_all_sites_to_superuser(db):
     queryset = admin.site._registry[Site].get_queryset(request)
 
     assert set(queryset) == {kent, other}
+
+
+def test_site_settings_dates_description_uses_rich_text_editor(db):
+    user = User.objects.create_superuser(username="admin")
+    request = RequestFactory().get("/admin/sites_core/site/add/")
+    request.user = user
+    inline = admin.site._registry[Site].inlines[0](Site, admin.site)
+
+    field = inline.formfield_for_dbfield(
+        SiteSettings._meta.get_field("dates_description"),
+        request,
+    )
+
+    assert isinstance(field.widget, AdminProseEditorWidget)
+
+
+def test_admin_language_is_forced_to_french(client, db):
+    User.objects.create_superuser(username="admin", password="password")
+    client.login(username="admin", password="password")
+
+    response = client.get(
+        reverse("admin:index"),
+        HTTP_ACCEPT_LANGUAGE="en-US,en;q=0.9",
+    )
+
+    assert response.status_code == 200
+    assert '<html lang="fr-fr"' in response.text
+    assert "Gestion du site" in response.text
+    assert "Site administration" not in response.text
+
+
+def test_event_admin_add_form_uses_french_editor_labels(db):
+    user = User.objects.create_superuser(username="admin")
+    request = RequestFactory().get("/admin/events/event/add/")
+    request.user = user
+    model_admin = admin.site._registry[Event]
+
+    labels = {
+        field_name: model_admin.formfield_for_dbfield(
+            Event._meta.get_field(field_name),
+            request,
+        ).label
+        for field_name in ["title", "end_date", "hide_time", "location_details", "is_published"]
+    }
+
+    assert labels == {
+        "title": "Titre",
+        "end_date": "Date de fin",
+        "hide_time": "Masquer l'heure",
+        "location_details": "Lieu / ville",
+        "is_published": "Publié",
+    }
+
+
+def test_event_admin_form_accepts_date_without_time_and_hides_time(db):
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    form = EventAdminForm(
+        data={
+            "site": str(site.pk),
+            "title": "La comédie du livre",
+            "slug": "la-comedie-du-livre",
+            "date_0": "2026-05-22",
+            "date_1": "",
+            "end_date_0": "",
+            "end_date_1": "",
+            "url": "",
+            "location_details": "Montpellier",
+            "description_html": "",
+        }
+    )
+
+    assert form.is_valid(), form.errors
+    assert form.cleaned_data["date"] == timezone.make_aware(
+        timezone.datetime(2026, 5, 22, 0, 0)
+    )
+    assert form.cleaned_data["hide_time"] is True
+
+
+def test_event_admin_form_keeps_time_visible_when_time_is_entered(db):
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    form = EventAdminForm(
+        data={
+            "site": str(site.pk),
+            "title": "Librairie Expérience",
+            "slug": "librairie-experience",
+            "date_0": "2026-05-29",
+            "date_1": "17:30",
+            "end_date_0": "",
+            "end_date_1": "",
+            "url": "",
+            "location_details": "Lyon",
+            "description_html": "",
+        }
+    )
+
+    assert form.is_valid(), form.errors
+    assert form.cleaned_data["date"] == timezone.make_aware(
+        timezone.datetime(2026, 5, 29, 17, 30)
+    )
+    assert form.cleaned_data["hide_time"] is False
 
 
 def test_site_scoped_admin_uses_default_site_as_initial_data(db):
