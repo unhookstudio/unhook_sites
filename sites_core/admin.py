@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.core.exceptions import ValidationError
 from django.db import models
+from django import forms
 from django.http import Http404
 from django.utils.html import format_html
 from django_prose_editor.widgets import AdminProseEditorWidget
@@ -13,6 +14,18 @@ from .models import NavigationLink, Redirect, Site, SiteSettings, TextSnippet, U
 admin.site.site_header = "Administration Kent"
 admin.site.site_title = "Administration Kent"
 admin.site.index_title = "Gestion du site"
+
+
+class TextSnippetAdminForm(forms.ModelForm):
+    class Meta:
+        model = TextSnippet
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        key = self.data.get(self.add_prefix("key")) or getattr(self.instance, "key", "")
+        if key == "about_biography":
+            self.fields["text"].widget = AdminProseEditorWidget(attrs={"rows": 10})
 
 
 class ScopedObjectAdminMixin:
@@ -194,6 +207,7 @@ class NavigationLinkAdmin(SiteScopedAdmin):
 
 @admin.register(TextSnippet)
 class TextSnippetAdmin(SiteScopedAdmin):
+    form = TextSnippetAdminForm
     list_display = ["label", "key", "site", "updated_at"]
     list_filter = ["site"]
     search_fields = ["label", "key", "text"]

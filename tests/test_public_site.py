@@ -599,6 +599,37 @@ def test_a_propos_renders_random_photo_pools_stories_and_key_dates(
     assert "Starshooter." in response.text
 
 
+def test_a_propos_uses_editorial_text_snippets_for_quote_and_biography(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    TextSnippet.objects.create(
+        site=site,
+        key="about_quote",
+        label="À propos - citation",
+        text="Citation éditable.",
+    )
+    TextSnippet.objects.create(
+        site=site,
+        key="about_quote_author",
+        label="À propos - auteur de la citation",
+        text="Auteur éditable",
+    )
+    TextSnippet.objects.create(
+        site=site,
+        key="about_biography",
+        label="À propos - biographie",
+        text="<p>Biographie <strong>éditable</strong>.</p>",
+    )
+
+    response = client.get(reverse("a_propos"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "Citation éditable." in response.text
+    assert "Auteur éditable" in response.text
+    assert "Biographie <strong>éditable</strong>." in response.text
+    assert "Difficile de trouver artiste plus accompli que Kent" not in response.text
+
+
 def test_home_does_not_render_hero_without_site_setting_checkbox(client, db, settings):
     settings.ALLOWED_HOSTS = ["kent-artiste.com"]
     site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")

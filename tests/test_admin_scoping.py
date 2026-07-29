@@ -9,7 +9,8 @@ from events.admin import EventAdminForm
 from events.models import Event
 from music.models import Album, Artist, Song, Track
 from photos.models import Photo, PhotoCollection, PhotoCollectionItem
-from sites_core.models import NavigationLink, Site, SiteSettings, User
+from sites_core.admin import TextSnippetAdminForm
+from sites_core.models import NavigationLink, Site, SiteSettings, TextSnippet, User
 from writing.admin import ArticleAdminForm
 from writing.models import Article
 
@@ -52,6 +53,21 @@ def test_site_settings_dates_description_uses_rich_text_editor(db):
     )
 
     assert isinstance(field.widget, AdminProseEditorWidget)
+
+
+def test_about_biography_text_snippet_uses_rich_text_editor(db):
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    snippet = TextSnippet.objects.create(
+        site=site,
+        key="about_biography",
+        label="À propos - biographie",
+        text="<p>Bio.</p>",
+    )
+
+    form = TextSnippetAdminForm(instance=snippet)
+
+    assert isinstance(form.fields["text"].widget, AdminProseEditorWidget)
+    assert form.fields["text"].widget.attrs["rows"] == 10
 
 
 def test_admin_language_is_forced_to_french(client, db):
