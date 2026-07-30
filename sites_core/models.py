@@ -59,13 +59,18 @@ def site_settings_file_upload_to(instance, filename):
 
 
 class SiteSettings(models.Model):
-    site = models.OneToOneField(Site, on_delete=models.CASCADE, related_name="settings")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    footer_text = models.TextField(blank=True)
-    newsletter_text = models.TextField(blank=True)
-    contact_title = models.CharField(max_length=255, blank=True)
-    contact_intro_text = models.TextField(blank=True)
+    site = models.OneToOneField(
+        Site,
+        on_delete=models.CASCADE,
+        related_name="settings",
+        verbose_name="site",
+    )
+    created_at = models.DateTimeField("créé le", auto_now_add=True)
+    updated_at = models.DateTimeField("modifié le", auto_now=True)
+    footer_text = models.TextField("texte du pied de page", blank=True)
+    newsletter_text = models.TextField("texte newsletter", blank=True)
+    contact_title = models.CharField("titre contact", max_length=255, blank=True)
+    contact_intro_text = models.TextField("texte contact", blank=True)
     dates_title = models.CharField("titre des dates", max_length=255, blank=True)
     dates_description = models.TextField("description des dates", blank=True)
     dates_secondary_title = models.CharField(
@@ -73,42 +78,52 @@ class SiteSettings(models.Model):
         max_length=255,
         blank=True,
     )
-    show_homepage_hero = models.BooleanField(default=False)
+    show_homepage_hero = models.BooleanField("afficher l'image d'accueil", default=False)
     homepage_hero_image = models.ForeignKey(
         "media_library.Image",
+        verbose_name="image d'accueil",
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
         related_name="+",
     )
     homepage_hero_text = models.TextField(
+        "texte d'accueil",
         blank=True,
-        help_text="Falls back to the default Kent introduction when left blank.",
+        help_text="Utilise le texte d'introduction par défaut si le champ est vide.",
     )
     homepage_hero_button_text = models.CharField(
+        "texte du bouton d'accueil",
         max_length=80,
         blank=True,
-        help_text="Falls back to “(Re)Découvrir” when left blank.",
+        help_text='Utilise "(Re)Découvrir" si le champ est vide.',
     )
-    homepage_hero_button_url = models.CharField(max_length=500, default="/a-propos")
-    instagram_url = models.URLField(blank=True)
-    facebook_url = models.URLField(blank=True)
-    bandcamp_url = models.URLField(blank=True)
-    youtube_url = models.URLField(blank=True)
+    homepage_hero_button_url = models.CharField(
+        "lien du bouton d'accueil",
+        max_length=500,
+        default="/a-propos",
+    )
+    instagram_url = models.URLField("URL Instagram", blank=True)
+    facebook_url = models.URLField("URL Facebook", blank=True)
+    bandcamp_url = models.URLField("URL Bandcamp", blank=True)
+    youtube_url = models.URLField("URL YouTube", blank=True)
     favicon_svg = models.FileField(
+        "favicon SVG",
         upload_to=site_settings_file_upload_to,
         blank=True,
-        help_text="Optional SVG favicon for this site.",
+        help_text="Favicon SVG optionnel pour ce site.",
     )
     favicon_ico = models.FileField(
+        "favicon ICO/PNG",
         upload_to=site_settings_file_upload_to,
         blank=True,
-        help_text="Optional .ico or PNG favicon fallback for this site.",
+        help_text="Favicon .ico ou PNG optionnel en fallback.",
     )
     apple_touch_icon = models.FileField(
+        "icône Apple Touch",
         upload_to=site_settings_file_upload_to,
         blank=True,
-        help_text="Optional iOS home-screen icon.",
+        help_text="Icône optionnelle pour l'écran d'accueil iOS.",
     )
 
     class Meta:

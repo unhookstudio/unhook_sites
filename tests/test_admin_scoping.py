@@ -7,7 +7,7 @@ from django_prose_editor.widgets import AdminProseEditorWidget
 
 from events.admin import EventAdminForm
 from events.models import Event
-from music.models import Album, Artist, Song, Track
+from music.models import Album, Artist, Song, Track, VideoClip
 from photos.models import Photo, PhotoCollection, PhotoCollectionItem
 from sites_core.admin import TextSnippetAdminForm
 from sites_core.models import NavigationLink, Site, SiteSettings, TextSnippet, User
@@ -53,6 +53,37 @@ def test_site_settings_dates_description_uses_rich_text_editor(db):
     )
 
     assert isinstance(field.widget, AdminProseEditorWidget)
+
+
+def test_site_settings_inline_uses_french_editor_labels(db):
+    user = User.objects.create_superuser(username="admin")
+    request = RequestFactory().get("/admin/sites_core/site/add/")
+    request.user = user
+    inline = admin.site._registry[Site].inlines[0](Site, admin.site)
+
+    labels = {
+        field_name: inline.formfield_for_dbfield(
+            SiteSettings._meta.get_field(field_name),
+            request,
+        ).label
+        for field_name in [
+            "newsletter_text",
+            "contact_title",
+            "show_homepage_hero",
+            "homepage_hero_image",
+            "homepage_hero_button_url",
+            "favicon_svg",
+        ]
+    }
+
+    assert labels == {
+        "newsletter_text": "Texte newsletter",
+        "contact_title": "Titre contact",
+        "show_homepage_hero": "Afficher l'image d'accueil",
+        "homepage_hero_image": "Image d'accueil",
+        "homepage_hero_button_url": "Lien du bouton d'accueil",
+        "favicon_svg": "Favicon SVG",
+    }
 
 
 def test_about_biography_text_snippet_uses_rich_text_editor(db):
@@ -105,6 +136,29 @@ def test_event_admin_add_form_uses_french_editor_labels(db):
         "hide_time": "Masquer l'heure",
         "location_details": "Lieu / ville",
         "is_published": "Publié",
+    }
+
+
+def test_video_clip_admin_add_form_uses_french_editor_labels(db):
+    user = User.objects.create_superuser(username="admin")
+    request = RequestFactory().get("/admin/music/videoclip/add/")
+    request.user = user
+    model_admin = admin.site._registry[VideoClip]
+
+    labels = {
+        field_name: model_admin.formfield_for_dbfield(
+            VideoClip._meta.get_field(field_name),
+            request,
+        ).label
+        for field_name in ["title", "description_html", "video_id", "thumbnail", "sort_order"]
+    }
+
+    assert labels == {
+        "title": "Titre",
+        "description_html": "Description",
+        "video_id": "ID vidéo YouTube",
+        "thumbnail": "Miniature",
+        "sort_order": "Ordre d'affichage",
     }
 
 

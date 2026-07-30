@@ -121,15 +121,21 @@ class Track(models.Model):
 
 
 class VideoClip(SiteOwnedModel, PublishableModel):
-    title = models.CharField(max_length=255)
-    slug = models.SlugField()
-    description_html = models.TextField(blank=True)
-    payload_description = models.JSONField(blank=True, null=True)
-    video_id = models.CharField(max_length=100, blank=True)
-    thumbnail = models.ForeignKey(Image, blank=True, null=True, on_delete=models.SET_NULL)
-    release_date = models.DateField(blank=True, null=True)
-    sort_order = models.PositiveIntegerField(blank=True, null=True)
-    payload_id = models.PositiveIntegerField(blank=True, null=True)
+    title = models.CharField("titre", max_length=255)
+    slug = models.SlugField("slug")
+    description_html = models.TextField("description", blank=True)
+    payload_description = models.JSONField("description Payload", blank=True, null=True)
+    video_id = models.CharField("ID vidéo YouTube", max_length=100, blank=True)
+    thumbnail = models.ForeignKey(
+        Image,
+        verbose_name="miniature",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    release_date = models.DateField("date", blank=True, null=True)
+    sort_order = models.PositiveIntegerField("ordre d'affichage", blank=True, null=True)
+    payload_id = models.PositiveIntegerField("ID Payload", blank=True, null=True)
 
     class Meta:
         verbose_name = "clip vidéo"
