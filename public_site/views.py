@@ -8,7 +8,7 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from django.db.models import F, Prefetch
+from django.db.models import F, Prefetch, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -40,9 +40,7 @@ def home(request):
         SiteSettings.objects.filter(site=site).select_related("homepage_hero_image").first()
     )
     latest_posts = _published(Article, site).select_related("featured_image")[:4]
-    events_queryset = _published(Event, site).select_related("cover_image")
-    events = list(events_queryset[:3])
-    has_more_events = events_queryset.count() > len(events)
+    events, has_more_events = _homepage_events(site)
     albums = list(_published(Album, site).select_related("artist", "cover_image")[:100])
     featured_album = choice(albums) if albums else None
     return render(
@@ -441,6 +439,33 @@ def _contact_status(request) -> str:
 
 def _published(model, site):
     return model.objects.filter(site=site, is_published=True)
+
+
+def _homepage_events(site, limit=3):
+    events_queryset = _published(Event, site).select_related("cover_image")
+    today_start = timezone.localtime(timezone.now()).replace(
+        hour=0,
+        minute=0,
+        second=0,
+        microsecond=0,
+    )
+    current_or_future_events = events_queryset.filter(
+        Q(date__gte=today_start) | Q(end_date__gte=today_start)
+    ).order_by(F("date").asc(nulls_last=True), "title")
+
+    events = list(current_or_future_events[:limit])
+    if len(events) < limit:
+        selected_event_ids = [event.pk for event in events]
+        past_events = (
+            events_queryset.exclude(pk__in=selected_event_ids)
+            .filter(Q(date__lt=today_start) | Q(date__isnull=True))
+            .exclude(end_date__gte=today_start)
+            .order_by(F("date").desc(nulls_last=True), "title")
+        )
+        events.extend(list(past_events[: limit - len(events)]))
+
+    events.sort(key=lambda event: (event.date is None, event.date, event.title))
+    return events, events_queryset.count() > len(events)
 
 
 def _photo_collection_items(site, slug: str):

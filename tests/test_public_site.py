@@ -266,6 +266,124 @@ def test_home_dates_hides_full_dates_link_when_all_dates_are_shown(client, db, s
     assert "home-dates__all-link" not in response.text
 
 
+def test_home_dates_show_upcoming_events_then_recent_past_dates(
+    client, db, settings, monkeypatch
+):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    monkeypatch.setattr(
+        "public_site.views.timezone.now",
+        lambda: timezone.make_aware(datetime(2026, 5, 20, 12, 0)),
+    )
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    Event.objects.create(
+        site=site,
+        title="Past date",
+        slug="past-date",
+        date=timezone.make_aware(datetime(2026, 5, 10, 15, 0)),
+        is_published=True,
+    )
+    Event.objects.create(
+        site=site,
+        title="Older past date",
+        slug="older-past-date",
+        date=timezone.make_aware(datetime(2026, 5, 5, 15, 0)),
+        is_published=True,
+    )
+    Event.objects.create(
+        site=site,
+        title="Far future date",
+        slug="far-future-date",
+        date=timezone.make_aware(datetime(2026, 6, 1, 15, 0)),
+        is_published=True,
+    )
+    Event.objects.create(
+        site=site,
+        title="Close future date",
+        slug="close-future-date",
+        date=timezone.make_aware(datetime(2026, 5, 22, 15, 0)),
+        is_published=True,
+    )
+
+    response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "Close future date" in response.text
+    assert "Far future date" in response.text
+    assert "Past date" in response.text
+    assert "Older past date" not in response.text
+    assert response.text.find("Past date") < response.text.find("Close future date")
+    assert response.text.find("Close future date") < response.text.find("Far future date")
+    assert "home-dates__all-link" in response.text
+
+
+def test_home_dates_treats_multiday_event_as_current_until_end_date(
+    client, db, settings, monkeypatch
+):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    monkeypatch.setattr(
+        "public_site.views.timezone.now",
+        lambda: timezone.make_aware(datetime(2026, 5, 23, 12, 0)),
+    )
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    Event.objects.create(
+        site=site,
+        title="Current exhibition",
+        slug="current-exhibition",
+        date=timezone.make_aware(datetime(2026, 5, 20, 0, 0)),
+        end_date=timezone.make_aware(datetime(2026, 5, 24, 0, 0)),
+        hide_time=True,
+        is_published=True,
+    )
+    Event.objects.create(
+        site=site,
+        title="Next signing",
+        slug="next-signing",
+        date=timezone.make_aware(datetime(2026, 5, 25, 15, 0)),
+        is_published=True,
+    )
+
+    response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "Current exhibition" in response.text
+    assert "Next signing" in response.text
+    assert response.text.find("Current exhibition") < response.text.find("Next signing")
+
+
+def test_home_dates_falls_back_to_latest_past_dates_without_future(
+    client, db, settings, monkeypatch
+):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    monkeypatch.setattr(
+        "public_site.views.timezone.now",
+        lambda: timezone.make_aware(datetime(2026, 6, 10, 12, 0)),
+    )
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    for title, slug, event_date in [
+        ("Oldest past date", "oldest-past-date", datetime(2026, 4, 1, 15, 0)),
+        ("Middle past date", "middle-past-date", datetime(2026, 5, 1, 15, 0)),
+        ("Recent past date", "recent-past-date", datetime(2026, 5, 15, 15, 0)),
+        ("Latest past date", "latest-past-date", datetime(2026, 6, 1, 15, 0)),
+    ]:
+        Event.objects.create(
+            site=site,
+            title=title,
+            slug=slug,
+            date=timezone.make_aware(event_date),
+            is_published=True,
+        )
+
+    response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "Latest past date" in response.text
+    assert "Recent past date" in response.text
+    assert "Middle past date" in response.text
+    assert "Oldest past date" not in response.text
+    assert response.text.find("Middle past date") < response.text.find("Recent past date")
+    assert response.text.find("Recent past date") < response.text.find("Latest past date")
+
+
 def test_base_hides_actualites_nav_without_published_events(client, db, settings):
     settings.ALLOWED_HOSTS = ["kent-artiste.com"]
     Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
