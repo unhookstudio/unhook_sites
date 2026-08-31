@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from unfold.admin import ModelAdmin, TabularInline
 
 from sites_core.admin import ScopedObjectAdminMixin, SiteScopedAdmin
 
@@ -21,7 +22,7 @@ def image_preview(field_file, *, width: int = 96) -> str:
     )
 
 
-class ImageVariantInline(admin.TabularInline):
+class ImageVariantInline(TabularInline):
     model = ImageVariant
     extra = 0
     fields = [
@@ -69,7 +70,7 @@ class ImageAdmin(SiteScopedAdmin):
 
 
 @admin.register(ImageVariant)
-class ImageVariantAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
+class ImageVariantAdmin(ScopedObjectAdminMixin, ModelAdmin):
     list_display = ["preview", "image", "kind", "payload_kind", "width", "height", "filesize"]
     list_filter = ["image__site", "kind", "mime_type"]
     readonly_fields = ["preview", "payload_kind"]

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin, TabularInline
 
 from media_library.admin import image_preview
 from sites_core.admin import ScopedObjectAdminMixin
@@ -7,7 +8,7 @@ from unhook_sites.admin import DomainModelAdmin
 from .models import Album, Artist, Song, Track, VideoClip
 
 
-class TrackInline(admin.TabularInline):
+class TrackInline(TabularInline):
     model = Track
     extra = 0
     autocomplete_fields = ["song"]
@@ -58,7 +59,7 @@ class SongAdmin(DomainModelAdmin):
 
 
 @admin.register(Track)
-class TrackAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
+class TrackAdmin(ScopedObjectAdminMixin, ModelAdmin):
     list_display = ["album", "song", "disc_number", "track_number", "version_type", "payload_id"]
     list_filter = ["album__site", "version_type"]
     search_fields = ["display_title", "album__title", "song__title", "payload_id"]

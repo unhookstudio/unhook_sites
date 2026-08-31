@@ -6,6 +6,8 @@ from django import forms
 from django.http import Http404
 from django.utils.html import format_html
 from django_prose_editor.widgets import AdminProseEditorWidget
+from unfold.forms import AdminPasswordChangeForm, UserChangeForm, UserCreationForm
+from unfold.admin import ModelAdmin, StackedInline
 
 from media_library.models import Image
 
@@ -41,7 +43,7 @@ class ScopedObjectAdminMixin:
             return False
 
 
-class SiteScopedAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
+class SiteScopedAdmin(ScopedObjectAdminMixin, ModelAdmin):
     site_field = "site"
 
     def has_add_permission(self, request):
@@ -106,7 +108,7 @@ class SiteScopedAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
         return request.user.sites.count() == 1
 
 
-class SiteSettingsInline(admin.StackedInline):
+class SiteSettingsInline(StackedInline):
     model = SiteSettings
     can_delete = False
     extra = 0
@@ -177,7 +179,7 @@ class SiteSettingsInline(admin.StackedInline):
 
 
 @admin.register(Site)
-class SiteAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
+class SiteAdmin(ScopedObjectAdminMixin, ModelAdmin):
     list_display = ["name", "slug", "domain", "is_active"]
     list_filter = ["is_active"]
     search_fields = ["name", "slug", "domain"]
@@ -191,7 +193,10 @@ class SiteAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
         return queryset.filter(pk__in=request.user.sites.values("pk"))
 
 @admin.register(User)
-class CustomUserAdmin(UserAdmin):
+class CustomUserAdmin(UserAdmin, ModelAdmin):
+    form = UserChangeForm
+    add_form = UserCreationForm
+    change_password_form = AdminPasswordChangeForm
     fieldsets = UserAdmin.fieldsets + (
         ("Site access", {"fields": ("sites", "default_site")}),
     )

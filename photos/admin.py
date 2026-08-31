@@ -1,4 +1,5 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin, TabularInline
 
 from media_library.admin import image_preview
 from sites_core.admin import ScopedObjectAdminMixin
@@ -7,7 +8,7 @@ from unhook_sites.admin import DomainModelAdmin
 from .models import Photo, PhotoCollection, PhotoCollectionItem, PhotoStory
 
 
-class PhotoCollectionMembershipInline(admin.TabularInline):
+class PhotoCollectionMembershipInline(TabularInline):
     model = PhotoCollectionItem
     fk_name = "photo"
     extra = 0
@@ -74,7 +75,7 @@ class PhotoStoryAdmin(DomainModelAdmin):
     autocomplete_fields = ["image"]
 
 
-class PhotoCollectionItemInline(admin.TabularInline):
+class PhotoCollectionItemInline(TabularInline):
     model = PhotoCollectionItem
     extra = 0
     fields = ["preview", "photo", "order", "caption"]
@@ -99,7 +100,7 @@ class PhotoCollectionAdmin(DomainModelAdmin):
 
 
 @admin.register(PhotoCollectionItem)
-class PhotoCollectionItemAdmin(ScopedObjectAdminMixin, admin.ModelAdmin):
+class PhotoCollectionItemAdmin(ScopedObjectAdminMixin, ModelAdmin):
     list_display = ["preview", "collection", "photo", "order", "caption"]
     list_filter = ["collection__site"]
     search_fields = ["collection__title", "photo__title", "caption"]
