@@ -1,17 +1,26 @@
 from django import forms
 from django.db import models
-from django.contrib.admin.widgets import AdminSplitDateTime
 from django.forms.fields import from_current_timezone
 from django_prose_editor.widgets import AdminProseEditorWidget
 
 from sites_core.admin import SiteScopedAdmin
 
 
-class DateOnlyFriendlySplitDateTimeField(forms.SplitDateTimeField):
-    widget = AdminSplitDateTime
+class BrowserSplitDateTimeWidget(forms.SplitDateTimeWidget):
+    def __init__(self, attrs=None):
+        super().__init__(
+            attrs,
+            date_format="%Y-%m-%d",
+            time_format="%H:%M",
+            date_attrs={"type": "date"},
+            time_attrs={"type": "time", "step": "60"},
+        )
 
+
+class DateOnlyFriendlySplitDateTimeField(forms.SplitDateTimeField):
     def __init__(self, *args, default_time: str = "00:00", **kwargs):
         self.default_time = default_time
+        kwargs.setdefault("widget", BrowserSplitDateTimeWidget())
         super().__init__(*args, **kwargs)
 
     def clean(self, value):

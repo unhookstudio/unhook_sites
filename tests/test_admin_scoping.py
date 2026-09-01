@@ -210,6 +210,16 @@ def test_event_admin_form_keeps_time_visible_when_time_is_entered(db):
     assert form.cleaned_data["hide_time"] is False
 
 
+def test_event_admin_form_uses_browser_date_and_time_inputs(db):
+    form = EventAdminForm()
+
+    rendered = str(form["date"])
+
+    assert 'type="date"' in rendered
+    assert 'type="time"' in rendered
+    assert 'step="60"' in rendered
+
+
 def test_article_admin_add_form_uses_french_editor_labels(db):
     user = User.objects.create_superuser(username="admin")
     request = RequestFactory().get("/admin/writing/article/add/")
@@ -261,6 +271,17 @@ def test_article_admin_form_hides_plain_text_and_uses_larger_content_editor(db):
     assert "content_plain" not in form.fields
     assert isinstance(form.fields["content_html"].widget, AdminProseEditorWidget)
     assert form.fields["content_html"].widget.attrs["rows"] == 8
+    assert form.fields["content_html"].widget.attrs["style"] == "min-height: 12rem;"
+
+
+def test_article_admin_form_uses_browser_date_and_time_inputs(db):
+    form = ArticleAdminForm()
+
+    rendered = str(form["published_at"])
+
+    assert 'type="date"' in rendered
+    assert 'type="time"' in rendered
+    assert 'step="60"' in rendered
 
 
 def test_article_admin_syncs_plain_text_when_saved(db):

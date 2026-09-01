@@ -23,7 +23,9 @@ class ArticleAdminForm(forms.ModelForm):
         model = Article
         exclude = ["content_plain"]
         widgets = {
-            "content_html": AdminProseEditorWidget(attrs={"rows": 8}),
+            "content_html": AdminProseEditorWidget(
+                attrs={"rows": 8, "style": "min-height: 12rem;"}
+            ),
         }
 
 
