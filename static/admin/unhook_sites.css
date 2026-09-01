@@ -1,0 +1,15 @@
+.prose-editor {
+  --body-bg: var(--color-white, #fff);
+  --body-fg: var(--color-font-default-light, #111827);
+  --border-color: var(--color-base-200, #e5e7eb);
+}
+
+.dark .prose-editor {
+  --body-bg: var(--color-base-900, #111827);
+  --body-fg: var(--color-font-default-dark, #f9fafb);
+  --border-color: var(--color-base-700, #374151);
+}
+
+.prose-editor:has(> textarea#id_content_html) .ProseMirror {
+  min-height: 12rem;
+}

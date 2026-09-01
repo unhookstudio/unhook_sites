@@ -218,6 +218,20 @@ def test_event_admin_form_uses_browser_date_and_time_inputs(db):
     assert 'type="date"' in rendered
     assert 'type="time"' in rendered
     assert 'step="60"' in rendered
+    assert "vTimeField" not in rendered
+
+
+def test_event_admin_publication_date_uses_24h_text_input(db):
+    form = EventAdminForm()
+
+    rendered = str(form["published_at"])
+
+    assert 'name="published_at_0"' in rendered
+    assert 'type="date"' in rendered
+    assert 'name="published_at_1"' in rendered
+    assert 'type="time"' in rendered
+    assert 'step="60"' in rendered
+    assert "vTimeField" not in rendered
 
 
 def test_article_admin_add_form_uses_french_editor_labels(db):
@@ -274,6 +288,12 @@ def test_article_admin_form_hides_plain_text_and_uses_larger_content_editor(db):
     assert form.fields["content_html"].widget.attrs["style"] == "min-height: 12rem;"
 
 
+def test_article_admin_loads_project_admin_css(db):
+    model_admin = admin.site._registry[Article]
+
+    assert "admin/unhook_sites.css" in str(model_admin.media)
+
+
 def test_article_admin_form_uses_browser_date_and_time_inputs(db):
     form = ArticleAdminForm()
 
@@ -282,6 +302,7 @@ def test_article_admin_form_uses_browser_date_and_time_inputs(db):
     assert 'type="date"' in rendered
     assert 'type="time"' in rendered
     assert 'step="60"' in rendered
+    assert "vTimeField" not in rendered
 
 
 def test_article_admin_syncs_plain_text_when_saved(db):

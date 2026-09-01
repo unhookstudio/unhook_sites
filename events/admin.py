@@ -9,6 +9,11 @@ from .models import Event, KeyDate
 class EventAdminForm(forms.ModelForm):
     date = DateOnlyFriendlySplitDateTimeField(label="Date", required=False)
     end_date = DateOnlyFriendlySplitDateTimeField(label="Date de fin", required=False)
+    published_at = DateOnlyFriendlySplitDateTimeField(
+        label="Publié le",
+        required=False,
+        default_time="15:00",
+    )
 
     class Meta:
         model = Event

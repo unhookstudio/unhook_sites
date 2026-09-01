@@ -46,6 +46,9 @@ class ScopedObjectAdminMixin:
 class SiteScopedAdmin(ScopedObjectAdminMixin, ModelAdmin):
     site_field = "site"
 
+    class Media:
+        css = {"all": ("admin/unhook_sites.css",)}
+
     def has_add_permission(self, request):
         has_permission = super().has_add_permission(request)
         if request.user.is_superuser:

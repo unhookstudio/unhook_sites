@@ -13,7 +13,10 @@ class BrowserSplitDateTimeWidget(forms.SplitDateTimeWidget):
             date_format="%Y-%m-%d",
             time_format="%H:%M",
             date_attrs={"type": "date"},
-            time_attrs={"type": "time", "step": "60"},
+            time_attrs={
+                "type": "time",
+                "step": "60",
+            },
         )
 
 
