@@ -10,6 +10,7 @@
   --border-color: var(--color-base-700, #374151);
 }
 
-.prose-editor:has(> textarea#id_content_html) .ProseMirror {
+.prose-editor:has(> textarea#id_content_html) .ProseMirror,
+.prose-editor:has(> textarea#id_description_html) .ProseMirror {
   min-height: 12rem;
 }

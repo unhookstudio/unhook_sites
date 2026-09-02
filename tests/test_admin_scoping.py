@@ -234,6 +234,14 @@ def test_event_admin_publication_date_uses_24h_text_input(db):
     assert "vTimeField" not in rendered
 
 
+def test_event_admin_form_uses_larger_description_editor(db):
+    form = EventAdminForm()
+
+    assert isinstance(form.fields["description_html"].widget, AdminProseEditorWidget)
+    assert form.fields["description_html"].widget.attrs["rows"] == 8
+    assert form.fields["description_html"].widget.attrs["style"] == "min-height: 12rem;"
+
+
 def test_article_admin_add_form_uses_french_editor_labels(db):
     user = User.objects.create_superuser(username="admin")
     request = RequestFactory().get("/admin/writing/article/add/")

@@ -23,20 +23,20 @@ def image_variant_upload_path(instance: "ImageVariant", filename: str) -> str:
 
 
 class Image(SiteOwnedModel):
-    title = models.CharField(max_length=255, blank=True)
-    alt_text = models.CharField(max_length=255, blank=True)
-    caption = models.TextField(blank=True)
-    original = models.ImageField(upload_to=image_original_upload_path, blank=True)
-    width = models.PositiveIntegerField(blank=True, null=True)
-    height = models.PositiveIntegerField(blank=True, null=True)
-    filesize = models.PositiveIntegerField(blank=True, null=True)
-    mime_type = models.CharField(max_length=120, blank=True)
-    filename = models.CharField(max_length=255, blank=True)
-    payload_id = models.PositiveIntegerField(blank=True, null=True)
-    payload_url = models.URLField(max_length=1000, blank=True)
-    payload_thumbnail_url = models.URLField(max_length=1000, blank=True)
-    payload_created_at = models.DateTimeField(blank=True, null=True)
-    payload_updated_at = models.DateTimeField(blank=True, null=True)
+    title = models.CharField("titre", max_length=255, blank=True)
+    alt_text = models.CharField("texte alternatif", max_length=255, blank=True)
+    caption = models.TextField("légende", blank=True)
+    original = models.ImageField("fichier original", upload_to=image_original_upload_path, blank=True)
+    width = models.PositiveIntegerField("largeur", blank=True, null=True)
+    height = models.PositiveIntegerField("hauteur", blank=True, null=True)
+    filesize = models.PositiveIntegerField("taille du fichier", blank=True, null=True)
+    mime_type = models.CharField("type MIME", max_length=120, blank=True)
+    filename = models.CharField("nom du fichier", max_length=255, blank=True)
+    payload_id = models.PositiveIntegerField("ID Payload", blank=True, null=True)
+    payload_url = models.URLField("URL Payload", max_length=1000, blank=True)
+    payload_thumbnail_url = models.URLField("URL vignette Payload", max_length=1000, blank=True)
+    payload_created_at = models.DateTimeField("créé dans Payload le", blank=True, null=True)
+    payload_updated_at = models.DateTimeField("modifié dans Payload le", blank=True, null=True)
 
     class Meta:
         verbose_name = "image"
@@ -97,18 +97,23 @@ class ImageVariant(models.Model):
         OG = "og", "Open Graph"
         OTHER = "other", "Autre"
 
-    image = models.ForeignKey(Image, on_delete=models.CASCADE, related_name="variants")
-    kind = models.CharField(max_length=40, choices=Kind.choices)
-    payload_kind = models.CharField(max_length=80, blank=True)
-    file = models.ImageField(upload_to=image_variant_upload_path, blank=True)
-    width = models.PositiveIntegerField(blank=True, null=True)
-    height = models.PositiveIntegerField(blank=True, null=True)
-    filesize = models.PositiveIntegerField(blank=True, null=True)
-    mime_type = models.CharField(max_length=120, blank=True)
-    filename = models.CharField(max_length=255, blank=True)
-    payload_url = models.URLField(max_length=1000, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    image = models.ForeignKey(
+        Image,
+        verbose_name="image",
+        on_delete=models.CASCADE,
+        related_name="variants",
+    )
+    kind = models.CharField("type", max_length=40, choices=Kind.choices)
+    payload_kind = models.CharField("type Payload", max_length=80, blank=True)
+    file = models.ImageField("fichier", upload_to=image_variant_upload_path, blank=True)
+    width = models.PositiveIntegerField("largeur", blank=True, null=True)
+    height = models.PositiveIntegerField("hauteur", blank=True, null=True)
+    filesize = models.PositiveIntegerField("taille du fichier", blank=True, null=True)
+    mime_type = models.CharField("type MIME", max_length=120, blank=True)
+    filename = models.CharField("nom du fichier", max_length=255, blank=True)
+    payload_url = models.URLField("URL Payload", max_length=1000, blank=True)
+    created_at = models.DateTimeField("créé le", auto_now_add=True)
+    updated_at = models.DateTimeField("modifié le", auto_now=True)
 
     class Meta:
         verbose_name = "variante d'image"

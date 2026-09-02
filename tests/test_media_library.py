@@ -77,6 +77,20 @@ def test_image_admin_technical_metadata_is_readonly():
     assert "filename" in ImageAdmin.readonly_fields
 
 
+def test_image_admin_add_form_uses_french_labels(db):
+    labels = {
+        field_name: Image._meta.get_field(field_name).verbose_name
+        for field_name in ["title", "alt_text", "caption", "original"]
+    }
+
+    assert labels == {
+        "title": "titre",
+        "alt_text": "texte alternatif",
+        "caption": "légende",
+        "original": "fichier original",
+    }
+
+
 def test_variant_upload_path_prefers_raw_payload_kind(db, settings, tmp_path):
     settings.MEDIA_ROOT = tmp_path
     site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")

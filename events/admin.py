@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib import admin
+from django_prose_editor.widgets import AdminProseEditorWidget
 
 from unhook_sites.admin import DateOnlyFriendlySplitDateTimeField, DomainModelAdmin
 
@@ -18,6 +19,11 @@ class EventAdminForm(forms.ModelForm):
     class Meta:
         model = Event
         fields = "__all__"
+        widgets = {
+            "description_html": AdminProseEditorWidget(
+                attrs={"rows": 8, "style": "min-height: 12rem;"}
+            ),
+        }
 
     def clean(self):
         cleaned_data = super().clean()
