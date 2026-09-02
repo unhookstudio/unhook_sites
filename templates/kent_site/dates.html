@@ -10,8 +10,14 @@
     <div class="dates-page-grid">
       <div class="dates-list">
         {% include "kent_site/includes/dates_intro.html" %}
-        {% if events %}
-          {% for event in events %}
+        {% if upcoming_events or past_events %}
+          {% for event in upcoming_events %}
+            {% include "kent_site/includes/event_card.html" with card_class="date-card" %}
+          {% endfor %}
+          {% if upcoming_events and past_events %}
+            <h2 class="dates-list__past-title">Dates passées</h2>
+          {% endif %}
+          {% for event in past_events %}
             {% include "kent_site/includes/event_card.html" with card_class="date-card" %}
           {% endfor %}
         {% else %}

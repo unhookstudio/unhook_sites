@@ -60,8 +60,15 @@ def home(request):
 
 def dates(request):
     site = _site(request)
-    events = _published(Event, site).select_related("cover_image").order_by("date", "title")[:100]
-    return render(request, _template(site, "dates.html"), {"events": events})
+    upcoming_events, past_events = _dates_events(site)
+    return render(
+        request,
+        _template(site, "dates.html"),
+        {
+            "upcoming_events": upcoming_events,
+            "past_events": past_events,
+        },
+    )
 
 
 def a_propos(request):
@@ -449,12 +456,7 @@ def _journal_articles(site):
 
 def _homepage_events(site, limit=3):
     events_queryset = _published(Event, site).select_related("cover_image")
-    today_start = timezone.localtime(timezone.now()).replace(
-        hour=0,
-        minute=0,
-        second=0,
-        microsecond=0,
-    )
+    today_start = _today_start()
     current_or_future_events = events_queryset.filter(
         Q(date__gte=today_start) | Q(end_date__gte=today_start)
     ).order_by(F("date").asc(nulls_last=True), "title")
@@ -472,6 +474,31 @@ def _homepage_events(site, limit=3):
 
     events.sort(key=lambda event: (event.date is None, event.date, event.title))
     return events, events_queryset.count() > len(events)
+
+
+def _dates_events(site, past_limit=5):
+    events_queryset = _published(Event, site).select_related("cover_image")
+    today_start = _today_start()
+    upcoming_events = list(
+        events_queryset.filter(Q(date__gte=today_start) | Q(end_date__gte=today_start))
+        .order_by(F("date").asc(nulls_last=True), "title")[:100]
+    )
+    past_events = list(
+        events_queryset.exclude(pk__in=[event.pk for event in upcoming_events])
+        .filter(Q(date__lt=today_start) | Q(date__isnull=True))
+        .exclude(end_date__gte=today_start)
+        .order_by(F("date").desc(nulls_last=True), "title")[:past_limit]
+    )
+    return upcoming_events, past_events
+
+
+def _today_start():
+    return timezone.localtime(timezone.now()).replace(
+        hour=0,
+        minute=0,
+        second=0,
+        microsecond=0,
+    )
 
 
 def _photo_collection_items(site, slug: str):

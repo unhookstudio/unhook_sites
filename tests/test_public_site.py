@@ -494,6 +494,67 @@ def test_dates_page_renders_event_range_link_location_and_hidden_time(client, db
     assert '<a href="https://example.com" target="_blank" rel="noopener noreferrer">planches originales</a>' in response.text
 
 
+def test_dates_page_shows_upcoming_then_recent_past_dates(client, db, settings, monkeypatch):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    monkeypatch.setattr(
+        "public_site.views.timezone.now",
+        lambda: timezone.make_aware(datetime(2026, 5, 20, 12, 0)),
+    )
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    for title, slug, event_date in [
+        ("Close future date", "close-future-date", datetime(2026, 5, 22, 15, 0)),
+        ("Far future date", "far-future-date", datetime(2026, 6, 1, 15, 0)),
+        ("Recent past date", "recent-past-date", datetime(2026, 5, 10, 15, 0)),
+        ("Older past date", "older-past-date", datetime(2026, 5, 1, 15, 0)),
+    ]:
+        Event.objects.create(
+            site=site,
+            title=title,
+            slug=slug,
+            date=timezone.make_aware(event_date),
+            is_published=True,
+        )
+
+    response = client.get(reverse("dates"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "Dates passées" in response.text
+    assert response.text.find("Close future date") < response.text.find("Far future date")
+    assert response.text.find("Far future date") < response.text.find("Dates passées")
+    assert response.text.find("Dates passées") < response.text.find("Recent past date")
+    assert response.text.find("Recent past date") < response.text.find("Older past date")
+
+
+def test_dates_page_shows_latest_past_dates_without_archive_heading(
+    client, db, settings, monkeypatch
+):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    monkeypatch.setattr(
+        "public_site.views.timezone.now",
+        lambda: timezone.make_aware(datetime(2026, 6, 10, 12, 0)),
+    )
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    for index in range(6):
+        Event.objects.create(
+            site=site,
+            title=f"Past date {index}",
+            slug=f"past-date-{index}",
+            date=timezone.make_aware(datetime(2026, 5, index + 1, 15, 0)),
+            is_published=True,
+        )
+
+    response = client.get(reverse("dates"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "Dates passées" not in response.text
+    assert response.text.count('class="date-card"') == 5
+    assert "Past date 5" in response.text
+    assert "Past date 1" in response.text
+    assert "Past date 0" not in response.text
+    assert response.text.find("Past date 5") < response.text.find("Past date 4")
+    assert response.text.find("Past date 2") < response.text.find("Past date 1")
+
+
 def test_home_dates_renders_single_event_time_and_location(client, db, settings):
     settings.ALLOWED_HOSTS = ["kent-artiste.com"]
     site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
