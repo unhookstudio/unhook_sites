@@ -6,6 +6,7 @@ from sites_core.models import PublishableModel, SiteOwnedModel
 
 class Article(SiteOwnedModel, PublishableModel):
     class Category(models.TextChoices):
+        JOURNAL = "journal", "Journal"
         NEWS = "news", "Actualités"
         PRESS = "press", "Presse"
         HEART = "coup-de-coeur", "Coup de coeur"

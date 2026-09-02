@@ -265,6 +265,12 @@ def test_article_admin_add_form_uses_french_editor_labels(db):
     }
 
 
+def test_article_admin_category_choices_include_journal(db):
+    form = ArticleAdminForm()
+
+    assert ("journal", "Journal") in form.fields["category"].choices
+
+
 def test_article_admin_form_accepts_publication_date_without_time_as_3pm(db):
     site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
     form = ArticleAdminForm(
