@@ -21,3 +21,13 @@ def test_site_settings_hero_image_must_belong_to_same_site(db):
 
     with pytest.raises(ValidationError):
         site_settings.full_clean()
+
+
+def test_site_settings_dates_image_must_belong_to_same_site(db):
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    other = Site.objects.create(name="Other", slug="other", domain="example.com")
+    image = Image.objects.create(site=other, title="Other image")
+    site_settings = SiteSettings(site=site, dates_image=image)
+
+    with pytest.raises(ValidationError):
+        site_settings.full_clean()

@@ -31,7 +31,8 @@
         </div>
         <div class="home-dates__grid">
           <div class="home-dates__image-wrap">
-            <img class="home-dates__image" src="{% static 'kent/assets/Cabaret_Voltaire_md.webp' %}" alt="Kent" />
+            {% image_url homepage_settings.dates_image "large" as dates_image_src %}
+            <img class="home-dates__image" src="{% if dates_image_src %}{{ dates_image_src }}{% else %}{% static 'kent/assets/Cabaret_Voltaire_md.webp' %}{% endif %}" alt="Kent" />
           </div>
           <div class="home-dates__cards">
             {% include "kent_site/includes/dates_intro.html" %}

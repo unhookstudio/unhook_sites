@@ -120,6 +120,8 @@ class SiteSettingsInline(StackedInline):
         "newsletter_text",
         "contact_title",
         "contact_intro_text",
+        "dates_image_preview",
+        "dates_image",
         "dates_title",
         "dates_description",
         "dates_secondary_title",
@@ -138,7 +140,7 @@ class SiteSettingsInline(StackedInline):
         "favicon_ico",
         "apple_touch_icon",
     ]
-    readonly_fields = ["homepage_hero_preview", "favicon_preview"]
+    readonly_fields = ["dates_image_preview", "homepage_hero_preview", "favicon_preview"]
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if isinstance(db_field, models.TextField) and db_field.name == "dates_description":
@@ -151,6 +153,19 @@ class SiteSettingsInline(StackedInline):
             return "-"
         try:
             url = obj.homepage_hero_image.original.url
+        except ValueError:
+            return "-"
+        return format_html(
+            '<img src="{}" alt="" style="max-width: 220px; max-height: 140px; height: auto;" />',
+            url,
+        )
+
+    @admin.display(description="Aperçu de l'image des dates")
+    def dates_image_preview(self, obj):
+        if not obj or not obj.dates_image or not obj.dates_image.original:
+            return "-"
+        try:
+            url = obj.dates_image.original.url
         except ValueError:
             return "-"
         return format_html(
@@ -176,7 +191,7 @@ class SiteSettingsInline(StackedInline):
         return format_html(" · ".join(["{}"] * len(links)), *links)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "homepage_hero_image" and not request.user.is_superuser:
+        if db_field.name in {"dates_image", "homepage_hero_image"} and not request.user.is_superuser:
             kwargs["queryset"] = Image.objects.filter(site__in=request.user.sites.all())
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 

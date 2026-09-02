@@ -71,6 +71,14 @@ class SiteSettings(models.Model):
     newsletter_text = models.TextField("texte newsletter", blank=True)
     contact_title = models.CharField("titre contact", max_length=255, blank=True)
     contact_intro_text = models.TextField("texte contact", blank=True)
+    dates_image = models.ForeignKey(
+        "media_library.Image",
+        verbose_name="image de la section dates",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
     dates_title = models.CharField("titre des dates", max_length=255, blank=True)
     dates_description = models.TextField("description des dates", blank=True)
     dates_secondary_title = models.CharField(
@@ -142,6 +150,10 @@ class SiteSettings(models.Model):
         ):
             raise ValidationError(
                 {"homepage_hero_image": "The hero image must belong to the same site."}
+            )
+        if self.dates_image_id and self.site_id and self.dates_image.site_id != self.site_id:
+            raise ValidationError(
+                {"dates_image": "The dates image must belong to the same site."}
             )
 
     @property

@@ -19,7 +19,8 @@
         {% endif %}
       </div>
       <div class="dates-page-image-wrap">
-        <img class="dates-page-image" src="{% static 'kent/assets/Cabaret_Voltaire_md.webp' %}" alt="Kent" />
+        {% image_url site_settings.dates_image "large" as dates_image_src %}
+        <img class="dates-page-image" src="{% if dates_image_src %}{{ dates_image_src }}{% else %}{% static 'kent/assets/Cabaret_Voltaire_md.webp' %}{% endif %}" alt="Kent" />
       </div>
     </div>
   </main>

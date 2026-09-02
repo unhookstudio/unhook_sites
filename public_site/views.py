@@ -37,9 +37,11 @@ def _site(request):
 def home(request):
     site = _site(request)
     homepage_settings = (
-        SiteSettings.objects.filter(site=site).select_related("homepage_hero_image").first()
+        SiteSettings.objects.filter(site=site)
+        .select_related("dates_image", "homepage_hero_image")
+        .first()
     )
-    latest_posts = _published(Article, site).select_related("featured_image")[:4]
+    latest_posts = _journal_articles(site).select_related("featured_image")[:4]
     events, has_more_events = _homepage_events(site)
     albums = list(_published(Album, site).select_related("artist", "cover_image")[:100])
     featured_album = choice(albums) if albums else None
@@ -258,7 +260,7 @@ def dessin_detail(request, slug):
 
 def posts(request):
     site = _site(request)
-    articles = _published(Article, site).select_related("featured_image")[:100]
+    articles = _journal_articles(site).select_related("featured_image")[:100]
     return render(request, _template(site, "posts.html"), {"articles": articles})
 
 
@@ -439,6 +441,10 @@ def _contact_status(request) -> str:
 
 def _published(model, site):
     return model.objects.filter(site=site, is_published=True)
+
+
+def _journal_articles(site):
+    return _published(Article, site).exclude(category=Article.Category.NEWS)
 
 
 def _homepage_events(site, limit=3):

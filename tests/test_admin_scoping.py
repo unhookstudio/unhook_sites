@@ -9,7 +9,7 @@ from events.admin import EventAdminForm
 from events.models import Event
 from music.models import Album, Artist, Song, Track, VideoClip
 from photos.models import Photo, PhotoCollection, PhotoCollectionItem
-from sites_core.admin import TextSnippetAdminForm
+from sites_core.admin import SiteSettingsInline, TextSnippetAdminForm
 from sites_core.models import NavigationLink, Site, SiteSettings, TextSnippet, User
 from writing.admin import ArticleAdminForm
 from writing.models import Article
@@ -69,6 +69,7 @@ def test_site_settings_inline_uses_french_editor_labels(db):
         for field_name in [
             "newsletter_text",
             "contact_title",
+            "dates_image",
             "show_homepage_hero",
             "homepage_hero_image",
             "homepage_hero_button_url",
@@ -79,11 +80,19 @@ def test_site_settings_inline_uses_french_editor_labels(db):
     assert labels == {
         "newsletter_text": "Texte newsletter",
         "contact_title": "Titre contact",
+        "dates_image": "Image de la section dates",
         "show_homepage_hero": "Afficher l'image d'accueil",
         "homepage_hero_image": "Image d'accueil",
         "homepage_hero_button_url": "Lien du bouton d'accueil",
         "favicon_svg": "Favicon SVG",
     }
+
+
+def test_site_settings_inline_places_dates_image_before_dates_title():
+    fields = SiteSettingsInline.fields
+
+    assert fields.index("dates_image_preview") < fields.index("dates_title")
+    assert fields.index("dates_image") < fields.index("dates_title")
 
 
 def test_about_biography_text_snippet_uses_rich_text_editor(db):

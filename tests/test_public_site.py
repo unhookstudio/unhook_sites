@@ -27,8 +27,20 @@ def test_public_home_uses_site_from_request_host(client, db, settings):
     settings.ALLOWED_HOSTS = ["kent-artiste.com"]
     kent = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
     other = Site.objects.create(name="Other", slug="other", domain="example.com")
-    Article.objects.create(site=kent, title="Kent article", slug="kent-article", is_published=True)
-    Article.objects.create(site=other, title="Other article", slug="other-article", is_published=True)
+    Article.objects.create(
+        site=kent,
+        title="Kent article",
+        slug="kent-article",
+        category=Article.Category.JOURNAL,
+        is_published=True,
+    )
+    Article.objects.create(
+        site=other,
+        title="Other article",
+        slug="other-article",
+        category=Article.Category.JOURNAL,
+        is_published=True,
+    )
 
     response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
 
@@ -172,7 +184,7 @@ def test_home_renders_news_cards_like_original_layout(client, db, settings):
         site=site,
         title="Journal entry",
         slug="journal-entry",
-        category=Article.Category.NEWS,
+        category=Article.Category.JOURNAL,
         content_plain="A readable excerpt for the news card.",
         is_published=True,
     )
@@ -184,7 +196,7 @@ def test_home_renders_news_cards_like_original_layout(client, db, settings):
     assert "au_fil_derniers.svg" in response.text
     assert "Tous les épisodes" in response.text
     assert 'class="section-link section-link--news" href="/posts"' in response.text
-    assert "Actualités" in response.text
+    assert "Journal" in response.text
     assert "News" not in response.text
     assert "A readable excerpt for the news card." in response.text
 
@@ -203,6 +215,26 @@ def test_home_renders_actualites_section_with_image_left_layout(client, db, sett
     assert "line_horizontal_squiggly.svg" in response.text
     assert "section-title-mask section-title--dates" in response.text
     assert 'href="/dates">Actualités</a>' in response.text
+
+
+def test_dates_sections_use_custom_settings_image(client, db, settings, tmp_path):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    settings.MEDIA_ROOT = tmp_path
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    image = Image.objects.create(site=site, title="Dates image")
+    image.original.save("dates.png", ContentFile(png_bytes()), save=True)
+    SiteSettings.objects.create(site=site, dates_image=image)
+    Event.objects.create(site=site, title="Concert", slug="concert", is_published=True)
+
+    home_response = client.get(reverse("home"), HTTP_HOST="kent-artiste.com")
+    dates_response = client.get(reverse("dates"), HTTP_HOST="kent-artiste.com")
+
+    assert home_response.status_code == 200
+    assert "/media/sites/kent/images/originals/dates.png" in home_response.text
+    assert "Cabaret_Voltaire_md.webp" not in home_response.text
+    assert dates_response.status_code == 200
+    assert "/media/sites/kent/images/originals/dates.png" in dates_response.text
+    assert "Cabaret_Voltaire_md.webp" not in dates_response.text
 
 
 def test_dates_intro_renders_on_home_and_dates_pages_when_configured(client, db, settings):
@@ -1192,7 +1224,7 @@ def test_home_article_cards_mark_home_source(client, db, settings):
         site=site,
         title="Journal entry",
         slug="journal-entry",
-        category=Article.Category.NEWS,
+        category=Article.Category.JOURNAL,
         content_plain="A readable excerpt.",
         is_published=True,
     )
@@ -1205,6 +1237,31 @@ def test_home_article_cards_mark_home_source(client, db, settings):
     assert posts_response.status_code == 200
     assert 'href="/post/journal-entry?from=home"' not in posts_response.text
     assert 'href="/post/journal-entry"' in posts_response.text
+
+
+def test_posts_page_excludes_actualites_articles(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    Article.objects.create(
+        site=site,
+        title="Journal entry",
+        slug="journal-entry",
+        category=Article.Category.JOURNAL,
+        is_published=True,
+    )
+    Article.objects.create(
+        site=site,
+        title="Old actualité",
+        slug="old-actualite",
+        category=Article.Category.NEWS,
+        is_published=True,
+    )
+
+    response = client.get(reverse("posts"), HTTP_HOST="kent-artiste.com")
+
+    assert response.status_code == 200
+    assert "Journal entry" in response.text
+    assert "Old actualité" not in response.text
 
 
 def test_post_detail_back_link_uses_home_source(client, db, settings):

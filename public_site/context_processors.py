@@ -14,7 +14,7 @@ def public_navigation(request):
             "text_snippets": DEFAULT_TEXT_SNIPPETS,
         }
 
-    site_settings = SiteSettings.objects.filter(site=site).first()
+    site_settings = SiteSettings.objects.filter(site=site).select_related("dates_image").first()
     site_copy = dict(DEFAULT_SITE_COPY)
     if site_settings is not None:
         for key in site_copy:
