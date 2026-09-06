@@ -1,5 +1,5 @@
 .home-announcement {
-  padding: 48px 0 24px;
+  padding: 7.5rem 0 0;
   background: #fff;
   color: #222;
   overflow-wrap: anywhere;
@@ -355,6 +355,10 @@ img {
   padding-top: 7.5rem;
   padding-bottom: 2rem;
   min-height: calc(100vh - 8rem);
+}
+
+.page-layout--with-announcement {
+  padding-top: 0;
 }
 
 .home-hero {

@@ -1,4 +1,4 @@
-{% load public_site_tags %}
+{% load static public_site_tags %}
 <section class="home-announcement" aria-labelledby="home-announcement-title" data-home-announcement>
   <div class="container">
     <h1 id="home-announcement-title">{{ homepage_settings.announcement_title|default:"Annonce" }}</h1>
@@ -13,6 +13,9 @@
           <a class="home-announcement__action" href="{{ homepage_settings.announcement_button_url }}">{{ homepage_settings.announcement_button_text|default:"En savoir plus" }}</a>
         {% endif %}
       </div>
+    </div>
+    <div class="section-spacer" aria-hidden="true">
+      <img src="{% static 'kent/assets/line_horizontal_straight.svg' %}" alt="" />
     </div>
   </div>
 </section>

@@ -26,7 +26,7 @@
     </section>
   {% endif %}
 
-  <main class="container page-layout{% if homepage_settings.show_effective_homepage_hero %} page-layout--with-hero{% endif %}">
+  <main class="container page-layout{% if homepage_settings.show_effective_homepage_hero %} page-layout--with-hero{% elif homepage_settings.show_homepage_announcement %} page-layout--with-announcement{% endif %}">
     {% if events %}
       <section class="section home-dates">
         <div class="section-heading-row">
