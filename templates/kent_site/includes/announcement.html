@@ -1,0 +1,18 @@
+{% load public_site_tags %}
+<section class="home-announcement" aria-labelledby="home-announcement-title" data-home-announcement>
+  <div class="container">
+    <h1 id="home-announcement-title">{{ homepage_settings.announcement_title|default:"Annonce" }}</h1>
+    {% image_url homepage_settings.announcement_image "large" as announcement_image_src %}
+    <div class="home-announcement__content{% if announcement_image_src %} home-announcement__content--with-image{% endif %}">
+      {% if announcement_image_src %}
+        <img class="home-announcement__image" src="{{ announcement_image_src }}" alt="{{ homepage_settings.announcement_image.alt_text }}" decoding="async" />
+      {% endif %}
+      <div>
+        <div class="prose">{{ homepage_settings.announcement_body|links_new_tab }}</div>
+        {% if homepage_settings.announcement_button_url %}
+          <a class="home-announcement__action" href="{{ homepage_settings.announcement_button_url }}">{{ homepage_settings.announcement_button_text|default:"En savoir plus" }}</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>

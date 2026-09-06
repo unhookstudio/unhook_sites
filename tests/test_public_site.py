@@ -15,6 +15,72 @@ from visual_art.models import BD, Drawing
 from writing.models import Article, Book
 
 
+def test_home_announcement_is_optional_and_homepage_only(client, db, settings):
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    config = SiteSettings.objects.create(
+        site=site,
+        announcement_title="CECI EST UNE ENQUÊTE",
+        announcement_body="<p>Un vinyle vous intéresse ?</p>",
+        announcement_button_url="mailto:thoobett@gmail.com",
+        announcement_button_text="Je suis intéressé",
+        show_homepage_hero=True,
+    )
+    def get_page(name):
+        return client.get(reverse(name), HTTP_HOST="kent-artiste.com").text
+
+    assert "data-home-announcement" not in get_page("home")
+    assert 'class="home-hero"' in get_page("home")
+    config.announcement_enabled = True
+    config.save()
+    html = get_page("home")
+    assert "data-home-announcement" in html
+    assert 'class="home-hero"' not in html
+    assert "page-layout--with-hero" not in html
+    assert "announcement.js" not in html
+    assert 'href="mailto:thoobett@gmail.com"' in html
+    assert "Je suis intéressé" in html
+    assert "data-home-announcement" not in get_page("dates")
+    config.announcement_body = ""
+    config.save()
+    assert "data-home-announcement" not in get_page("home")
+    assert 'class="home-hero"' in get_page("home")
+
+
+def test_announcement_image_is_rendered_and_must_belong_to_site(client, db, settings, tmp_path):
+    import pytest
+    from django.core.exceptions import ValidationError
+
+    settings.ALLOWED_HOSTS = ["kent-artiste.com"]
+    site = Site.objects.create(name="Kent", slug="kent", domain="kent-artiste.com")
+    other = Site.objects.create(name="Other", slug="other", domain="other.example")
+    settings.MEDIA_ROOT = tmp_path
+    picture = Image.objects.create(site=site, original=ContentFile(png_bytes(), name="announcement.png"), alt_text="Concert")
+    config = SiteSettings.objects.create(
+        site=site, announcement_enabled=True, announcement_body="<p>Un concert</p>",
+        announcement_image=picture,
+    )
+    config.clean()
+    html = client.get(reverse("home"), HTTP_HOST="kent-artiste.com").text
+    assert 'class="home-announcement__image"' in html
+    assert 'alt="Concert"' in html
+    assert picture.original.url in html
+    config.site = other
+    with pytest.raises(ValidationError, match="même site"):
+        config.clean()
+
+
+def test_announcement_link_accepts_email_but_rejects_script_urls():
+    import pytest
+    from django.core.exceptions import ValidationError
+
+    config = SiteSettings(announcement_button_url="mailto:thoobett@gmail.com?subject=Vinyle")
+    config.clean()
+    config.announcement_button_url = "javascript:alert(1)"
+    with pytest.raises(ValidationError):
+        config.clean()
+
+
 def test_public_views_resolve_templates_from_site_slug():
     from public_site.views import _template
 

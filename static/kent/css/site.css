@@ -1,3 +1,39 @@
+.home-announcement {
+  padding: 48px 0 24px;
+  background: #fff;
+  color: #222;
+  overflow-wrap: anywhere;
+}
+
+.home-announcement h1 { font-size: 2rem; margin: 0 0 28px; }
+.home-announcement__content { max-width: 850px; }
+.home-announcement__content > div { min-width: 0; }
+.home-announcement__image {
+  display: block;
+  width: 100%;
+  max-height: 560px;
+  object-fit: contain;
+  object-position: top left;
+  margin-bottom: 24px;
+}
+@media (min-width: 768px) {
+  .home-announcement__content--with-image {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: 40px;
+    max-width: none;
+    align-items: start;
+  }
+}
+.home-announcement__action {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 12px 20px;
+  background: var(--k-bleu-cyan-light);
+  color: #222;
+  border-radius: 4px;
+}
+
 @font-face {
   font-family: "PPNikkeiMaru";
   src: url("../fonts/PPNikkeiMaru-Ultrabold.otf") format("opentype");

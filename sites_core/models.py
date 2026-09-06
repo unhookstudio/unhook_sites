@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator, validate_email
 from django.db import models
 from django.utils import timezone
 
@@ -71,6 +72,21 @@ class SiteSettings(models.Model):
     newsletter_text = models.TextField("texte newsletter", blank=True)
     contact_title = models.CharField("titre contact", max_length=255, blank=True)
     contact_intro_text = models.TextField("texte contact", blank=True)
+    announcement_enabled = models.BooleanField("afficher l'annonce sur l'accueil", default=False)
+    announcement_title = models.CharField("titre de l'annonce", max_length=255, blank=True)
+    announcement_body = models.TextField("texte de l'annonce", blank=True)
+    announcement_image = models.ForeignKey(
+        "media_library.Image", verbose_name="image de l'annonce", blank=True,
+        null=True, on_delete=models.SET_NULL, related_name="+",
+        help_text="Sélectionnez une image ou utilisez + pour en importer une nouvelle.",
+    )
+    announcement_button_text = models.CharField("texte du bouton de l'annonce", max_length=80, blank=True)
+    announcement_button_url = models.CharField(
+        "lien du bouton de l'annonce",
+        max_length=500,
+        blank=True,
+        help_text="Adresse https:// ou mailto: pour ouvrir un e-mail.",
+    )
     dates_image = models.ForeignKey(
         "media_library.Image",
         verbose_name="image de la section dates",
@@ -143,6 +159,16 @@ class SiteSettings(models.Model):
 
     def clean(self) -> None:
         super().clean()
+        if self.announcement_image_id and self.site_id and self.announcement_image.site_id != self.site_id:
+            raise ValidationError({"announcement_image": "L'image doit appartenir au même site."})
+        if self.announcement_button_url:
+            try:
+                if self.announcement_button_url.startswith("mailto:"):
+                    validate_email(self.announcement_button_url[7:].split("?", 1)[0])
+                else:
+                    URLValidator(schemes=["http", "https"])(self.announcement_button_url)
+            except ValidationError as error:
+                raise ValidationError({"announcement_button_url": "Indiquez une URL http(s) ou une adresse mailto: valide."}) from error
         if (
             self.homepage_hero_image_id
             and self.site_id
@@ -155,6 +181,14 @@ class SiteSettings(models.Model):
             raise ValidationError(
                 {"dates_image": "The dates image must belong to the same site."}
             )
+
+    @property
+    def show_homepage_announcement(self) -> bool:
+        return self.announcement_enabled and bool(self.announcement_body.strip())
+
+    @property
+    def show_effective_homepage_hero(self) -> bool:
+        return self.show_homepage_hero and not self.show_homepage_announcement
 
     @property
     def effective_homepage_hero_text(self) -> str:

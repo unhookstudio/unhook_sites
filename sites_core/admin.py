@@ -120,6 +120,13 @@ class SiteSettingsInline(StackedInline):
         "newsletter_text",
         "contact_title",
         "contact_intro_text",
+        "announcement_enabled",
+        "announcement_title",
+        "announcement_image_preview",
+        "announcement_image",
+        "announcement_body",
+        "announcement_button_text",
+        "announcement_button_url",
         "dates_image_preview",
         "dates_image",
         "dates_title",
@@ -140,10 +147,19 @@ class SiteSettingsInline(StackedInline):
         "favicon_ico",
         "apple_touch_icon",
     ]
-    readonly_fields = ["dates_image_preview", "homepage_hero_preview", "favicon_preview"]
+    readonly_fields = ["announcement_image_preview", "dates_image_preview", "homepage_hero_preview", "favicon_preview"]
+
+    @admin.display(description="Aperçu de l'image de l'annonce")
+    def announcement_image_preview(self, obj):
+        if not obj or not obj.announcement_image or not obj.announcement_image.original:
+            return "-"
+        return format_html(
+            '<img src="{}" alt="" style="max-width: 220px; max-height: 140px; height: auto;" />',
+            obj.announcement_image.original.url,
+        )
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if isinstance(db_field, models.TextField) and db_field.name == "dates_description":
+        if isinstance(db_field, models.TextField) and db_field.name in {"dates_description", "announcement_body"}:
             kwargs["widget"] = AdminProseEditorWidget
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
@@ -191,7 +207,7 @@ class SiteSettingsInline(StackedInline):
         return format_html(" · ".join(["{}"] * len(links)), *links)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name in {"dates_image", "homepage_hero_image"} and not request.user.is_superuser:
+        if db_field.name in {"announcement_image", "dates_image", "homepage_hero_image"} and not request.user.is_superuser:
             kwargs["queryset"] = Image.objects.filter(site__in=request.user.sites.all())
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 

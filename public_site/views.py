@@ -38,7 +38,7 @@ def home(request):
     site = _site(request)
     homepage_settings = (
         SiteSettings.objects.filter(site=site)
-        .select_related("dates_image", "homepage_hero_image")
+        .select_related("announcement_image", "dates_image", "homepage_hero_image")
         .first()
     )
     latest_posts = _journal_articles(site).select_related("featured_image")[:4]
